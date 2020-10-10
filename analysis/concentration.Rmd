@@ -1,0 +1,127 @@
+---
+title: "Probability Concentration on the Ball"
+author: "Joonsuk Kang"
+date: "2020-10-10"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+We check the theoretical and simulation results for the probability concentration under the scenario 3: random matrix.
+
+### Settings
+
+\[
+Z=(z_1,\dots,z_N)^T \sim N(0,\Sigma=\sigma^2(\frac{\sigma^2}{\sigma_F^2}+r^2)(kI_N-XX^T)^{-1}).
+\]
+
+
+$k^*$ is chosen to satisfy the first moment condition:
+\[
+E[Z^TZ] =\sum_i^N \frac{\sigma^2(\frac{\sigma^2}{\sigma_F^2}+r^2)}{k^*-d_i}.
+\]
+
+Then, we compute the variance:
+\[
+var(Z^TZ) =2\sum_i^N \bigg( \frac{\sigma^2(\frac{\sigma^2}{\sigma_F^2}+r^2)}{k^*-d_i}  \bigg)^2.
+\]
+
+
+
+## Simulation
+
+```{r}
+library(mvtnorm)
+library(ggplot2)
+```
+
+
+```{r} 
+# define function to run simulation
+sim <- function(y, # constant N/P ratio
+                P, # number of columns of X
+                sig2, # sigma^2: variance of E_{ij}
+                sigF2, # sigma_F^2: variance of f_j
+                r2,  # r^2
+                densityplot_eigen=FALSE,
+                histogram_ztz=FALSE){
+
+N <- y*P
+target <- r2/(sig2*(sig2/sigF2+r2))
+
+# generate data
+X <- matrix(data=c(rnorm(N*P, mean=0, sd=1/sqrt(P))), ncol=P, nrow=N)
+Xt <- X%*%t(X) # N x N matrix
+d <- eigen(Xt)$values
+if(densityplot_eigen==TRUE){
+    fig1 <- ggplot()+
+      geom_density(aes(x=d))+
+      geom_jitter(aes(d,0), height = 0.01)+
+      ggtitle(expression(paste("Density of eigenvalues ",d[i])))
+    print(fig1)
+}
+  
+cond1m <- function(k,d){return(sum(1/(k-d)))} # first moment condition
+loss1m <- function(k){return((cond1m(k,d)-target)^2)}
+kstar <- optimize(f=loss1m, 
+                   interval=c(d[1]+1/target,d[1]+N/target)
+                   # min: d1+1/target (when d1 dominates others)
+                   # max: d1+N/target (when d1=...=dN)
+)$minimum
+varztz <- 2*(sig2*(sig2/sigF2+r2))^2*sum(1/(kstar-d)^2)
+
+# generate z from dist
+z <- rmvnorm(n=1000, 
+        mean=rep(0,N),
+        sigma=sig2*(sig2/sigF2+r2)*solve((kstar*diag(N)-Xt))
+)
+ztz <- rowSums(z^2)
+
+if(histogram_ztz==TRUE){
+  fig2 <- ggplot()+geom_histogram(aes(x=ztz), bins=50)+
+    ggtitle(expression(paste("Simulated Distribution of ", Z^T, Z)))
+  print(fig2)
+}
+
+df.result <- 
+  data.frame(theoretical.mean = r2, # theoretical mean and variance of the norm of simulated vectors Z
+           theoretical.var = varztz,
+           simulated.mean = mean(ztz), # mean and variance 
+           simulated.var = sd(ztz)^2)
+return(df.result)
+}
+
+```
+
+The histogram of $Z^TZ$ for two cases when $P=100$ and $P=10000$ are shown.
+
+```{r}
+df.sim <- data.frame(P=c(100,200,500,1000,2000,5000,10000),
+                     theoretical.mean = 0,
+                     theoretical.var = 0,
+                     simulated.mean = 0,
+                     simulated.var = 0
+                     )
+
+for (i in 1:nrow(df.sim)){
+  df.sim[i,2:5] <- sim(y = 0.3,  P = df.sim$P[i],    sig2 = 1,   sigF2 = 1,   r2 = 1,
+                       histogram_ztz=((i==1) + (i==nrow(df.sim))))
+}
+```
+
+## Results
+
+
+```{r}
+ggplot(data=df.sim)+
+  geom_point(aes(x=P, y=simulated.var, col="simulated variance"))+
+  geom_line(aes(x=P, y=simulated.var, col="simulated variance"))+
+  geom_point(aes(x=P, y=theoretical.var, col="theoretical variance"))+
+  geom_line(aes(x=P, y=theoretical.var, col="theoretical variance"))+
+  scale_x_log10()+
+  scale_y_log10()
+
+print(df.sim)
+```
