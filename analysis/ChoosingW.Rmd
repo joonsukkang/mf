@@ -1,0 +1,186 @@
+---
+title: "Prior Variance and Induced Sparsity"
+author: "Joonsuk Kang"
+date: "2020-10-10"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+We check how prior variance $W=(w_1,\cdots,w_N)$ ($var(l_i)=w_i$) impacts induced sparsity.
+
+First, we start from the joint distribution of two independent Gaussian or two independent Laplace random variables. Gaussian puts more probability mass along one axis, but the sparse solution on the other axis has lower density than its neighbors. Laplace density favors all the sparse solutions than their neighbors.
+
+Second, for the bivariate independent Laplace density, we change values of $w_1$ while fixing $w_1+w_2=1$ to check how the shape of conditional density changes.
+
+Third, for the bivariate independent Laplace density, the case with smaller prior variance yields more sparsity-inducing prior over the unit ball. However, it is important to remember that though the likelihood concentrates the posterior probability measure around the radius $r$ ball, if the prior puts too little probability around the radius $r$ ball, our likelihood approximation would fail. 
+
+There will be a sweet spot in the trade-off between sparsity-inducing prior and deviating from the radius-r ball. As $N$ increases, we have increasing number of coordinates where the prior probability mass will be allocated. Then, the trade-off will become easier.
+
+
+WLOG, we study density on a unit ball: $\{r | r^2=1\}$. The effect of changing $r^2$ is equivalent to the effect of changing $W$.
+
+
+## Bivariate Gaussian vs Bivariate Laplace
+
+
+
+```{r, fig.width=5, fig.height=5}
+library(mvtnorm)
+library(tidyverse)
+library(rmutil)
+
+
+# create grid over the unit ball
+#######################################################
+
+# grid over the unit ball
+theta0 <- seq(0,2*pi,length.out=10000)
+Y1 <- cos(theta0); Y2 <- sin(theta0)
+Y <- cbind(Y1,Y2)
+
+# variance parameters
+w1 <- 0.3
+w2 <- 0.7
+
+
+# Densities
+#######################################################
+
+# Gaussian
+dn <- dmvnorm(Y, mean=c(0,0), sigma=diag(c(w1,w2)))
+dn_n <- dn/max(dn) # normalize density so that maximum becomes 1
+
+# Laplace
+dl1 <- dlaplace(Y1, m=0, s=sqrt(w1/2))
+dl2 <- dlaplace(Y2, m=0, s=sqrt(w2/2))
+dl <- dl1*dl2
+dl_n <- dl/max(dl) # normalize 
+
+
+# Density Plot: in coordinate systems
+# x-axis: y1 (first coordiante);
+# y-axis: y2 (second coordinate);
+# color: by density (higher density = darker color)
+#######################################################
+df.sparse <- data.frame(x = c(1,-1,0,0), # sparse points on the unit ball
+                        y = c(0,0,1,-1))
+
+ggplot()+
+  geom_point(aes(x=Y1, y=Y2), col='blue', alpha=dn_n/100)+
+  geom_point(data=df.sparse, aes(x=x, y=y), col='black', size=2)+
+  ggtitle("Bivariate Gaussian Density around the unit ball")
+
+ggplot()+
+  geom_point(aes(x=Y1, y=Y2), col='red', alpha=dl_n/100)+
+  geom_point(data=df.sparse, aes(x=x, y=y), col='black', size=2)+
+  ggtitle("Bivariate Laplace Density around the unit ball")
+
+
+
+# Density Plot: as a function of angles
+# x-axis: angle (from 0 to 2pi);
+# y-axis: density;
+# color: by density (higher density = darker color)
+#######################################################
+
+ggplot()+
+  geom_line(aes(x=theta0, y=dn_n, col='Gaussian'))+
+  geom_line(aes(x=theta0, y=dl_n, col='Laplace'))+
+  scale_x_continuous(breaks=c(0,pi/2,pi,3/2*pi,2*pi))+
+  scale_y_continuous(limits = c(0,NA))+
+  geom_vline(xintercept=c(0,pi/2,pi,3/2*pi,2*pi), col='grey')+
+  ggtitle("Bivariate Density around the unit ball")
+
+```
+
+
+
+## Bivariate Laplace
+
+### When $w_1+w_2=1$ is fixed
+
+By symmetry, we only need to consider the range $w_1\leq 0.5$. 
+
+
+```{r}
+data.frame(w1=seq(0.05,0.5, by=0.05)) %>%
+  mutate(w2=1-w1) -> df.w
+
+df.result <- data.frame()
+
+# Densities
+#######################################################
+
+for (i in 1:nrow(df.w)){
+w1 <- df.w$w1[i]; w2 <- df.w$w2[i]
+
+# evaluate Laplace density over the ball
+dl1 <- dlaplace(Y1, m=0, s=sqrt(w1/2))
+dl2 <- dlaplace(Y2, m=0, s=sqrt(w2/2))
+dl <- dl1*dl2
+dl_n <- dl/max(dl) # normalize 
+
+df.result <- rbind(df.result,
+                   data.frame(theta=theta0,
+                        w1=w1,
+                        w2=w2,
+                        density = dl_n)
+                   )
+}
+
+df.result %>% group_by(w1) %>%
+  ggplot()+
+  geom_line(aes(x=theta, y=density, group=w1, col=w1))+
+  scale_x_continuous(breaks=c(0,pi/2,pi,3/2*pi,2*pi))+
+  scale_y_continuous(limits = c(0,NA))+
+  geom_vline(xintercept=c(0,pi/2,pi,3/2*pi,2*pi), col='grey')+
+  ggtitle("Bivariate Laplace Density around the unit ball")
+```
+
+
+### When $w_1/w_2=1$ is fixed
+
+The case with smallest variance $(w_1,w_2)=(0.05,0.05)$ produces the most sparsity-inducing prior on $l$; the case with largest variance $(w_1,w_2)=(2,2)$ produces the least sparsity-inducing prior.
+
+However, it is important to remember that though the likelihood concentrates the posterior probability measure around the radius $r$ ball, if the prior puts too little probability around the radius $r$ ball, our likelihood approximation would fail.
+
+There will be a sweet spot in the trade-off between sparsity-inducing prior and deviating from the radius-r ball. As $N$ increases, we have increasing number of coordinates where the prior probability mass will be allocated. Then, the trade-off will become easier.
+
+```{r}
+data.frame(w1=c(0.05, 0.1, 0.2, 0.5, 1, 1.5, 2)) %>%
+  mutate(w2=w1) -> df.w
+
+df.result <- data.frame()
+
+# Densities
+#######################################################
+
+for (i in 1:nrow(df.w)){
+w1 <- df.w$w1[i]; w2 <- df.w$w2[i]
+
+# evaluate Laplace density over the ball
+dl1 <- dlaplace(Y1, m=0, s=sqrt(w1/2))
+dl2 <- dlaplace(Y2, m=0, s=sqrt(w2/2))
+dl <- dl1*dl2
+dl_n <- dl/max(dl) # normalize 
+
+df.result <- rbind(df.result,
+                   data.frame(theta=theta0,
+                        w1=w1,
+                        w2=w2,
+                        density = dl_n)
+                   )
+}
+
+df.result %>% group_by(w1) %>%
+  ggplot()+
+  geom_line(aes(x=theta, y=density, group=w1, col=w1))+
+  scale_x_continuous(breaks=c(0,pi/2,pi,3/2*pi,2*pi))+
+  scale_y_continuous(limits = c(0,NA))+
+  geom_vline(xintercept=c(0,pi/2,pi,3/2*pi,2*pi), col='grey')+
+  ggtitle("Bivariate Laplace Density around the unit ball")
+```
+
