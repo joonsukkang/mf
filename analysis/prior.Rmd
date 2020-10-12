@@ -151,11 +151,17 @@ movie3d(spin3d(axis = c(1, 1, 1), rpm=5), duration = 5,
 
 ### The Laplacian Ball
 
-![The Laplacian Ball](../output/LaplacianBall.gif)
+![The Laplacian Ball](../output/LaplacianBall.jpg)
+
+A more interesting! moving gif is available here: 
+
+[Laplacian Ball] (https://github.com/joonsukkang/mf/blob/master/output/LaplacianBall.gif) and also
+[Gaussian Ball] (https://github.com/joonsukkang/mf/blob/master/output/GaussianBall.gif)
+
 
 ### The Gaussian Ball
 
-![The Gaussian Ball](../output/GaussianBall.gif)
+![The Gaussian Ball](../output/GaussianBall.jpg)
 
 
 ## More Explorations on Bivariate Laplace
