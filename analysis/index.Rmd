@@ -8,4 +8,38 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+
+## integrating f out
+
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+
+:::
+::: {}
+
++ demo result : [demo_toy](demo_toy.html)
+
+:::
+::::
+
+
+
+## miscellaneous
+
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/warmstart.Rmd/unnamed-chunk-7-1.png" width="400">
+:::
+::: {}
+
++ investigation of warmstart advantage  : [warmstart](warmstart.html)
+  + The warmstart advantage disappears when we restrict to rank-1 approximation. Rather than the current marginal fitting of factors, joint estimation of multiple factors may be the key to obtaining a better solution.
+
+:::
+::::
+
+
+
+
