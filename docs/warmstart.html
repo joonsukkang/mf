@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Joonsuk Kang" />
+
+
+<title>Investigation on Warmstart Advantage</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+      </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/joonsukkang/mf">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Investigation on Warmstart Advantage</h1>
+<h4 class="author">Joonsuk Kang</h4>
+<h4 class="date">2020-11-1</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-11-02
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mf/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201010code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201010)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201010code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201010)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeea4a36b50179b5adefeb279c1b42d382f9baf011targetblankea4a36ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/ea4a36b50179b5adefeb279c1b42d382f9baf011" target="_blank">ea4a36b</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeea4a36b50179b5adefeb279c1b42d382f9baf011targetblankea4a36ba" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/ea4a36b50179b5adefeb279c1b42d382f9baf011" target="_blank">ea4a36b</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.Rhistory
+
+Untracked files:
+    Untracked:  analysis/demo_toy.Rmd
+    Untracked:  code/code_wflow_publish.R
+    Untracked:  code/temp.R
+    Untracked:  output/Likelihood.gif
+    Untracked:  writing/
+
+Unstaged changes:
+    Deleted:    analysis/ChoosingW.Rmd
+    Deleted:    analysis/concentration.Rmd
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/warmstart.Rmd</code>) and HTML (<code>docs/warmstart.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/ea4a36b50179b5adefeb279c1b42d382f9baf011/analysis/warmstart.Rmd" target="_blank">ea4a36b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-02
+</td>
+<td>
+Investigation on Warmstart Advantage
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>We investigated the warmstart advantage from <a href="https://stephens999.github.io/misc/tree_pca_03.html" class="uri">https://stephens999.github.io/misc/tree_pca_03.html</a>.</p>
+<p>The warmstart advantage disappears when we restrict to rank-1 approximation. Rather than the current (and feasible) marginal fitting of factors, joint estimation of multiple factors may be the key to obtaining a better solution.</p>
+<div id="previous-analysis" class="section level3">
+<h3>Previous Analysis</h3>
+<p>The previous investigation showed (presented in <strong>Recap</strong> section below):</p>
+<ol style="list-style-type: decimal">
+<li>(setting 1) flash is not satisfactory in this problem (solution not sparse)</li>
+<li>(setting 2) with a specific noise setting, flash worked</li>
+<li>(setting 3) given the solution in (setting 2) as the warmstart, flash worked in the original setting (setting 1); elbo of the warmstart method is much higher than in setting 1 .</li>
+</ol>
+<p>Based on the observations, Matthew commented “the objective with warmstart is much larger, demonstrating this is a convergence problem rather than a fundamental problem with the objective function”</p>
+</div>
+<div id="new-observations" class="section level3">
+<h3>New Observations</h3>
+<ol style="list-style-type: decimal">
+<li>As expected, when we remove first two factors, the warmstart advantage is still remaining.</li>
+<li>However, when we restrict to rank-1 estimation, the warmstart advantage disappears.</li>
+</ol>
+</div>
+<div id="thoughts" class="section level3">
+<h3>Thoughts</h3>
+<p>In our toy data, the singular values of <code>X</code> are 255, 237, 140, 134, and the others are 0. After removing the first two, we are left with the other two (<code>X2</code>). The singular values 140 and 134 are similar but different. Intuitively, in our situation, when we’re allowed to use only one factor, we should stick to the first singular vector, which corresponds to the greatest singular value, though it seems (to us) comparable to the second largest singular value.</p>
+<p>The real edge of warmstart was proposing an initialization for the <strong>set of two factors</strong>. Once given the set of two factors, the <code>flash</code> machine marginally could tune up the solution. But when given only one initialization, it regressed to the nonsparse svd solution.</p>
+<p>Therefore, the key to get a sparse/nice solution in similar situations would be to allow fitting multiple factors simultaneously. In addition to the <strong>integrate out f</strong> approach, this <strong>joint estimation of multiple factors</strong> approach would be also helpful.</p>
+</div>
+</div>
+<div id="recap" class="section level2">
+<h2>Recap</h2>
+<div id="data-identical-to-the-previous-seeds" class="section level3">
+<h3>Data (identical to the previous seeds)</h3>
+<pre class="r"><code>set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+
+X.svd = svd(X)
+X.svd$d[1:10]</code></pre>
+<pre><code> [1] 2.555150e+02 2.370327e+02 1.402663e+02 1.345016e+02 1.146709e-13
+ [6] 1.022084e-13 3.826175e-14 3.077609e-14 2.377645e-14 2.377645e-14</code></pre>
+<pre class="r"><code>set.seed(5)
+Xn = X + rnorm(4*n*p,sd=3)</code></pre>
+</div>
+<div id="model-fitting" class="section level3">
+<h3>Model Fitting</h3>
+<pre class="r"><code># flash
+X.flash = flashr::flash(X,10,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -122756.12        Inf</code></pre>
+<pre><code>          2     -122752.26   3.86e+00</code></pre>
+<pre><code>          3     -122752.12   1.40e-01</code></pre>
+<pre><code>          4     -122752.02   1.05e-01</code></pre>
+<pre><code>          5     -122751.94   7.95e-02</code></pre>
+<pre><code>          6     -122751.88   6.03e-02</code></pre>
+<pre><code>          7     -122751.83   4.58e-02</code></pre>
+<pre><code>          8     -122751.80   3.50e-02</code></pre>
+<pre><code>          9     -122751.77   2.68e-02</code></pre>
+<pre><code>         10     -122751.75   2.06e-02</code></pre>
+<pre><code>         11     -122751.73   1.59e-02</code></pre>
+<pre><code>         12     -122751.72   1.24e-02</code></pre>
+<pre><code>         13     -122751.71   9.65e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 1.83e+04. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -122751.71</code></pre>
+<pre><code>Fitting factor/loading 2 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -90298.98        Inf</code></pre>
+<pre><code>          2      -90295.31   3.67e+00</code></pre>
+<pre><code>          3      -90295.30   1.90e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 3.25e+04. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -90295.3</code></pre>
+<pre><code>Fitting factor/loading 3 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -65811.86        Inf</code></pre>
+<pre><code>          2      -65807.92   3.94e+00</code></pre>
+<pre><code>          3      -65807.69   2.35e-01</code></pre>
+<pre><code>          4      -65807.49   1.99e-01</code></pre>
+<pre><code>          5      -65807.32   1.69e-01</code></pre>
+<pre><code>          6      -65807.18   1.43e-01</code></pre>
+<pre><code>          7      -65807.05   1.21e-01</code></pre>
+<pre><code>          8      -65806.95   1.03e-01</code></pre>
+<pre><code>          9      -65806.86   8.74e-02</code></pre>
+<pre><code>         10      -65806.79   7.42e-02</code></pre>
+<pre><code>         11      -65806.73   6.30e-02</code></pre>
+<pre><code>         12      -65806.67   5.35e-02</code></pre>
+<pre><code>         13      -65806.63   4.55e-02</code></pre>
+<pre><code>         14      -65806.59   3.87e-02</code></pre>
+<pre><code>         15      -65806.56   3.29e-02</code></pre>
+<pre><code>         16      -65806.53   2.80e-02</code></pre>
+<pre><code>         17      -65806.50   2.39e-02</code></pre>
+<pre><code>         18      -65806.48   2.03e-02</code></pre>
+<pre><code>         19      -65806.47   1.73e-02</code></pre>
+<pre><code>         20      -65806.45   1.48e-02</code></pre>
+<pre><code>         21      -65806.44   1.26e-02</code></pre>
+<pre><code>         22      -65806.43   1.08e-02</code></pre>
+<pre><code>         23      -65806.42   9.22e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 3 decreases objective by 2.45e+04. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -65806.42</code></pre>
+<pre><code>Fitting factor/loading 4 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1       20638.36        Inf</code></pre>
+<pre><code>          2       20642.02   3.66e+00</code></pre>
+<pre><code>          3       20642.02   6.64e-04</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 4 decreases objective by 8.64e+04. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: 20642.02</code></pre>
+<pre><code>Fitting factor/loading 5 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1       20637.96        Inf</code></pre>
+<pre><code>          2       20642.01   4.05e+00</code></pre>
+<pre><code>          3       20642.01   7.37e-06</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 5 increases objective by 1.11e-02. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: 20642.02</code></pre>
+<pre class="r"><code># noisy version (easy seed)
+Xn.flash = flashr::flash(Xn,10,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -207818.46        Inf</code></pre>
+<pre><code>          2     -207814.67   3.79e+00</code></pre>
+<pre><code>          3     -207814.66   6.45e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 1.84e+03. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -207814.66</code></pre>
+<pre><code>Fitting factor/loading 2 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -206245.15        Inf</code></pre>
+<pre><code>          2     -206241.34   3.81e+00</code></pre>
+<pre><code>          3     -206241.34   3.20e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 1.57e+03. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -206241.34</code></pre>
+<pre><code>Fitting factor/loading 3 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -205926.28        Inf</code></pre>
+<pre><code>          2     -205919.49   6.78e+00</code></pre>
+<pre><code>          3     -205919.10   3.94e-01</code></pre>
+<pre><code>          4     -205919.04   6.22e-02</code></pre>
+<pre><code>          5     -205919.03   1.28e-02</code></pre>
+<pre><code>          6     -205919.02   3.65e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 3 decreases objective by 3.22e+02. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -205919.02</code></pre>
+<pre><code>Fitting factor/loading 4 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -205661.05        Inf</code></pre>
+<pre><code>          2     -205655.22   5.84e+00</code></pre>
+<pre><code>          3     -205654.78   4.32e-01</code></pre>
+<pre><code>          4     -205654.67   1.16e-01</code></pre>
+<pre><code>          5     -205654.64   3.25e-02</code></pre>
+<pre><code>          6     -205654.63   1.00e-02</code></pre>
+<pre><code>          7     -205654.62   3.45e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 4 decreases objective by 2.64e+02. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -205654.62</code></pre>
+<pre><code>Fitting factor/loading 5 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -205713.11        Inf</code></pre>
+<pre><code>          2     -205702.77   1.03e+01</code></pre>
+<pre><code>          3     -205701.59   1.18e+00</code></pre>
+<pre><code>          4     -205701.08   5.16e-01</code></pre>
+<pre><code>          5     -205700.64   4.37e-01</code></pre>
+<pre><code>          6     -205700.06   5.79e-01</code></pre>
+<pre><code>          7     -205698.99   1.06e+00</code></pre>
+<pre><code>          8     -205696.53   2.47e+00</code></pre>
+<pre><code>          9     -205691.37   5.16e+00</code></pre>
+<pre><code>         10     -205684.14   7.22e+00</code></pre>
+<pre><code>         11     -205678.13   6.02e+00</code></pre>
+<pre><code>         12     -205678.11   1.79e-02</code></pre>
+<pre><code>         13     -205678.11   0.00e+00</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 5 increases objective by 2.35e+01. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -205654.62</code></pre>
+<pre class="r"><code># warmstart
+X.flash.warmstart = flashr::flash(X,K=4,f_init=Xn.flash,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;,backfit = TRUE,greedy = FALSE)</code></pre>
+<pre><code>Backfitting 4 factor/loading(s) (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -22561.50        Inf</code></pre>
+<pre><code>          2      127675.68   1.50e+05</code></pre>
+<pre><code>          3      277187.43   1.50e+05</code></pre>
+<pre><code>          4      424502.25   1.47e+05</code></pre>
+<pre><code>          5      570868.91   1.46e+05</code></pre>
+<pre><code>          6      716984.12   1.46e+05</code></pre>
+<pre><code>          7      863101.91   1.46e+05</code></pre>
+<pre><code>          8     1003104.16   1.40e+05</code></pre>
+<pre><code>          9     1055225.60   5.21e+04</code></pre>
+<pre><code>         10     1055916.90   6.91e+02</code></pre>
+<pre><code>         11     1056004.19   8.73e+01</code></pre>
+<pre><code>         12     1056015.01   1.08e+01</code></pre>
+<pre><code>Warning in verbose_obj_decrease_warning(): An iteration decreased the objective.
+This happens occasionally, perhaps due to numeric reasons. You could ignore this
+warning, but you might like to check out https://github.com/stephenslab/flashr/
+issues/26 for more details.</code></pre>
+<pre><code>         13     1056000.70  -1.43e+01</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 1.22e+06. Factor retained.</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 1.21e+06. Factor retained.</code></pre>
+<pre><code>  Deleting factor 3 decreases objective by 1.17e+06. Factor retained.</code></pre>
+<pre><code>  Deleting factor 4 decreases objective by 1.17e+06. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: 1056000.7</code></pre>
+</div>
+<div id="results" class="section level3">
+<h3>Results</h3>
+<pre class="r"><code># flash
+par(mfcol=c(2,2))
+plot(X.flash$ldf$f[,1])
+plot(X.flash$ldf$f[,2])
+plot(X.flash$ldf$f[,3])
+plot(X.flash$ldf$f[,4])</code></pre>
+<p><img src="figure/warmstart.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># noisy version (easy seed)
+par(mfcol=c(2,2))
+plot(Xn.flash$ldf$f[,1])
+plot(Xn.flash$ldf$f[,2])
+plot(Xn.flash$ldf$f[,3])
+plot(Xn.flash$ldf$f[,4])</code></pre>
+<p><img src="figure/warmstart.Rmd/unnamed-chunk-3-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># warmstart
+par(mfcol=c(2,2))
+plot(X.flash.warmstart$ldf$f[,1])
+plot(X.flash.warmstart$ldf$f[,2])
+plot(X.flash.warmstart$ldf$f[,3])
+plot(X.flash.warmstart$ldf$f[,4])</code></pre>
+<p><img src="figure/warmstart.Rmd/unnamed-chunk-3-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>X.flash$objective</code></pre>
+<pre><code>[1] 20642.02</code></pre>
+<pre class="r"><code>Xn.flash$objective</code></pre>
+<pre><code>[1] -205654.6</code></pre>
+<pre class="r"><code>X.flash.warmstart$objective</code></pre>
+<pre><code>[1] 1056001</code></pre>
+</div>
+</div>
+<div id="the-simpler-picture-removing-first-two-factors" class="section level2">
+<h2>The simpler picture: removing first two factors</h2>
+<div id="model-fitting-1" class="section level3">
+<h3>Model Fitting</h3>
+<pre class="r"><code>X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+set.seed(5)
+X2n = X2 + rnorm(4*n*p,sd=3)
+
+# flash
+X2.flash = flashr::flash(X2,10,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -57104.19        Inf</code></pre>
+<pre><code>          2      -57100.23   3.96e+00</code></pre>
+<pre><code>          3      -57099.98   2.47e-01</code></pre>
+<pre><code>          4      -57099.77   2.09e-01</code></pre>
+<pre><code>          5      -57099.60   1.77e-01</code></pre>
+<pre><code>          6      -57099.45   1.50e-01</code></pre>
+<pre><code>          7      -57099.32   1.27e-01</code></pre>
+<pre><code>          8      -57099.21   1.08e-01</code></pre>
+<pre><code>          9      -57099.12   9.16e-02</code></pre>
+<pre><code>         10      -57099.04   7.78e-02</code></pre>
+<pre><code>         11      -57098.98   6.60e-02</code></pre>
+<pre><code>         12      -57098.92   5.61e-02</code></pre>
+<pre><code>         13      -57098.87   4.76e-02</code></pre>
+<pre><code>         14      -57098.83   4.05e-02</code></pre>
+<pre><code>         15      -57098.80   3.44e-02</code></pre>
+<pre><code>         16      -57098.77   2.93e-02</code></pre>
+<pre><code>         17      -57098.74   2.49e-02</code></pre>
+<pre><code>         18      -57098.72   2.12e-02</code></pre>
+<pre><code>         19      -57098.70   1.81e-02</code></pre>
+<pre><code>         20      -57098.69   1.54e-02</code></pre>
+<pre><code>         21      -57098.68   1.32e-02</code></pre>
+<pre><code>         22      -57098.66   1.12e-02</code></pre>
+<pre><code>         23      -57098.66   9.60e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 2.64e+04. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -57098.66</code></pre>
+<pre><code>Fitting factor/loading 2 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      109745.24        Inf</code></pre>
+<pre><code>          2      109748.90   3.66e+00</code></pre>
+<pre><code>          3      109748.90   6.57e-04</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 1.67e+05. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: 109748.9</code></pre>
+<pre><code>Fitting factor/loading 3 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      109732.70        Inf</code></pre>
+<pre><code>          2      109748.65   1.60e+01</code></pre>
+<pre><code>          3      109748.65   1.06e-06</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 3 increases objective by 2.50e-01. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: 109748.9</code></pre>
+<pre class="r"><code># noisy version (easy seed)
+X2n.flash = flashr::flash(X2n,10,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -203561.58        Inf</code></pre>
+<pre><code>          2     -203554.74   6.84e+00</code></pre>
+<pre><code>          3     -203554.14   5.99e-01</code></pre>
+<pre><code>          4     -203554.01   1.26e-01</code></pre>
+<pre><code>          5     -203553.98   3.18e-02</code></pre>
+<pre><code>          6     -203553.97   9.81e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 3.26e+02. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -203553.97</code></pre>
+<pre><code>Fitting factor/loading 2 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -203293.13        Inf</code></pre>
+<pre><code>          2     -203287.05   6.08e+00</code></pre>
+<pre><code>          3     -203286.50   5.45e-01</code></pre>
+<pre><code>          4     -203286.34   1.61e-01</code></pre>
+<pre><code>          5     -203286.29   5.38e-02</code></pre>
+<pre><code>          6     -203286.27   1.80e-02</code></pre>
+<pre><code>          7     -203286.26   4.51e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 2.68e+02. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -203286.26</code></pre>
+<pre><code>Fitting factor/loading 3 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -203343.45        Inf</code></pre>
+<pre><code>          2     -203333.32   1.01e+01</code></pre>
+<pre><code>          3     -203332.20   1.13e+00</code></pre>
+<pre><code>          4     -203331.64   5.61e-01</code></pre>
+<pre><code>          5     -203331.01   6.26e-01</code></pre>
+<pre><code>          6     -203329.93   1.08e+00</code></pre>
+<pre><code>          7     -203327.72   2.21e+00</code></pre>
+<pre><code>          8     -203324.38   3.34e+00</code></pre>
+<pre><code>          9     -203321.58   2.80e+00</code></pre>
+<pre><code>         10     -203319.14   2.44e+00</code></pre>
+<pre><code>         11     -203317.20   1.94e+00</code></pre>
+<pre><code>         12     -203315.46   1.74e+00</code></pre>
+<pre><code>         13     -203313.86   1.60e+00</code></pre>
+<pre><code>         14     -203313.32   5.37e-01</code></pre>
+<pre><code>         15     -203313.14   1.83e-01</code></pre>
+<pre><code>         16     -203312.97   1.69e-01</code></pre>
+<pre><code>         17     -203312.71   2.62e-01</code></pre>
+<pre><code>         18     -203312.18   5.28e-01</code></pre>
+<pre><code>         19     -203311.27   9.13e-01</code></pre>
+<pre><code>         20     -203310.41   8.54e-01</code></pre>
+<pre><code>         21     -203310.27   1.43e-01</code></pre>
+<pre><code>         22     -203310.25   2.11e-02</code></pre>
+<pre><code>         23     -203310.24   9.66e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 3 increases objective by 2.40e+01. Factor zeroed out.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -203286.26</code></pre>
+<pre class="r"><code># warmstart
+X2.flash.warmstart = flashr::flash(X2,K=4,f_init=X2n.flash,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;,backfit = TRUE,greedy = FALSE)</code></pre>
+<pre><code>Backfitting 2 factor/loading(s) (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1       -9754.92        Inf</code></pre>
+<pre><code>          2      153985.83   1.64e+05</code></pre>
+<pre><code>          3      319281.82   1.65e+05</code></pre>
+<pre><code>          4      484188.49   1.65e+05</code></pre>
+<pre><code>          5      648763.41   1.65e+05</code></pre>
+<pre><code>          6      813054.99   1.64e+05</code></pre>
+<pre><code>          7      977092.30   1.64e+05</code></pre>
+<pre><code>          8     1123208.33   1.46e+05</code></pre>
+<pre><code>          9     1147820.81   2.46e+04</code></pre>
+<pre><code>         10     1147864.57   4.38e+01</code></pre>
+<pre><code>Warning in verbose_obj_decrease_warning(): An iteration decreased the objective.
+This happens occasionally, perhaps due to numeric reasons. You could ignore this
+warning, but you might like to check out https://github.com/stephenslab/flashr/
+issues/26 for more details.</code></pre>
+<pre><code>         11     1147596.25  -2.68e+02</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 1.22e+06. Factor retained.</code></pre>
+<pre><code>  Deleting factor 2 decreases objective by 1.22e+06. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: 1147596.25</code></pre>
+</div>
+<div id="results-1" class="section level3">
+<h3>Results</h3>
+<pre class="r"><code>par(mfcol=c(2,3))
+plot(X2.flash$ldf$f[,1]) # flash
+plot(X2.flash$ldf$f[,2])
+plot(X2n.flash$ldf$f[,1]) # noisy version
+plot(X2n.flash$ldf$f[,2])
+plot(X2.flash.warmstart$ldf$f[,1]) # warmstart
+plot(X2.flash.warmstart$ldf$f[,2])</code></pre>
+<p><img src="figure/warmstart.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>X2.flash$objective</code></pre>
+<pre><code>[1] 109748.9</code></pre>
+<pre class="r"><code>X2n.flash$objective</code></pre>
+<pre><code>[1] -203286.3</code></pre>
+<pre class="r"><code>X2.flash.warmstart$objective</code></pre>
+<pre><code>[1] 1147596</code></pre>
+</div>
+</div>
+<div id="rank-1-estimation-warmstart-advantage-is-gone" class="section level2">
+<h2>Rank-1 Estimation: Warmstart Advantage is gone</h2>
+<div id="model-fitting-2" class="section level3">
+<h3>Model Fitting</h3>
+<pre class="r"><code># flash
+X2.flash1 = flashr::flash(X2,1,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -57104.19        Inf</code></pre>
+<pre><code>          2      -57100.23   3.96e+00</code></pre>
+<pre><code>          3      -57099.98   2.47e-01</code></pre>
+<pre><code>          4      -57099.77   2.09e-01</code></pre>
+<pre><code>          5      -57099.60   1.77e-01</code></pre>
+<pre><code>          6      -57099.45   1.50e-01</code></pre>
+<pre><code>          7      -57099.32   1.27e-01</code></pre>
+<pre><code>          8      -57099.21   1.08e-01</code></pre>
+<pre><code>          9      -57099.12   9.16e-02</code></pre>
+<pre><code>         10      -57099.04   7.78e-02</code></pre>
+<pre><code>         11      -57098.98   6.60e-02</code></pre>
+<pre><code>         12      -57098.92   5.61e-02</code></pre>
+<pre><code>         13      -57098.87   4.76e-02</code></pre>
+<pre><code>         14      -57098.83   4.05e-02</code></pre>
+<pre><code>         15      -57098.80   3.44e-02</code></pre>
+<pre><code>         16      -57098.77   2.93e-02</code></pre>
+<pre><code>         17      -57098.74   2.49e-02</code></pre>
+<pre><code>         18      -57098.72   2.12e-02</code></pre>
+<pre><code>         19      -57098.70   1.81e-02</code></pre>
+<pre><code>         20      -57098.69   1.54e-02</code></pre>
+<pre><code>         21      -57098.68   1.32e-02</code></pre>
+<pre><code>         22      -57098.66   1.12e-02</code></pre>
+<pre><code>         23      -57098.66   9.60e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 2.64e+04. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -57098.66</code></pre>
+<pre class="r"><code># noisy version (easy seed)
+X2n.flash1 = flashr::flash(X2n,1,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;)</code></pre>
+<pre><code>Fitting factor/loading 1 (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1     -203561.58        Inf</code></pre>
+<pre><code>          2     -203554.74   6.84e+00</code></pre>
+<pre><code>          3     -203554.14   5.99e-01</code></pre>
+<pre><code>          4     -203554.01   1.26e-01</code></pre>
+<pre><code>          5     -203553.98   3.18e-02</code></pre>
+<pre><code>          6     -203553.97   9.81e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 3.26e+02. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -203553.97</code></pre>
+<pre class="r"><code># warmstart
+X2.flash.warmstart1 = flashr::flash(X2,K=1,f_init=X2n.flash1,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;,backfit = TRUE,greedy = FALSE)</code></pre>
+<pre><code>Backfitting 1 factor/loading(s) (stop when difference in obj. is &lt; 1.00e-02):</code></pre>
+<pre><code>  Iteration      Objective   Obj Diff</code></pre>
+<pre><code>          1      -62429.38        Inf</code></pre>
+<pre><code>          2      -57644.08   4.79e+03</code></pre>
+<pre><code>          3      -57598.28   4.58e+01</code></pre>
+<pre><code>          4      -57551.17   4.71e+01</code></pre>
+<pre><code>          5      -57502.86   4.83e+01</code></pre>
+<pre><code>          6      -57453.96   4.89e+01</code></pre>
+<pre><code>          7      -57409.81   4.41e+01</code></pre>
+<pre><code>          8      -57368.37   4.14e+01</code></pre>
+<pre><code>          9      -57331.68   3.67e+01</code></pre>
+<pre><code>         10      -57298.66   3.30e+01</code></pre>
+<pre><code>         11      -57269.36   2.93e+01</code></pre>
+<pre><code>         12      -57244.11   2.53e+01</code></pre>
+<pre><code>         13      -57222.44   2.17e+01</code></pre>
+<pre><code>         14      -57203.88   1.86e+01</code></pre>
+<pre><code>         15      -57188.02   1.59e+01</code></pre>
+<pre><code>         16      -57174.49   1.35e+01</code></pre>
+<pre><code>         17      -57162.96   1.15e+01</code></pre>
+<pre><code>         18      -57153.15   9.81e+00</code></pre>
+<pre><code>         19      -57144.81   8.34e+00</code></pre>
+<pre><code>         20      -57137.72   7.08e+00</code></pre>
+<pre><code>         21      -57131.71   6.01e+00</code></pre>
+<pre><code>         22      -57126.61   5.10e+00</code></pre>
+<pre><code>         23      -57122.29   4.32e+00</code></pre>
+<pre><code>         24      -57118.63   3.66e+00</code></pre>
+<pre><code>         25      -57115.53   3.10e+00</code></pre>
+<pre><code>         26      -57112.90   2.62e+00</code></pre>
+<pre><code>         27      -57110.68   2.22e+00</code></pre>
+<pre><code>         28      -57108.80   1.88e+00</code></pre>
+<pre><code>         29      -57107.22   1.59e+00</code></pre>
+<pre><code>         30      -57105.87   1.34e+00</code></pre>
+<pre><code>         31      -57104.74   1.14e+00</code></pre>
+<pre><code>         32      -57103.78   9.60e-01</code></pre>
+<pre><code>         33      -57102.97   8.11e-01</code></pre>
+<pre><code>         34      -57102.28   6.85e-01</code></pre>
+<pre><code>         35      -57101.70   5.79e-01</code></pre>
+<pre><code>         36      -57101.21   4.89e-01</code></pre>
+<pre><code>         37      -57100.80   4.12e-01</code></pre>
+<pre><code>         38      -57100.45   3.48e-01</code></pre>
+<pre><code>         39      -57100.16   2.94e-01</code></pre>
+<pre><code>         40      -57099.91   2.48e-01</code></pre>
+<pre><code>         41      -57099.70   2.09e-01</code></pre>
+<pre><code>         42      -57099.53   1.76e-01</code></pre>
+<pre><code>         43      -57099.38   1.49e-01</code></pre>
+<pre><code>         44      -57099.25   1.25e-01</code></pre>
+<pre><code>         45      -57099.15   1.06e-01</code></pre>
+<pre><code>         46      -57099.06   8.90e-02</code></pre>
+<pre><code>         47      -57098.98   7.49e-02</code></pre>
+<pre><code>         48      -57098.92   6.31e-02</code></pre>
+<pre><code>         49      -57098.87   5.31e-02</code></pre>
+<pre><code>         50      -57098.82   4.46e-02</code></pre>
+<pre><code>         51      -57098.78   3.75e-02</code></pre>
+<pre><code>         52      -57098.75   3.15e-02</code></pre>
+<pre><code>         53      -57098.73   2.64e-02</code></pre>
+<pre><code>         54      -57098.70   2.22e-02</code></pre>
+<pre><code>         55      -57098.69   1.86e-02</code></pre>
+<pre><code>         56      -57098.67   1.56e-02</code></pre>
+<pre><code>         57      -57098.66   1.30e-02</code></pre>
+<pre><code>         58      -57098.65   1.09e-02</code></pre>
+<pre><code>         59      -57098.64   9.11e-03</code></pre>
+<pre><code>Performing nullcheck...</code></pre>
+<pre><code>  Deleting factor 1 decreases objective by 2.64e+04. Factor retained.</code></pre>
+<pre><code>  Nullcheck complete. Objective: -57098.64</code></pre>
+</div>
+<div id="results-2" class="section level3">
+<h3>Results</h3>
+<pre class="r"><code>par(mfcol=c(1,3))
+plot(X2.flash1$ldf$f[,1])
+plot(X2n.flash1$ldf$f[,1])
+plot(X2.flash.warmstart1$ldf$f[,1])</code></pre>
+<p><img src="figure/warmstart.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>X2.flash1$objective</code></pre>
+<pre><code>[1] -57098.66</code></pre>
+<pre class="r"><code>X2n.flash1$objective</code></pre>
+<pre><code>[1] -203554</code></pre>
+<pre class="r"><code>X2.flash.warmstart1$objective</code></pre>
+<pre><code>[1] -57098.64</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.2 (2020-06-22)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.5       plyr_1.8.6       pillar_1.4.6     compiler_4.0.2  
+ [5] later_1.1.0.1    git2r_0.27.1     tools_4.0.2      digest_0.6.25   
+ [9] gtable_0.3.0     evaluate_0.14    lifecycle_0.2.0  tibble_3.0.3    
+[13] lattice_0.20-41  pkgconfig_2.0.3  rlang_0.4.7      Matrix_1.2-18   
+[17] rstudioapi_0.11  yaml_2.2.1       ebnm_0.1-24      xfun_0.18       
+[21] invgamma_1.1     dplyr_1.0.2      stringr_1.4.0    knitr_1.30      
+[25] generics_0.0.2   fs_1.5.0         vctrs_0.3.4      tidyselect_1.1.0
+[29] rprojroot_1.3-2  grid_4.0.2       glue_1.4.2       R6_2.4.1        
+[33] rmarkdown_2.4    mixsqp_0.3-43    irlba_2.3.3      reshape2_1.4.4  
+[37] purrr_0.3.4      ggplot2_3.3.2    flashr_0.6-7     ashr_2.2-47     
+[41] magrittr_1.5     whisker_0.4      scales_1.1.1     backports_1.1.10
+[45] promises_1.1.1   ellipsis_0.3.1   htmltools_0.5.0  softImpute_1.4  
+[49] colorspace_1.4-1 httpuv_1.5.4     stringi_1.5.3    munsell_0.5.0   
+[53] truncnorm_1.0-8  SQUAREM_2020.4   crayon_1.3.4    </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
