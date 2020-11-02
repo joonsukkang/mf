@@ -1,5 +1,5 @@
 ---
-title: "Investigation on Warmstart Advantage"
+title: "Investigation of Warmstart Advantage"
 author: "Joonsuk Kang"
 date: "2020-11-1"
 output: workflowr::wflow_html
