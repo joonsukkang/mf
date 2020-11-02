@@ -1,0 +1,177 @@
+---
+title: "Investigation on Warmstart Advantage"
+author: "Joonsuk Kang"
+date: "2020-11-1"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Summary
+
+We investigated the warmstart advantage from https://stephens999.github.io/misc/tree_pca_03.html. 
+
+The warmstart advantage disappears when we restrict to rank-1 approximation. Rather than the current (and feasible) marginal fitting of factors, joint estimation of multiple factors may be the key to obtaining a better solution.
+
+### Previous Analysis
+
+The previous investigation showed (presented in **Recap** section below):
+
+1. (setting 1) flash is not satisfactory in this problem (solution not sparse)
+2. (setting 2) with a specific noise setting, flash worked
+3. (setting 3) given the solution in (setting 2) as the warmstart, flash worked in the original setting (setting 1); elbo of the warmstart method is much higher than in setting 1 .
+
+Based on the observations, Matthew commented "the objective with warmstart is much larger, demonstrating this is a convergence problem rather than a fundamental problem with the objective function"
+
+
+### New Observations
+
+1. As expected, when we remove first two factors, the warmstart advantage is still remaining.
+2. However, when we restrict to rank-1 estimation, the warmstart advantage disappears.
+
+### Thoughts
+
+In our toy data, the singular values of `X` are 255, 237, 140, 134, and the others are 0. After removing the first two, we are left with the other two (`X2`). The singular values 140 and 134 are similar but different. Intuitively, in our situation, when we're allowed to use only one factor, we should stick to the first singular vector, which corresponds to the greatest singular value, though it seems (to us) comparable to the second largest singular value. 
+
+The real edge of warmstart was proposing an initialization for the **set of two factors**. Once given the set of two factors, the `flash` machine marginally could tune up the solution. But when given only one initialization, it regressed to the nonsparse svd solution.
+
+Therefore, the key to get a sparse/nice solution in similar situations would be to allow fitting multiple factors simultaneously. In addition to the **integrate out f** approach, this **joint estimation of multiple factors** approach would be also helpful.
+
+
+
+
+## Recap
+
+### Data (identical to the previous seeds)
+
+```{r}
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+
+X.svd = svd(X)
+X.svd$d[1:10]
+
+set.seed(5)
+Xn = X + rnorm(4*n*p,sd=3)
+```
+
+### Model Fitting
+
+```{r}
+# flash
+X.flash = flashr::flash(X,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant")
+# noisy version (easy seed)
+Xn.flash = flashr::flash(Xn,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant")
+# warmstart
+X.flash.warmstart = flashr::flash(X,K=4,f_init=Xn.flash,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant",backfit = TRUE,greedy = FALSE)
+```
+
+
+### Results 
+
+```{r}
+# flash
+par(mfcol=c(2,2))
+plot(X.flash$ldf$f[,1])
+plot(X.flash$ldf$f[,2])
+plot(X.flash$ldf$f[,3])
+plot(X.flash$ldf$f[,4])
+
+# noisy version (easy seed)
+par(mfcol=c(2,2))
+plot(Xn.flash$ldf$f[,1])
+plot(Xn.flash$ldf$f[,2])
+plot(Xn.flash$ldf$f[,3])
+plot(Xn.flash$ldf$f[,4])
+
+# warmstart
+par(mfcol=c(2,2))
+plot(X.flash.warmstart$ldf$f[,1])
+plot(X.flash.warmstart$ldf$f[,2])
+plot(X.flash.warmstart$ldf$f[,3])
+plot(X.flash.warmstart$ldf$f[,4])
+
+
+
+
+
+
+X.flash$objective
+Xn.flash$objective
+X.flash.warmstart$objective
+
+```
+
+
+## The simpler picture: removing first two factors
+
+### Model Fitting
+
+```{r}
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+set.seed(5)
+X2n = X2 + rnorm(4*n*p,sd=3)
+
+# flash
+X2.flash = flashr::flash(X2,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant")
+# noisy version (easy seed)
+X2n.flash = flashr::flash(X2n,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant")
+# warmstart
+X2.flash.warmstart = flashr::flash(X2,K=4,f_init=X2n.flash,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant",backfit = TRUE,greedy = FALSE)
+```
+
+### Results
+
+```{r}
+par(mfcol=c(2,3))
+plot(X2.flash$ldf$f[,1]) # flash
+plot(X2.flash$ldf$f[,2])
+plot(X2n.flash$ldf$f[,1]) # noisy version
+plot(X2n.flash$ldf$f[,2])
+plot(X2.flash.warmstart$ldf$f[,1]) # warmstart
+plot(X2.flash.warmstart$ldf$f[,2])
+
+X2.flash$objective
+X2n.flash$objective
+X2.flash.warmstart$objective
+```
+
+
+## Rank-1 Estimation: Warmstart Advantage is gone
+
+### Model Fitting
+
+```{r}
+# flash
+X2.flash1 = flashr::flash(X2,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant")
+# noisy version (easy seed)
+X2n.flash1 = flashr::flash(X2n,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant")
+# warmstart
+X2.flash.warmstart1 = flashr::flash(X2,K=1,f_init=X2n.flash1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant",backfit = TRUE,greedy = FALSE)
+```
+
+### Results
+
+```{r}
+par(mfcol=c(1,3))
+plot(X2.flash1$ldf$f[,1])
+plot(X2n.flash1$ldf$f[,1])
+plot(X2.flash.warmstart1$ldf$f[,1])
+
+X2.flash1$objective
+X2n.flash1$objective
+X2.flash.warmstart1$objective
+```
