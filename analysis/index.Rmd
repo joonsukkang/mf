@@ -14,11 +14,12 @@ editor_options:
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
-
+<img src="https://joonsukkang.github.io/mf/figure/rank1_setup.Rmd/unnamed-chunk-7-1.png" width="400">
 :::
 ::: {}
 
-+ demo result : [demo_toy](demo_toy.html)
++ the rank-1 problem: [rank1_setup](rank1_setup.html)
+  + The rank-1 problem is stated and the previous and a few additinoal analyses are shown.
 
 :::
 ::::
