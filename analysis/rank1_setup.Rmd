@@ -1,0 +1,206 @@
+---
+title: "The Rank-1 Problem"
+author: "Joonsuk Kang"
+date: "2020-11-3"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+We introduce the rank-1 problem we try to solve using the `integrate out f` approach. The data and previous analysis outlined in  https://stephens999.github.io/misc/tree_pca_03.html is restated and a few additional analyses are added.
+
+
+## Data from previous investigation
+
+### X: baseline
+
+```{r}
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+
+X.svd = svd(X)
+
+# noisy obs: Xn_a (hard) and Xn_b (easy)
+set.seed(9) # the seed where flash didn't work
+Xn_a = X + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+Xn_b = X + rnorm(4*n*p,sd=3)
+```
+
+### X2: simpler version
+
+Previous analysis: "remove the effects of the top branches so we are just left with the “difficult” part of the problem"
+
+```{r}
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+```
+
+### X2n_a/b: simpler version + noises 
+
+
+```{r}
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+```
+
+
+
+## Fit from flash and svd
+
+### fitting
+
+```{r}
+X.svd= svd(X);        X2.svd = svd(X2)
+Xn_a.svd = svd(Xn_a); X2n_a.svd = svd(X2n_a)
+Xn_b.svd = svd(Xn_b); X2n_b.svd = svd(X2n_b)
+
+library(tidyverse)
+library(flashr)
+
+X.flash = flashr::flash(X,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+Xn_a.flash = flashr::flash(Xn_a,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+Xn_b.flash = flashr::flash(Xn_b,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+
+X2.flash = flashr::flash(X2,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+X2n_a.flash = flashr::flash(X2n_a,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+X2n_b.flash = flashr::flash(X2n_b,10,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+```
+
+
+### estimated `l`: four-factor case
+
+```{r}
+# plots
+data.frame(idx = 1:80,
+           l = c(X.svd$v[,1:4],
+                 Xn_a.svd$v[,1:4],
+                 Xn_b.svd$v[,1:4],
+                 c(X.flash$ldf$f[,1:4]),
+                 c(Xn_a.flash$ldf$f[,1:4]),
+                 c(Xn_b.flash$ldf$f[,1:4])),
+           factor=rep(rep(1:4, each=80),times=6),
+           data = rep(rep(c("X", "Xn_a (hard)", "Xn_b (easy)"), each=4*80), times=2),
+           method = rep(c("svd", "flash"), each=80*4*3)
+           )  %>% 
+  # adjust sign for illustration
+  mutate(l = ifelse((factor==3 & data=="X" & method=="flash")|
+                              (factor==4 & data=="Xn_a (hard)" & method=="flash")|
+                              (factor==4 & data=="Xn_b (easy)" & method=="flash"),
+                            -l,
+                            l)
+         ) -> X.fit
+X.fit %>%
+  ggplot()+geom_line(aes(x=idx, y=l, group=method, col=method))+
+  facet_grid(data~factor, labeller=label_both)+geom_hline(yintercept=0)+
+  ggtitle("Four factors")
+```
+
+The flash fits are identical to the svd results (singular vectors) in all cases. 
+
+The first factor captures the mean trend and the second factor captures the (-1,-1,1,1) split. The result is consistent across data (noiseless `X` and noisy `Xn_a`/`Xn_b`) and method (flash and svd).
+
+For the third and fourth factor, we want to obtain a sparse solution, such as factor 3=(0,0,-1,1) and factor 4 = (-1,1,0,0). The noiseless data `X` and the noisy data `Xn_a` have the nonsparse solution while the noisy data `Xn_b` has the sparse solution. 
+
+To focus on the factors 3 and 4, we constructed a simpler data `X2` and its corresponding noisy versions `X2n_a` and `X2n_b`.
+
+
+
+### estimated `l`: simplified two-factor case
+
+```{r}
+data.frame(idx = 1:80,
+           l = c(X2.svd$v[,1:2],
+                 X2n_a.svd$v[,1:2],
+                 X2n_b.svd$v[,1:2],
+                 c(X2.flash$ldf$f[,1:2]),
+                 c(X2n_a.flash$ldf$f[,1:2]),
+                 c(X2n_b.flash$ldf$f[,1:2])),
+           factor=rep(rep(1:2, each=80),times=6),
+           data = rep(rep(c("X2", "X2n_a (hard)", "X2n_b (easy)"), each=2*80), times=2),
+           method = rep(c("svd", "flash"), each=80*2*3)
+           ) %>% 
+  # adjust sign for illustration
+  mutate(l = ifelse((factor==1 & data=="X2n_b (easy)" & method=="flash"),
+                            -l,
+                            l)
+         ) -> X2.fit
+
+# warmstart: sparse fit (from X2n_b) initialization for flash on data X2
+X2.flash.warmstart = flashr::flash(X2,K=4,f_init=X2n_b.flash,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant",backfit = TRUE,greedy = FALSE, verbose=FALSE)
+data.frame(idx=1:80, 
+           l = c(X2.flash.warmstart$ldf$f[,1:2]), 
+           factor=rep(1:2, each=80), data="X2", method="flash_warm") %>%
+  rbind(X2.fit) -> X2.fit
+
+X2.fit %>%
+  ggplot()+geom_line(aes(x=idx, y=l, group=method, col=method))+
+  facet_grid(data~factor, labeller=label_both)+#geom_hline(yintercept=0)+
+  ggtitle("Simplified two factors")
+```
+
+As expected, the results are identical to the previous result for the third and fourth factors.
+
+The warmstart fit is added. It uses the sparse fit from `X2n_b` as the initialization for the flash model on data `X2`. The wartmstart fit produces an enhanced sparse solution.
+
+
+## The rank-1 problem
+
+The preceding problem was to find both of the two factors in the data. Now, we further simplify it to a rank-1 problem.
+
+**The rank-1 problem** We are given the same set of data: noiseless rank-2 matrix `X2`, noisy versions `X2n_a` and `X2n_b`. And we are allowed to fit only one factor. The goal is to find a solution that is sparse.
+
+As shown in https://joonsukkang.github.io/mf/warmstart.html, the warmstart fit reverts to the nonsparse solution (which is identical to svd or flash fit) when we only allow rank-1 estimation. So, under this rank-1 problem setting, warmstart does not give you an advantage. 
+
+```{r}
+# flash fit: restricted to rank-1
+X2.flash1 = flashr::flash(X2,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+X2n_a.flash1 = flashr::flash(X2n_a,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+X2n_b.flash1 = flashr::flash(X2n_b,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+
+# 
+data.frame(idx = 1:80,
+           l = c(X2.svd$v[,1],
+                 X2n_a.svd$v[,1],
+                 X2n_b.svd$v[,1],
+                 X2.flash1$ldf$f[,1],
+                 X2n_a.flash1$ldf$f[,1],
+                 X2n_b.flash1$ldf$f[,1]),
+           data = rep(rep(c("X2", "X2n_a (hard)", "X2n_b (easy)"), each=80), times=2),
+           method = rep(c("svd", "flash"), each=80*3)
+           ) %>% 
+  # adjust sign for illustration
+  mutate(l = ifelse((data=="X2n_b (easy)" & method=="flash"),
+                            -l,
+                            l)
+         ) -> X2.fit1
+
+# warmstart: sparse fit (from X2n_b) initialization for flash on data X2
+X2.flash.warmstart1 = flashr::flash(X2,K=1,f_init=X2n_b.flash1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant",backfit = TRUE,greedy = FALSE, verbose=FALSE)
+data.frame(idx=1:80, 
+           l = c(X2.flash.warmstart1$ldf$f[,1]), data="X2", method="flash_warm") %>%
+  rbind(X2.fit1) -> X2.fit1
+
+X2.fit1 %>%
+  ggplot()+geom_line(aes(x=idx, y=l, group=method, col=method))+
+  facet_grid(method~data, labeller=label_both)+geom_hline(yintercept=0)+
+  ggtitle("The Rank-1 Problem")
+```
