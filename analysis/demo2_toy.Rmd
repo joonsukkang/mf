@@ -1,0 +1,379 @@
+---
+title: "Integrate f out: demo2--sprase binary prior"
+author: "Joonsuk Kang"
+date: "2020-11-3"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+The prior is set as a sparse binary distribution: probability 0.5 at (a value close to zero) and (a large value). When given two points, e.g. $(\kappa_0, \kappa_1)=(10^{-5}, 2)$, the prior distribution for `w` is set as the discrete probability distribution with probability mass 0.5 at each of the two points. The first singular vector of the data is used as the initialization of `l` and The initialization for `w_i` is set as a two-step procedure. First, set $w_i=l_i^2$ using the initialization $l_i$'s. Second, if $w_i$ is less than the median of $\{w_i\}_{i=1}^n$, replace the value with $\kappa_0$; otherwise, replace it with $\kappa_1$. For details, refer to the function `demo.init.svd` below. 
+
+A grid of values $(\kappa_0, \kappa_1)$ are explored. 
+
+The method successfully identified the sweet spots. 
+
+
+
+## Data
+
+```{r}
+# code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+
+# take transpose
+X2 <- t(X2)
+X2n_a <- t(X2n_a)
+X2n_b <- t(X2n_b)
+
+# svd
+X2.svd = svd(X2)
+X2n_a.svd = svd(X2n_a)
+X2n_b.svd = svd(X2n_b)
+```
+
+## Demo Functions
+
+### Initialization
+
+```{r}
+# initialization of l using svd
+demo.init.svd <- function(X, warmstart=FALSE, warmstart.l=NA,
+                          grid.bin.0, grid.bin.1){
+      
+    N <- nrow(X)
+    P <- ncol(X)
+    
+    X.svd <- svd(X)
+    init.l <- X.svd$u[,1]
+    ############### temporary functionality; overwrite init.l if given warmstart
+    if(warmstart==TRUE){ init.l <- warmstart.l }
+    ###############
+    init.w <- init.l^2
+    
+    init.sigmasq <- c((norm(X, type='f')^2-t(init.l)%*%X%*%t(X)%*%init.l)/((N-1)*P))
+    init.delta <- c((t(init.l)%*%X%*%t(X)%*%init.l)/(P*init.sigmasq)-1)
+    
+    # set the grid
+    grid.min <- grid.bin.0
+    grid.max <- grid.bin.1
+    sigmasq.grid <- c(grid.min, grid.max)
+    
+    init.pi <- c(0.5, 0.5)
+    
+    # change init.w: into two groups
+    init.w[init.w<median(init.w)] <- grid.min
+    init.w[init.w>=median(init.w)] <- grid.max
+    
+    init.Ew.inv <- 1/init.w
+    
+    out.list = list()
+    out.list$l <- init.l
+    out.list$w <- init.w
+    out.list$Ew.inv <- init.Ew.inv
+    out.list$sigmasq <- init.sigmasq
+    out.list$delta <- init.delta
+    out.list$pi <- init.pi
+    out.list$sigmasq.grid <- sigmasq.grid
+    
+    return(out.list)
+}
+```
+
+
+### Updates
+
+
+```{r}
+# leg A: given w, update l (essentially, Sigma.star), sigmasq, delta
+demo.update.A <- function(X, sigmasq, delta, Ew.inv){
+    # input: X; sigmasq, delta, Ew.inv, 
+    # output: Sigma.star, Elsq, Elxxl; updated sigmasq, delta; u1 (first left singular vector of Y)
+  
+    N <- nrow(X)
+    P <- ncol(X)
+  
+    Y <- X%*%t(X)/(sigmasq*(1+1/delta)) - diag(x=Ew.inv)
+    Y.svd <- svd(Y)
+    
+    eval.expectation <- function(k){(sum(1/(k/(sigmasq*(1+1/delta))-Y.svd$d))-1)^2}
+    find.k.star <- optimize(f=eval.expectation,
+                            interval = c((Y.svd$d[1]+1)*sigmasq*(1+1/delta), (Y.svd$d[1]+N)*sigmasq*(1+1/delta))
+                            )
+    k.star <- find.k.star$minimum
+  
+    # ####### 
+    d.tilde <- 1/(k.star/(sigmasq*(1+1/delta))-Y.svd$d)
+    Sigma.star <- Y.svd$u %*% diag(x=d.tilde) %*% t(Y.svd$u)
+    # ####### mpfr ver
+    # d.tilde <- Rmpfr::mpfr(1/(k.star/(sigmasq*(1+1/delta))-Y.svd$d),30)
+    # Sigma.star <- matrix(0, nrow=N, ncol=N)
+    # for (i in 1:N){
+    #   Sigma.star <- Sigma.star + d.tilde[i]*Y.svd$u[,i] %*% t(Y.svd$u[,i])
+    # }
+    # #######
+
+    Elsq <- diag(Sigma.star)
+    ElXXl <- sum(diag((t(X) %*% Sigma.star %*% X)))
+    
+    sigmasq <- (norm(X, type='f')^2-ElXXl/(1+1/delta))/(N*P)
+    delta <- max(ElXXl/(P*sigmasq)-1,10^(-10)) # lower bound at 10^(-10)
+    
+    out.list = list()
+    out.list$Sigma.star = Sigma.star
+    out.list$Elsq = Elsq
+    out.list$ElXXl = ElXXl
+    out.list$sigmasq = sigmasq
+    out.list$delta = delta
+    out.list$u1 = Y.svd$u[,1]
+
+    
+    return(out.list)
+}
+
+
+# leg B: update w (essentially, pi_q) and g (essentially, Ew.inv)
+demo.update.B <- function(X, Elsq, pi, sigmasq.grid, niter.wg = 10){
+    # input: Elsq, pi; sigmasq.grid, niter.wg
+    # output: pi, pi_q Ew.inv
+  
+    N <- nrow(X)
+    P <- ncol(X)
+  
+    for (wg.iter in 1:niter.wg){ # more than one iteration helps
+    pi_q <- matrix(data=0, nrow=N, ncol=length(sigmasq.grid))
+    for (i in 1:N){
+      pi_q[i,] <- pi*sigmasq.grid^(-0.5)*exp(-Elsq[i]/(2*sigmasq.grid))
+      pi_q[i,] <- pi_q[i,]/sum(pi_q[i,])
+    }
+    pi <- colSums(pi_q)/N
+    }
+    
+    Ew.inv <- vector(mode='numeric', length=N)
+    for (i in 1:N){
+    Ew.inv[i] <- sum(pi_q[i,]*(1/sigmasq.grid))
+    }
+    
+    out.list = list()
+    out.list$pi = pi
+    out.list$pi_q = pi_q
+    out.list$Ew.inv = Ew.inv
+    
+    return(out.list)
+}
+
+demo.elbo <- function(N,P,
+                      sigmasq, delta,
+                      Sigma.star, ElXXl, Elsq,
+                      pi, pi_q, 
+                      sigmasq.grid,
+                      Ew.inv
+                      ){
+  logpi <- log(pi)
+  logpi[pi==0] <- 0 # to exclude -Inf (where pi=0) in the sum
+
+  elbo <- -N*P*log(sigmasq)/2-P*log(1+delta)/2-norm(X,'f')^2/(2*sigmasq)+ElXXl/(2*sigmasq*(1+1/delta))+
+    log(det(Sigma.star))/2-sum(log(pi_q)*pi_q, na.rm=TRUE)-sum(pi_q %*% log(sigmasq.grid))/2-sum(Elsq*Ew.inv)/2+
+    sum(pi_q %*% logpi)
+  
+  return(elbo)
+}
+```
+
+
+### initialization + updates + elbo
+
+```{r}
+demo.fit <- function(X, niter, init='rand', print.elbo=TRUE, warmstart.l=NA,
+                     binary0=10^(-10), binary1=1){
+  
+    N <- nrow(X)
+    P <- ncol(X)
+  
+    if(init=="rand"){ par.init <- demo.init.random(X, grid.bin.0=binary0, grid.bin.1=binary1) }
+    if(init=="svd"){ par.init <- demo.init.svd(X,grid.bin.0=binary0, grid.bin.1=binary1) }
+    if(init=="warm"){ par.init <- demo.init.svd(X, warmstart=TRUE, warmstart.l=warmstart.l,
+                                                grid.bin.0=binary0, grid.bin.1=binary1)}
+  
+    l <- par.init$l
+    w <- par.init$w
+    Ew.inv <- par.init$Ew.inv
+    sigmasq <- par.init$sigmasq
+    delta <- par.init$delta
+    pi <- par.init$pi
+    sigmasq.grid <- par.init$sigmasq.grid
+    
+    elbo <- vector('numeric',length=niter)
+    
+    for (i in 1:niter){
+    # leg A
+    temp.A <- demo.update.A(X,
+                          sigmasq=sigmasq,
+                          delta=delta,
+                          Ew.inv=Ew.inv)
+    Sigma.star <- temp.A$Sigma.star
+    Elsq <- temp.A$Elsq
+    ElXXl <- temp.A$ElXXl
+    sigmasq <- temp.A$sigmasq
+    delta <- temp.A$delta
+  
+    # leg B
+    temp.B <- demo.update.B(X,
+                          Elsq=Elsq,
+                          pi=pi,
+                          sigmasq.grid=sigmasq.grid)
+    pi <- temp.B$pi
+    pi_q <- temp.B$pi_q
+    Ew.inv <- temp.B$Ew.inv
+    
+    # elbo
+    elbo[i] <- demo.elbo(N,P,
+                      sigmasq, delta,
+                      Sigma.star, ElXXl, Elsq,
+                      pi, pi_q, 
+                      sigmasq.grid,
+                      Ew.inv
+                      )
+    if(print.elbo==TRUE){print(elbo[i])}
+    }
+    
+    out.list = list()
+    out.list$Sigma.star <- Sigma.star
+    out.list$Elsq <- Elsq
+    out.list$ElXXl <- ElXXl
+    out.list$sigmasq <- sigmasq
+    out.list$delta <- delta
+    out.list$pi <- pi
+    out.list$pi_q <- pi_q
+    out.list$Ew.inv <- Ew.inv
+    out.list$u1 <- temp.A$u1
+    out.list$sigmasq.grid <- sigmasq.grid
+    out.list$elbo <- elbo
+    return(out.list)
+}
+```
+
+
+
+
+## Demo Analysis
+
+```{r}
+library(tidyverse)
+library(flashr)
+```
+
+### Recap: the flash/svd fit for the rank-1 problem
+
+```{r}
+# flash fit: restricted to rank-1
+X2.flash1 = flashr::flash(X2,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+X2n_a.flash1 = flashr::flash(X2n_a,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+X2n_b.flash1 = flashr::flash(X2n_b,1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant", verbose=FALSE)
+
+data.frame(idx = 1:80,
+           l = c(X2.svd$u[,1],
+                 X2n_a.svd$u[,1],
+                 X2n_b.svd$u[,1],
+                 X2.flash1$ldf$l[,1],
+                 X2n_a.flash1$ldf$l[,1],
+                 X2n_b.flash1$ldf$l[,1]),
+           data = rep(rep(c("X2", "X2n_a (hard)", "X2n_b (easy)"), each=80), times=2),
+           method = rep(c("svd", "flash"), each=80*3)
+           ) %>% 
+  # adjust sign for illustration
+  mutate(l = ifelse((data=="X2n_b (easy)" & method=="flash"),
+                            -l,
+                            l)
+         ) -> X2.fit1
+
+# warmstart: sparse fit (from X2n_b) initialization for flash on data X2
+X2.flash.warmstart1 = flashr::flash(X2,K=1,f_init=X2n_b.flash1,ebnm_fn = list(l="ebnm_pn", f="ebnm_ash"),var_type = "constant",backfit = TRUE,greedy = FALSE, verbose=FALSE)
+data.frame(idx=1:80, 
+           l = c(X2.flash.warmstart1$ldf$l[,1]), data="X2", method="flash_warm") %>%
+  rbind(X2.fit1) -> X2.fit1
+
+X2.fit1 %>%
+  ggplot()+geom_line(aes(x=idx, y=l, group=method, col=method))+
+  facet_grid(method~data, labeller=label_both)+geom_hline(yintercept=0)+
+  ggtitle("The Rank-1 Problem")
+```
+
+### demo results: main analysis
+
+
+```{r, fig.height = 12, fig.width = 10}
+
+# sparse binary prior: =bin0 wp 0.5 and =bin1 wp 0.5
+summary((X2.svd$u[,1])^2)
+summary((X2n_a.svd$u[,1])^2)
+summary((X2n_b.svd$u[,1])^2)
+
+# bin0: essentially 0
+# bin1: a large value
+
+niter <- 20
+bin0.grid <- c(10^(-5), 1.5*10^(-5), 2*10^(-5), 3*10^(-5),4*10^(-5),5*10^(-5), 
+               10^(-4), 2*10^(-4), 3*10^(-4), 4*10^(-4), 5*10^(-4), 
+               10^(-3), 2*10^(-3), 5*10^(-3))
+bin1.grid <- c(0.01,0.02,0.05, 0.1, 0.2, 0.5, 1,2,3,4,5)
+df.result <- data.frame()
+
+for (i in 1:length(bin0.grid)){
+  for (j in 1:length(bin1.grid)){
+
+          bin0 <- bin0.grid[i]
+          bin1 <- bin1.grid[j]
+           df.result <- rbind(df.result,
+                          data.frame(l=demo.fit(X2, niter=niter, init='svd', print.elbo=FALSE, binary0=bin0, binary1=bin1)$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2"),
+                          data.frame(l=demo.fit(X2n_a, niter=niter, init='svd', print.elbo=FALSE, binary0=bin0, binary1=bin1)$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2n_a (hard)"),
+                          data.frame(l=demo.fit(X2n_b, niter=niter, init='svd', print.elbo=FALSE, binary0=bin0, binary1=bin1)$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2n_b (easy)")
+                          )
+  }
+}
+
+df.result %>% mutate(bin0=factor(bin0), bin1=factor(bin1)) -> df.result
+
+df.result %>% filter(data=="X2") %>%
+  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col='red', alpha=0.5)+
+  facet_grid(bin0~bin1, labeller='label_both', scales='free')+ggtitle("svd initialization + X2")
+df.result %>% filter(data=="X2n_a (hard)") %>%
+  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col='red', alpha=0.5)+
+  facet_grid(bin0~bin1, labeller='label_both', scales='free')+ggtitle("svd initialization + X2n_a (hard)")
+df.result %>% filter(data=="X2n_b (easy)") %>%
+  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col='red', alpha=0.5)+
+  facet_grid(bin0~bin1, labeller='label_both', scales='free')+ggtitle("svd initialization + X2n_b (easy)")
+```
+
+
