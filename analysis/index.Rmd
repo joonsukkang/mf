@@ -19,7 +19,19 @@ editor_options:
 ::: {}
 
 + the rank-1 problem: [rank1_setup](rank1_setup.html)
-  + The rank-1 problem is stated and the previous and a few additinoal analyses are shown.
+  + The rank-1 problem is stated and the previous and a few additional analyses are shown.
+
+:::
+::::
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/demo_toy.Rmd/unnamed-chunk-8-1.png" width="400">
+:::
+::: {}
+
++ demo version: [demo_toy](demo_toy.html)
+  + The demo version of the integrate f out method is applied to the toy data.
 
 :::
 ::::
