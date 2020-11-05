@@ -7,12 +7,16 @@ editor_options:
   chunk_output_type: console
 ---
 
-The prior is set as a sparse binary distribution: probability 0.5 at (a value close to zero) and (a large value). When given two points, e.g. $(\kappa_0, \kappa_1)=(10^{-5}, 2)$, the prior distribution for `w` is set as the discrete probability distribution with probability mass 0.5 at each of the two points. The first singular vector of the data is used as the initialization of `l` and The initialization for `w_i` is set as a two-step procedure. First, set $w_i=l_i^2$ using the initialization $l_i$'s. Second, if $w_i$ is less than the median of $\{w_i\}_{i=1}^n$, replace the value with $\kappa_0$; otherwise, replace it with $\kappa_1$. For details, refer to the function `demo.init.svd` below. 
+The prior is set as a sparse binary distribution: probability 0.5 at (a value close to zero) and (a large value). When given two points, e.g. $(\kappa_0, \kappa_1)=(10^{-15}, 10^{15})$, the prior distribution for `w` is set as the discrete probability distribution with probability mass 0.5 at each of the two points. The first singular vector of the data is used as the initialization of `l` and The initialization for `w_i` is set using a two-step procedure. First, set $w_i=l_i^2$ using the initialization $l_i$'s. Second, if $w_i$ is less than the median of $\{w_i\}_{i=1}^n$, replace the value with $\kappa_0$; otherwise, replace it with $\kappa_1$. For details, refer to the function `demo.init.svd` below. 
 
 A grid of values $(\kappa_0, \kappa_1)$ are explored. 
 
-The method successfully identified the sweet spots. 
+This shows that there exist settings in which the method works.
 
+Minor fixes:
+
++ elbo calculation
++ use evd in update steps instead of svd
 
 
 ## Data
@@ -58,6 +62,7 @@ X2n_b <- t(X2n_b)
 X2.svd = svd(X2)
 X2n_a.svd = svd(X2n_a)
 X2n_b.svd = svd(X2n_b)
+rm(X)
 ```
 
 ## Demo Functions
@@ -66,32 +71,32 @@ X2n_b.svd = svd(X2n_b)
 
 ```{r}
 # initialization of l using svd
-demo.init.svd <- function(X, warmstart=FALSE, warmstart.l=NA,
-                          grid.bin.0, grid.bin.1){
+demo.init.svd <- function(mat.X, warmstart=FALSE, warmstart.l=NA,
+                          grid.bin0, grid.bin1, prob.bin0){
       
-    N <- nrow(X)
-    P <- ncol(X)
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
     
-    X.svd <- svd(X)
-    init.l <- X.svd$u[,1]
+    mat.X.svd <- svd(mat.X)
+    init.l <- mat.X.svd$u[,1]
     ############### temporary functionality; overwrite init.l if given warmstart
     if(warmstart==TRUE){ init.l <- warmstart.l }
     ###############
     init.w <- init.l^2
     
-    init.sigmasq <- c((norm(X, type='f')^2-t(init.l)%*%X%*%t(X)%*%init.l)/((N-1)*P))
-    init.delta <- c((t(init.l)%*%X%*%t(X)%*%init.l)/(P*init.sigmasq)-1)
+    init.sigmasq <- c((norm(mat.X, type='f')^2-t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/((N-1)*P))
+    init.delta <- c((t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/(P*init.sigmasq)-1)
     
     # set the grid
-    grid.min <- grid.bin.0
-    grid.max <- grid.bin.1
+    grid.min <- grid.bin0
+    grid.max <- grid.bin1
     sigmasq.grid <- c(grid.min, grid.max)
     
-    init.pi <- c(0.5, 0.5)
+    init.pi <- c(prob.bin0, 1-prob.bin0)
     
     # change init.w: into two groups
-    init.w[init.w<median(init.w)] <- grid.min
-    init.w[init.w>=median(init.w)] <- grid.max
+    init.w[init.w<quantile(init.w, prob.bin0)] <- grid.min
+    init.w[init.w>=quantile(init.w, prob.bin0)] <- grid.max
     
     init.Ew.inv <- 1/init.w
     
@@ -114,46 +119,40 @@ demo.init.svd <- function(X, warmstart=FALSE, warmstart.l=NA,
 
 ```{r}
 # leg A: given w, update l (essentially, Sigma.star), sigmasq, delta
-demo.update.A <- function(X, sigmasq, delta, Ew.inv){
-    # input: X; sigmasq, delta, Ew.inv, 
+demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv){
+    # input: mat.X; sigmasq, delta, Ew.inv, 
     # output: Sigma.star, Elsq, Elxxl; updated sigmasq, delta; u1 (first left singular vector of Y)
   
-    N <- nrow(X)
-    P <- ncol(X)
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
   
-    Y <- X%*%t(X)/(sigmasq*(1+1/delta)) - diag(x=Ew.inv)
-    Y.svd <- svd(Y)
+    Y <- mat.X%*%t(mat.X)/(sigmasq*(1+1/delta)) - diag(x=Ew.inv)
+    Y.eigen <- eigen(Y)
     
-    eval.expectation <- function(k){(sum(1/(k/(sigmasq*(1+1/delta))-Y.svd$d))-1)^2}
+    eval.expectation <- function(k){(sum(1/(k/(sigmasq*(1+1/delta))-Y.eigen$values))-1)^2}
     find.k.star <- optimize(f=eval.expectation,
-                            interval = c((Y.svd$d[1]+1)*sigmasq*(1+1/delta), (Y.svd$d[1]+N)*sigmasq*(1+1/delta))
+                            interval = c((Y.eigen$values[1]+1)*sigmasq*(1+1/delta), (Y.eigen$values[1]+N)*sigmasq*(1+1/delta))
                             )
     k.star <- find.k.star$minimum
   
-    # ####### 
-    d.tilde <- 1/(k.star/(sigmasq*(1+1/delta))-Y.svd$d)
-    Sigma.star <- Y.svd$u %*% diag(x=d.tilde) %*% t(Y.svd$u)
-    # ####### mpfr ver
-    # d.tilde <- Rmpfr::mpfr(1/(k.star/(sigmasq*(1+1/delta))-Y.svd$d),30)
-    # Sigma.star <- matrix(0, nrow=N, ncol=N)
-    # for (i in 1:N){
-    #   Sigma.star <- Sigma.star + d.tilde[i]*Y.svd$u[,i] %*% t(Y.svd$u[,i])
-    # }
-    # #######
+    d.tilde <- 1/(k.star/(sigmasq*(1+1/delta))-Y.eigen$values)
+    Sigma.star <- Y.eigen$vectors %*% diag(x=d.tilde) %*% t(Y.eigen$vectors)
+    log.det.Sigma.star <- sum(log(d.tilde))
 
     Elsq <- diag(Sigma.star)
-    ElXXl <- sum(diag((t(X) %*% Sigma.star %*% X)))
+    ElXXl <- sum(diag((t(mat.X) %*% Sigma.star %*% mat.X)))
     
-    sigmasq <- (norm(X, type='f')^2-ElXXl/(1+1/delta))/(N*P)
+    sigmasq <- (norm(mat.X, type='f')^2-ElXXl/(1+1/delta))/(N*P)
     delta <- max(ElXXl/(P*sigmasq)-1,10^(-10)) # lower bound at 10^(-10)
     
     out.list = list()
+    out.list$log.det.Sigma.star = log.det.Sigma.star
     out.list$Sigma.star = Sigma.star
     out.list$Elsq = Elsq
     out.list$ElXXl = ElXXl
     out.list$sigmasq = sigmasq
     out.list$delta = delta
-    out.list$u1 = Y.svd$u[,1]
+    out.list$u1 = Y.eigen$vectors[,1]
 
     
     return(out.list)
@@ -161,12 +160,12 @@ demo.update.A <- function(X, sigmasq, delta, Ew.inv){
 
 
 # leg B: update w (essentially, pi_q) and g (essentially, Ew.inv)
-demo.update.B <- function(X, Elsq, pi, sigmasq.grid, niter.wg = 10){
+demo.update.B <- function(mat.X, Elsq, pi, sigmasq.grid, niter.wg = 10){
     # input: Elsq, pi; sigmasq.grid, niter.wg
     # output: pi, pi_q Ew.inv
   
-    N <- nrow(X)
-    P <- ncol(X)
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
   
     for (wg.iter in 1:niter.wg){ # more than one iteration helps
     pi_q <- matrix(data=0, nrow=N, ncol=length(sigmasq.grid))
@@ -190,9 +189,9 @@ demo.update.B <- function(X, Elsq, pi, sigmasq.grid, niter.wg = 10){
     return(out.list)
 }
 
-demo.elbo <- function(N,P,
+demo.elbo <- function(mat.X, N,P,
                       sigmasq, delta,
-                      Sigma.star, ElXXl, Elsq,
+                      log.det.Sigma.star, ElXXl, Elsq,
                       pi, pi_q, 
                       sigmasq.grid,
                       Ew.inv
@@ -200,8 +199,8 @@ demo.elbo <- function(N,P,
   logpi <- log(pi)
   logpi[pi==0] <- 0 # to exclude -Inf (where pi=0) in the sum
 
-  elbo <- -N*P*log(sigmasq)/2-P*log(1+delta)/2-norm(X,'f')^2/(2*sigmasq)+ElXXl/(2*sigmasq*(1+1/delta))+
-    log(det(Sigma.star))/2-sum(log(pi_q)*pi_q, na.rm=TRUE)-sum(pi_q %*% log(sigmasq.grid))/2-sum(Elsq*Ew.inv)/2+
+  elbo <- -N*P*log(sigmasq)/2-P*log(1+delta)/2-norm(mat.X,'f')^2/(2*sigmasq)+ElXXl/(2*sigmasq*(1+1/delta))+
+    log.det.Sigma.star/2-sum(log(pi_q)*pi_q, na.rm=TRUE)-sum(pi_q %*% log(sigmasq.grid))/2-sum(Elsq*Ew.inv)/2+
     sum(pi_q %*% logpi)
   
   return(elbo)
@@ -212,17 +211,17 @@ demo.elbo <- function(N,P,
 ### initialization + updates + elbo
 
 ```{r}
-demo.fit <- function(X, niter, init='rand', print.elbo=TRUE, warmstart.l=NA,
-                     binary0=10^(-10), binary1=1){
+demo.fit <- function(mat.X, niter, print.elbo=TRUE, warmstart.l=NA,
+                     binary_small=10^(-15), binary_big=10^15, prob_small=0.5 # (prob_big=1-prob_small)
+                     ){
   
-    N <- nrow(X)
-    P <- ncol(X)
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
   
-    if(init=="rand"){ par.init <- demo.init.random(X, grid.bin.0=binary0, grid.bin.1=binary1) }
-    if(init=="svd"){ par.init <- demo.init.svd(X,grid.bin.0=binary0, grid.bin.1=binary1) }
-    if(init=="warm"){ par.init <- demo.init.svd(X, warmstart=TRUE, warmstart.l=warmstart.l,
-                                                grid.bin.0=binary0, grid.bin.1=binary1)}
-  
+    par.init <- demo.init.svd(mat.X,
+                              grid.bin0=binary_small,    grid.bin1=binary_big,
+                                               prob.bin0=prob_small) 
+                                               
     l <- par.init$l
     w <- par.init$w
     Ew.inv <- par.init$Ew.inv
@@ -235,18 +234,19 @@ demo.fit <- function(X, niter, init='rand', print.elbo=TRUE, warmstart.l=NA,
     
     for (i in 1:niter){
     # leg A
-    temp.A <- demo.update.A(X,
+    temp.A <- demo.update.A(mat.X,
                           sigmasq=sigmasq,
                           delta=delta,
                           Ew.inv=Ew.inv)
     Sigma.star <- temp.A$Sigma.star
+    log.det.Sigma.star <- temp.A$log.det.Sigma.star
     Elsq <- temp.A$Elsq
     ElXXl <- temp.A$ElXXl
     sigmasq <- temp.A$sigmasq
     delta <- temp.A$delta
   
     # leg B
-    temp.B <- demo.update.B(X,
+    temp.B <- demo.update.B(mat.X,
                           Elsq=Elsq,
                           pi=pi,
                           sigmasq.grid=sigmasq.grid)
@@ -255,9 +255,9 @@ demo.fit <- function(X, niter, init='rand', print.elbo=TRUE, warmstart.l=NA,
     Ew.inv <- temp.B$Ew.inv
     
     # elbo
-    elbo[i] <- demo.elbo(N,P,
+    elbo[i] <- demo.elbo(mat.X,N,P,
                       sigmasq, delta,
-                      Sigma.star, ElXXl, Elsq,
+                      log.det.Sigma.star, ElXXl, Elsq,
                       pi, pi_q, 
                       sigmasq.grid,
                       Ew.inv
@@ -266,6 +266,7 @@ demo.fit <- function(X, niter, init='rand', print.elbo=TRUE, warmstart.l=NA,
     }
     
     out.list = list()
+    out.list$log.det.Sigma.star <- log.det.Sigma.star
     out.list$Sigma.star <- Sigma.star
     out.list$Elsq <- Elsq
     out.list$ElXXl <- ElXXl
@@ -327,53 +328,105 @@ X2.fit1 %>%
   ggtitle("The Rank-1 Problem")
 ```
 
-### demo results: main analysis
+### Analysis for the noiseless data `X2`
 
-
-```{r, fig.height = 12, fig.width = 10}
-
+```{r, fig.height = 8, fig.width = 10}
 # sparse binary prior: =bin0 wp 0.5 and =bin1 wp 0.5
 summary((X2.svd$u[,1])^2)
-summary((X2n_a.svd$u[,1])^2)
-summary((X2n_b.svd$u[,1])^2)
 
 # bin0: essentially 0
 # bin1: a large value
+niter <- 5
+bin0.grid <- 10^c(-15,-10,-7,-5,-4,-3)
+bin1.grid <- 10^c(-2,-1,0,1,2,5,10,15)
 
-niter <- 20
-bin0.grid <- c(10^(-5), 1.5*10^(-5), 2*10^(-5), 3*10^(-5),4*10^(-5),5*10^(-5), 
-               10^(-4), 2*10^(-4), 3*10^(-4), 4*10^(-4), 5*10^(-4), 
-               10^(-3), 2*10^(-3), 5*10^(-3))
-bin1.grid <- c(0.01,0.02,0.05, 0.1, 0.2, 0.5, 1,2,3,4,5)
 df.result <- data.frame()
+df.elbo <-data.frame()
 
 for (i in 1:length(bin0.grid)){
   for (j in 1:length(bin1.grid)){
 
           bin0 <- bin0.grid[i]
           bin1 <- bin1.grid[j]
+
+           X2.fit    <- demo.fit(X2, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1)
            df.result <- rbind(df.result,
-                          data.frame(l=demo.fit(X2, niter=niter, init='svd', print.elbo=FALSE, binary0=bin0, binary1=bin1)$u1,
-                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2"),
-                          data.frame(l=demo.fit(X2n_a, niter=niter, init='svd', print.elbo=FALSE, binary0=bin0, binary1=bin1)$u1,
-                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2n_a (hard)"),
-                          data.frame(l=demo.fit(X2n_b, niter=niter, init='svd', print.elbo=FALSE, binary0=bin0, binary1=bin1)$u1,
-                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2n_b (easy)")
-                          )
+                          data.frame(l=X2.fit$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2"))
+           df.elbo <- rbind(df.elbo,
+                            data.frame(elbo=c(last(X2.fit$elbo)),
+                                       data=c("X2"),
+                                       bin0=bin0, bin1=bin1))
   }
 }
 
 df.result %>% mutate(bin0=factor(bin0), bin1=factor(bin1)) -> df.result
+df.elbo %>% mutate(bin0=factor(bin0)) -> df.elbo
 
 df.result %>% filter(data=="X2") %>%
   ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col='red', alpha=0.5)+
   facet_grid(bin0~bin1, labeller='label_both', scales='free')+ggtitle("svd initialization + X2")
+```
+```{r}
+df.elbo %>% filter(data=="X2") %>%
+  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position="jitter")+scale_x_log10()
+```
+
+
+### Analysis for the noiseless data `X2n_a` (hard) and `X2n_b` (easy)
+
+
+```{r, fig.height = 8, fig.width = 10}
+# sparse binary prior: =bin0 wp 0.5 and =bin1 wp 0.5
+summary((X2n_a.svd$u[,1])^2)
+summary((X2n_b.svd$u[,1])^2)
+
+# bin0: essentially 0
+# bin1: a large value
+niter <- 5
+bin0.grid <- 10^c(-15,-10,-7,-5,-4,-3)
+bin1.grid <- 10^c(-2,-1,0,1,2,5,10,15)
+
+df.result <- data.frame()
+df.elbo <-data.frame()
+
+for (i in 1:length(bin0.grid)){
+  for (j in 1:length(bin1.grid)){
+
+          bin0 <- bin0.grid[i]
+          bin1 <- bin1.grid[j]
+
+           X2n_a.fit    <- demo.fit(X2n_a, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1)
+           X2n_b.fit    <- demo.fit(X2n_b, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1)
+           df.result <- rbind(df.result,
+                          data.frame(l=X2n_a.fit$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2n_a (hard)"),
+                          data.frame(l=X2n_b.fit$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data="X2n_b (easy)"))
+           df.elbo <- rbind(df.elbo,
+                            data.frame(elbo=c(last(X2n_a.fit$elbo), last(X2n_b.fit$elbo)),
+                                       data=c("X2n_a (hard)", "X2n_b (easy)"),
+                                       bin0=bin0, bin1=bin1))
+  }
+}
+
+df.result %>% mutate(bin0=factor(bin0), bin1=factor(bin1)) -> df.result
+df.elbo %>% mutate(bin0=factor(bin0)) -> df.elbo
+
 df.result %>% filter(data=="X2n_a (hard)") %>%
   ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col='red', alpha=0.5)+
   facet_grid(bin0~bin1, labeller='label_both', scales='free')+ggtitle("svd initialization + X2n_a (hard)")
+```
+```{r}
+df.elbo %>% filter(data=="X2n_a (hard)") %>%
+  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position="jitter")+scale_x_log10()
+```
+```{r, fig.height = 8, fig.width = 10}
 df.result %>% filter(data=="X2n_b (easy)") %>%
   ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col='red', alpha=0.5)+
   facet_grid(bin0~bin1, labeller='label_both', scales='free')+ggtitle("svd initialization + X2n_b (easy)")
 ```
-
-
+```{r}
+df.elbo %>% filter(data=="X2n_b (easy)") %>%
+  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position="jitter")+scale_x_log10()
+```
