@@ -1,0 +1,48 @@
+---
+title: "ebmr.alph: Sparsity and Residual Variance"
+author: "Joonsuk Kang"
+date: "2020-11-5"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+The relationship between sparsity and residual variance is explored. Other parameters are set according to the previous setting: $n=50$ and $p=200$; nonzero betas are half 1 and half -1.
+
+There are also some cases where `ebr` ends up with really small residual variance estimates.
+
+
+```{r}
+library("ebmr.alpha")
+
+# data
+set.seed(100)
+s.grid <- seq(2,40,by=2) # sparsity level
+
+resvar.ebr     <- vector(mode='numeric', length=length(s.grid))
+resvar.eblasso <- vector(mode='numeric', length=length(s.grid))
+mse.ebr        <- vector(mode='numeric', length=length(s.grid))
+mse.eblasso    <- vector(mode='numeric', length=length(s.grid))
+
+for (i in 1:length(s.grid)){
+  s <- s.grid[i]
+  n = 50
+  p = 200
+  X = matrix(rnorm(n*p),nrow=n,ncol=p)
+  
+  btrue = rep(0,p)
+  btrue[1:s/2] = 1        #  1 for s/2 parameters
+  btrue[101:100+s/2] = -1 # -1 for s/2 parameters
+  y = X %*% btrue + rnorm(n)
+  
+  y.fit.ebr     <- ebmr(X, y, maxiter = 200, ebnv_fn = ebnv.pm)
+  y.fit.eblasso <- ebmr(X, y, maxiter = 200, ebnv_fn = ebnv.exp)
+  
+  resvar.ebr[i]     <- y.fit.ebr$residual_variance
+  resvar.eblasso[i] <- y.fit.eblasso$residual_variance
+  mse.ebr[i]        <- sqrt(mean((coef(y.fit.ebr)- btrue)^2))
+  mse.eblasso[i]    <- sqrt(mean((coef(y.fit.eblasso)- btrue)^2))
+}
+
+print(cbind(s.grid, resvar.ebr, resvar.eblasso, mse.ebr, mse.eblasso ))
+```
