@@ -512,16 +512,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree04846386d0337718fa290fd84326c69994938f5dtargetblank0484638a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/04846386d0337718fa290fd84326c69994938f5d" target="_blank">0484638</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree14e315940b2f773c41f5d0a9faa72d3862a847d7targetblank14e3159a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/14e315940b2f773c41f5d0a9faa72d3862a847d7" target="_blank">14e3159</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree04846386d0337718fa290fd84326c69994938f5dtargetblank0484638a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree14e315940b2f773c41f5d0a9faa72d3862a847d7targetblank14e3159a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/04846386d0337718fa290fd84326c69994938f5d" target="_blank">0484638</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/14e315940b2f773c41f5d0a9faa72d3862a847d7" target="_blank">14e3159</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -533,6 +533,8 @@ Ignored files:
     Ignored:    analysis/.Rhistory
 
 Untracked files:
+    Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/temp.Rmd
     Untracked:  code/code_wflow_publish.R
     Untracked:  code/temp.R
     Untracked:  code/temp2.R
@@ -542,7 +544,6 @@ Untracked files:
 Unstaged changes:
     Deleted:    analysis/ChoosingW.Rmd
     Deleted:    analysis/concentration.Rmd
-    Modified:   analysis/index.Rmd
 
 </code></pre>
 <p>
@@ -581,6 +582,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/14e315940b2f773c41f5d0a9faa72d3862a847d7/analysis/demo2_toy.Rmd" target="_blank">14e3159</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+<td>
+added comparison: with/without updating prior
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/075959c7537ce61f8e6e1aaf7f1a376b42f78bf1/docs/demo2_toy.html" target="_blank">075959c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -781,7 +816,7 @@ demo.update.A &lt;- function(mat.X, sigmasq, delta, Ew.inv){
 
 
 # leg B: update w (essentially, pi_q) and g (essentially, Ew.inv)
-demo.update.B &lt;- function(mat.X, Elsq, pi, sigmasq.grid, niter.wg = 10){
+demo.update.B &lt;- function(mat.X, Elsq, pi, sigmasq.grid, niter.wg = 10, update_pi=TRUE){
     # input: Elsq, pi; sigmasq.grid, niter.wg
     # output: pi, pi_q Ew.inv
   
@@ -794,7 +829,7 @@ demo.update.B &lt;- function(mat.X, Elsq, pi, sigmasq.grid, niter.wg = 10){
       pi_q[i,] &lt;- pi*sigmasq.grid^(-0.5)*exp(-Elsq[i]/(2*sigmasq.grid))
       pi_q[i,] &lt;- pi_q[i,]/sum(pi_q[i,])
     }
-    pi &lt;- colSums(pi_q)/N
+    if(update_pi==TRUE){pi &lt;- colSums(pi_q)/N}
     }
     
     Ew.inv &lt;- vector(mode=&#39;numeric&#39;, length=N)
@@ -830,7 +865,8 @@ demo.elbo &lt;- function(mat.X, N,P,
 <div id="initialization-updates-elbo" class="section level3">
 <h3>initialization + updates + elbo</h3>
 <pre class="r"><code>demo.fit &lt;- function(mat.X, niter, print.elbo=TRUE, warmstart.l=NA,
-                     binary_small=10^(-15), binary_big=10^15, prob_small=0.5 # (prob_big=1-prob_small)
+                     binary_small=10^(-15), binary_big=10^15, prob_small=0.5, # (prob_big=1-prob_small)
+                     update_pi=TRUE
                      ){
   
     N &lt;- nrow(mat.X)
@@ -867,7 +903,8 @@ demo.elbo &lt;- function(mat.X, N,P,
     temp.B &lt;- demo.update.B(mat.X,
                           Elsq=Elsq,
                           pi=pi,
-                          sigmasq.grid=sigmasq.grid)
+                          sigmasq.grid=sigmasq.grid,
+                          update_pi=update_pi)
     pi &lt;- temp.B$pi
     pi_q &lt;- temp.B$pi_q
     Ew.inv &lt;- temp.B$Ew.inv
@@ -900,8 +937,8 @@ demo.elbo &lt;- function(mat.X, N,P,
 }</code></pre>
 </div>
 </div>
-<div id="demo-analysis" class="section level2">
-<h2>Demo Analysis</h2>
+<div id="recap-the-flashsvd-fit-for-the-rank-1-problem" class="section level2">
+<h2>Recap: the flash/svd fit for the rank-1 problem</h2>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>── Attaching packages ────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>✓ ggplot2 3.3.2     ✓ purrr   0.3.4
@@ -911,10 +948,9 @@ demo.elbo &lt;- function(mat.X, N,P,
 <pre><code>── Conflicts ───────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 x dplyr::filter() masks stats::filter()
 x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(flashr)</code></pre>
-<div id="recap-the-flashsvd-fit-for-the-rank-1-problem" class="section level3">
-<h3>Recap: the flash/svd fit for the rank-1 problem</h3>
-<pre class="r"><code># flash fit: restricted to rank-1
+<pre class="r"><code>library(flashr)
+
+# flash fit: restricted to rank-1
 X2.flash1 = flashr::flash(X2,1,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;, verbose=FALSE)
 X2n_a.flash1 = flashr::flash(X2n_a,1,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;, verbose=FALSE)
 X2n_b.flash1 = flashr::flash(X2n_b,1,ebnm_fn = list(l=&quot;ebnm_pn&quot;, f=&quot;ebnm_ash&quot;),var_type = &quot;constant&quot;, verbose=FALSE)</code></pre>
@@ -948,7 +984,51 @@ X2.fit1 %&gt;%
   ggplot()+geom_line(aes(x=idx, y=l, group=method, col=method))+
   facet_grid(method~data, labeller=label_both)+geom_hline(yintercept=0)+
   ggtitle(&quot;The Rank-1 Problem&quot;)</code></pre>
-<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="demo-analysis-without-updating-prior-distribution" class="section level2">
+<h2>Demo Analysis: without updating prior distribution</h2>
+<p>Do not update <code>pi</code> parameter. It’s fixed at (0.5, 0.5).</p>
+<div id="analysis-for-the-noiseless-data-x2" class="section level3">
+<h3>Analysis for the noiseless data <code>X2</code></h3>
+<pre class="r"><code># sparse binary prior: =bin0 wp 0.5 and =bin1 wp 0.5
+summary((X2.svd$u[,1])^2)</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.004986 0.005103 0.011159 0.012500 0.018556 0.022695 </code></pre>
+<pre class="r"><code># bin0: essentially 0
+# bin1: a large value
+niter &lt;- 5
+bin0.grid &lt;- 10^c(-15,-10,-7,-5,-4,-3)
+bin1.grid &lt;- 10^c(-2,-1,0,1,2,5,10,15)
+
+df.result &lt;- data.frame()
+df.elbo &lt;-data.frame()
+
+for (i in 1:length(bin0.grid)){
+  for (j in 1:length(bin1.grid)){
+
+          bin0 &lt;- bin0.grid[i]
+          bin1 &lt;- bin1.grid[j]
+
+           X2.fit    &lt;- demo.fit(X2, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1, 
+                                 update_pi=FALSE)
+           df.result &lt;- rbind(df.result,
+                          data.frame(l=X2.fit$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data=&quot;X2&quot;))
+           df.elbo &lt;- rbind(df.elbo,
+                            data.frame(elbo=c(last(X2.fit$elbo)),
+                                       data=c(&quot;X2&quot;),
+                                       bin0=bin0, bin1=bin1))
+  }
+}
+
+df.result %&gt;% mutate(bin0=factor(bin0), bin1=factor(bin1)) -&gt; df.result
+df.elbo %&gt;% mutate(bin0=factor(bin0)) -&gt; df.elbo
+
+df.result %&gt;% filter(data==&quot;X2&quot;) %&gt;%
+  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col=&#39;red&#39;, alpha=0.5)+
+  facet_grid(bin0~bin1, labeller=&#39;label_both&#39;, scales=&#39;free&#39;)+ggtitle(&quot;svd initialization + X2&quot;)</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
 Past versions of unnamed-chunk-6-1.png
@@ -986,46 +1066,9 @@ Joonsuk Kang
 </table>
 </div>
 </div>
-</div>
-<div id="analysis-for-the-noiseless-data-x2" class="section level3">
-<h3>Analysis for the noiseless data <code>X2</code></h3>
-<pre class="r"><code># sparse binary prior: =bin0 wp 0.5 and =bin1 wp 0.5
-summary((X2.svd$u[,1])^2)</code></pre>
-<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-0.004986 0.005103 0.011159 0.012500 0.018556 0.022695 </code></pre>
-<pre class="r"><code># bin0: essentially 0
-# bin1: a large value
-niter &lt;- 5
-bin0.grid &lt;- 10^c(-15,-10,-7,-5,-4,-3)
-bin1.grid &lt;- 10^c(-2,-1,0,1,2,5,10,15)
-
-df.result &lt;- data.frame()
-df.elbo &lt;-data.frame()
-
-for (i in 1:length(bin0.grid)){
-  for (j in 1:length(bin1.grid)){
-
-          bin0 &lt;- bin0.grid[i]
-          bin1 &lt;- bin1.grid[j]
-
-           X2.fit    &lt;- demo.fit(X2, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1)
-           df.result &lt;- rbind(df.result,
-                          data.frame(l=X2.fit$u1,
-                                     idx=1:80, bin0 = bin0, bin1=bin1, data=&quot;X2&quot;))
-           df.elbo &lt;- rbind(df.elbo,
-                            data.frame(elbo=c(last(X2.fit$elbo)),
-                                       data=c(&quot;X2&quot;),
-                                       bin0=bin0, bin1=bin1))
-  }
-}
-
-df.result %&gt;% mutate(bin0=factor(bin0), bin1=factor(bin1)) -&gt; df.result
-df.elbo %&gt;% mutate(bin0=factor(bin0)) -&gt; df.elbo
-
-df.result %&gt;% filter(data==&quot;X2&quot;) %&gt;%
-  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col=&#39;red&#39;, alpha=0.5)+
-  facet_grid(bin0~bin1, labeller=&#39;label_both&#39;, scales=&#39;free&#39;)+ggtitle(&quot;svd initialization + X2&quot;)</code></pre>
-<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df.elbo %&gt;% filter(data==&quot;X2&quot;) %&gt;%
+  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position=&quot;jitter&quot;)+scale_x_log10()</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
 Past versions of unnamed-chunk-7-1.png
@@ -1050,6 +1093,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/075959c7537ce61f8e6e1aaf7f1a376b42f78bf1/docs/figure/demo2_toy.Rmd/unnamed-chunk-7-1.png" target="_blank">075959c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/93d88947e6815f003d90d9b160a94105050dcb28/docs/figure/demo2_toy.Rmd/unnamed-chunk-7-1.png" target="_blank">93d8894</a>
 </td>
 <td>
@@ -1063,9 +1117,6 @@ Joonsuk Kang
 </table>
 </div>
 </div>
-<pre class="r"><code>df.elbo %&gt;% filter(data==&quot;X2&quot;) %&gt;%
-  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position=&quot;jitter&quot;)+scale_x_log10()</code></pre>
-<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="analysis-for-the-noiseless-data-x2n_a-hard-and-x2n_b-easy" class="section level3">
 <h3>Analysis for the noiseless data <code>X2n_a</code> (hard) and <code>X2n_b</code> (easy)</h3>
@@ -1091,8 +1142,8 @@ for (i in 1:length(bin0.grid)){
           bin0 &lt;- bin0.grid[i]
           bin1 &lt;- bin1.grid[j]
 
-           X2n_a.fit    &lt;- demo.fit(X2n_a, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1)
-           X2n_b.fit    &lt;- demo.fit(X2n_b, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1)
+           X2n_a.fit    &lt;- demo.fit(X2n_a, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1, update_pi=FALSE)
+           X2n_b.fit    &lt;- demo.fit(X2n_b, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1, update_pi=FALSE)
            df.result &lt;- rbind(df.result,
                           data.frame(l=X2n_a.fit$u1,
                                      idx=1:80, bin0 = bin0, bin1=bin1, data=&quot;X2n_a (hard)&quot;),
@@ -1111,17 +1162,306 @@ df.elbo %&gt;% mutate(bin0=factor(bin0)) -&gt; df.elbo
 df.result %&gt;% filter(data==&quot;X2n_a (hard)&quot;) %&gt;%
   ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col=&#39;red&#39;, alpha=0.5)+
   facet_grid(bin0~bin1, labeller=&#39;label_both&#39;, scales=&#39;free&#39;)+ggtitle(&quot;svd initialization + X2n_a (hard)&quot;)</code></pre>
-<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-9-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-8-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/075959c7537ce61f8e6e1aaf7f1a376b42f78bf1/docs/figure/demo2_toy.Rmd/unnamed-chunk-8-1.png" target="_blank">075959c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>df.elbo %&gt;% filter(data==&quot;X2n_a (hard)&quot;) %&gt;%
   ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position=&quot;jitter&quot;)+scale_x_log10()</code></pre>
-<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/075959c7537ce61f8e6e1aaf7f1a376b42f78bf1/docs/figure/demo2_toy.Rmd/unnamed-chunk-9-1.png" target="_blank">075959c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>df.result %&gt;% filter(data==&quot;X2n_b (easy)&quot;) %&gt;%
   ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col=&#39;red&#39;, alpha=0.5)+
   facet_grid(bin0~bin1, labeller=&#39;label_both&#39;, scales=&#39;free&#39;)+ggtitle(&quot;svd initialization + X2n_b (easy)&quot;)</code></pre>
-<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-11-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-10-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/075959c7537ce61f8e6e1aaf7f1a376b42f78bf1/docs/figure/demo2_toy.Rmd/unnamed-chunk-10-1.png" target="_blank">075959c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>df.elbo %&gt;% filter(data==&quot;X2n_b (easy)&quot;) %&gt;%
   ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position=&quot;jitter&quot;)+scale_x_log10()</code></pre>
-<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
+Past versions of unnamed-chunk-11-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-11-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/075959c7537ce61f8e6e1aaf7f1a376b42f78bf1/docs/figure/demo2_toy.Rmd/unnamed-chunk-11-1.png" target="_blank">075959c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="demo-analysis-updating-prior-distribution" class="section level2">
+<h2>Demo Analysis: updating prior distribution</h2>
+<p>Update <code>pi</code> parameter. The <code>pi</code> starts at (0.5, 0.5), and gets updated.</p>
+<div id="analysis-for-the-noiseless-data-x2-1" class="section level3">
+<h3>Analysis for the noiseless data <code>X2</code></h3>
+<pre class="r"><code># sparse binary prior: =bin0 wp 0.5 and =bin1 wp 0.5
+summary((X2.svd$u[,1])^2)</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.004986 0.005103 0.011159 0.012500 0.018556 0.022695 </code></pre>
+<pre class="r"><code># bin0: essentially 0
+# bin1: a large value
+niter &lt;- 5
+bin0.grid &lt;- 10^c(-15,-10,-7,-5,-4,-3)
+bin1.grid &lt;- 10^c(-2,-1,0,1,2,5,10,15)
+
+df.result &lt;- data.frame()
+df.elbo &lt;-data.frame()
+
+for (i in 1:length(bin0.grid)){
+  for (j in 1:length(bin1.grid)){
+
+          bin0 &lt;- bin0.grid[i]
+          bin1 &lt;- bin1.grid[j]
+
+           X2.fit    &lt;- demo.fit(X2, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1,
+                                 update_pi=TRUE)
+           df.result &lt;- rbind(df.result,
+                          data.frame(l=X2.fit$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data=&quot;X2&quot;))
+           df.elbo &lt;- rbind(df.elbo,
+                            data.frame(elbo=c(last(X2.fit$elbo)),
+                                       data=c(&quot;X2&quot;),
+                                       bin0=bin0, bin1=bin1))
+  }
+}
+
+df.result %&gt;% mutate(bin0=factor(bin0), bin1=factor(bin1)) -&gt; df.result
+df.elbo %&gt;% mutate(bin0=factor(bin0)) -&gt; df.elbo
+
+df.result %&gt;% filter(data==&quot;X2&quot;) %&gt;%
+  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col=&#39;red&#39;, alpha=0.5)+
+  facet_grid(bin0~bin1, labeller=&#39;label_both&#39;, scales=&#39;free&#39;)+ggtitle(&quot;svd initialization + X2&quot;)</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-12-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
+Past versions of unnamed-chunk-12-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/075959c7537ce61f8e6e1aaf7f1a376b42f78bf1/docs/figure/demo2_toy.Rmd/unnamed-chunk-12-1.png" target="_blank">075959c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-05
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>df.elbo %&gt;% filter(data==&quot;X2&quot;) %&gt;%
+  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position=&quot;jitter&quot;)+scale_x_log10()</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="analysis-for-the-noiseless-data-x2n_a-hard-and-x2n_b-easy-1" class="section level3">
+<h3>Analysis for the noiseless data <code>X2n_a</code> (hard) and <code>X2n_b</code> (easy)</h3>
+<pre class="r"><code># sparse binary prior: =bin0 wp 0.5 and =bin1 wp 0.5
+summary((X2n_a.svd$u[,1])^2)</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.001411 0.006873 0.012183 0.012500 0.016770 0.027912 </code></pre>
+<pre class="r"><code>summary((X2n_b.svd$u[,1])^2)</code></pre>
+<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+1.250e-06 3.819e-04 6.484e-03 1.250e-02 2.277e-02 4.602e-02 </code></pre>
+<pre class="r"><code># bin0: essentially 0
+# bin1: a large value
+niter &lt;- 5
+bin0.grid &lt;- 10^c(-15,-10,-7,-5,-4,-3)
+bin1.grid &lt;- 10^c(-2,-1,0,1,2,5,10,15)
+
+df.result &lt;- data.frame()
+df.elbo &lt;-data.frame()
+
+for (i in 1:length(bin0.grid)){
+  for (j in 1:length(bin1.grid)){
+
+          bin0 &lt;- bin0.grid[i]
+          bin1 &lt;- bin1.grid[j]
+
+           X2n_a.fit    &lt;- demo.fit(X2n_a, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1, update_pi=TRUE)
+           X2n_b.fit    &lt;- demo.fit(X2n_b, niter=niter, print.elbo=FALSE, binary_small=bin0, binary_big=bin1, update_pi=TRUE)
+           df.result &lt;- rbind(df.result,
+                          data.frame(l=X2n_a.fit$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data=&quot;X2n_a (hard)&quot;),
+                          data.frame(l=X2n_b.fit$u1,
+                                     idx=1:80, bin0 = bin0, bin1=bin1, data=&quot;X2n_b (easy)&quot;))
+           df.elbo &lt;- rbind(df.elbo,
+                            data.frame(elbo=c(last(X2n_a.fit$elbo), last(X2n_b.fit$elbo)),
+                                       data=c(&quot;X2n_a (hard)&quot;, &quot;X2n_b (easy)&quot;),
+                                       bin0=bin0, bin1=bin1))
+  }
+}
+
+df.result %&gt;% mutate(bin0=factor(bin0), bin1=factor(bin1)) -&gt; df.result
+df.elbo %&gt;% mutate(bin0=factor(bin0)) -&gt; df.elbo
+
+df.result %&gt;% filter(data==&quot;X2n_a (hard)&quot;) %&gt;%
+  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col=&#39;red&#39;, alpha=0.5)+
+  facet_grid(bin0~bin1, labeller=&#39;label_both&#39;, scales=&#39;free&#39;)+ggtitle(&quot;svd initialization + X2n_a (hard)&quot;)</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-14-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df.elbo %&gt;% filter(data==&quot;X2n_a (hard)&quot;) %&gt;%
+  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position=&quot;jitter&quot;)+scale_x_log10()</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df.result %&gt;% filter(data==&quot;X2n_b (easy)&quot;) %&gt;%
+  ggplot()+geom_line(aes(x=idx, y=l))+geom_hline(yintercept=0, col=&#39;red&#39;, alpha=0.5)+
+  facet_grid(bin0~bin1, labeller=&#39;label_both&#39;, scales=&#39;free&#39;)+ggtitle(&quot;svd initialization + X2n_b (easy)&quot;)</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-16-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>df.elbo %&gt;% filter(data==&quot;X2n_b (easy)&quot;) %&gt;%
+  ggplot(aes(x=bin1, y=elbo, group=bin0, col=bin0))+geom_line()+geom_point(position=&quot;jitter&quot;)+scale_x_log10()</code></pre>
+<p><img src="figure/demo2_toy.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
