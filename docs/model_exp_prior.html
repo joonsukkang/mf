@@ -512,16 +512,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeac7dd8c972a88bf1b67ebf9e8585f96f19cb9543targetblankac7dd8ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/ac7dd8c972a88bf1b67ebf9e8585f96f19cb9543" target="_blank">ac7dd8c</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree457638c4583f346fb2f798e9f7cff800c9ed6c0atargetblank457638ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/457638c4583f346fb2f798e9f7cff800c9ed6c0a" target="_blank">457638c</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeac7dd8c972a88bf1b67ebf9e8585f96f19cb9543targetblankac7dd8ca" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree457638c4583f346fb2f798e9f7cff800c9ed6c0atargetblank457638ca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/ac7dd8c972a88bf1b67ebf9e8585f96f19cb9543" target="_blank">ac7dd8c</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/457638c4583f346fb2f798e9f7cff800c9ed6c0a" target="_blank">457638c</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -580,6 +580,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/457638c4583f346fb2f798e9f7cff800c9ed6c0a/analysis/model_exp_prior.Rmd" target="_blank">457638c</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-06
+</td>
+<td>
+The model with exponential prior
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/4281e673ab3b934a8359f42cd3bb0a045ed89b57/docs/model_exp_prior.html" target="_blank">4281e67</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -798,20 +832,197 @@ demo.update.B &lt;- function(mat.X, Elsq, eta=eta, niter.updates = 10){
 mat.X &lt;- X2
 obj.fit    &lt;- demo.fit(mat.X, niter=10) 
 plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
 <p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-5-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
+Past versions of unnamed-chunk-5-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4281e673ab3b934a8359f42cd3bb0a045ed89b57/docs/figure/model_exp_prior.Rmd/unnamed-chunk-5-1.png" target="_blank">4281e67</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+d.tilde</code></pre>
+<pre><code> [1] 9.982127e-01 1.456654e-04 1.180018e-05 1.180018e-05 1.180018e-05
+ [6] 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05
+[11] 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05
+[16] 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05
+[21] 1.180018e-05 1.179944e-05 1.179888e-05 1.179888e-05 1.179888e-05
+[26] 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05
+[31] 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05
+[36] 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05
+[41] 1.179888e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
+[46] 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
+[51] 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
+[56] 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
+[61] 1.179029e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05
+[66] 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05
+[71] 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05
+[76] 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05</code></pre>
+<pre class="r"><code>sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.9992784</code></pre>
+<pre><code>[1] 1.992857</code></pre>
 <pre class="r"><code># X2n_a hard
 mat.X &lt;- X2n_a
 obj.fit    &lt;- demo.fit(mat.X, niter=10) 
 plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
 <p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-5-2.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-2">
+Past versions of unnamed-chunk-5-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4281e673ab3b934a8359f42cd3bb0a045ed89b57/docs/figure/model_exp_prior.Rmd/unnamed-chunk-5-2.png" target="_blank">4281e67</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+d.tilde</code></pre>
+<pre><code> [1] 0.9399069562 0.0056021078 0.0009414144 0.0009165970 0.0009016915
+ [6] 0.0008844991 0.0008789741 0.0008706081 0.0008565388 0.0008541135
+[11] 0.0008458513 0.0008394023 0.0008381368 0.0008282749 0.0008146330
+[16] 0.0008089763 0.0008007258 0.0007947508 0.0007873748 0.0007836141
+[21] 0.0007766458 0.0007701809 0.0007622419 0.0007561796 0.0007517493
+[26] 0.0007480074 0.0007444239 0.0007413441 0.0007354612 0.0007260134
+[31] 0.0007219168 0.0007111853 0.0007077682 0.0007034780 0.0007017215
+[36] 0.0006967447 0.0006948100 0.0006927592 0.0006908396 0.0006843098
+[41] 0.0006800373 0.0006775842 0.0006732646 0.0006704370 0.0006674565
+[46] 0.0006641283 0.0006632037 0.0006597896 0.0006574266 0.0006566626
+[51] 0.0006519832 0.0006457932 0.0006435929 0.0006402566 0.0006389404
+[56] 0.0006337450 0.0006323043 0.0006277457 0.0006213161 0.0006177289
+[61] 0.0006169141 0.0006127171 0.0006073892 0.0006065187 0.0006037721
+[66] 0.0006023469 0.0005983250 0.0005952478 0.0005910553 0.0005875531
+[71] 0.0005859429 0.0005822196 0.0005800342 0.0005778737 0.0005730931
+[76] 0.0005684380 0.0005647778 0.0005582155 0.0005486837 0.0005429092</code></pre>
+<pre class="r"><code>sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 1</code></pre>
+<pre><code>[1] 1.766991</code></pre>
 <pre class="r"><code># X2n_b easy
 mat.X &lt;- X2n_b
 obj.fit    &lt;- demo.fit(mat.X, niter=10) 
 plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
 <p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-5-3.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-3">
+Past versions of unnamed-chunk-5-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4281e673ab3b934a8359f42cd3bb0a045ed89b57/docs/figure/model_exp_prior.Rmd/unnamed-chunk-5-3.png" target="_blank">4281e67</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+d.tilde</code></pre>
+<pre><code> [1] 0.9479044719 0.0023384040 0.0008738298 0.0008468223 0.0008330404
+ [6] 0.0008288662 0.0008180034 0.0008013198 0.0007948054 0.0007805784
+[11] 0.0007759162 0.0007707917 0.0007579579 0.0007480127 0.0007459079
+[16] 0.0007451647 0.0007390499 0.0007282562 0.0007204987 0.0007174841
+[21] 0.0007065114 0.0007043136 0.0007035109 0.0006954875 0.0006907955
+[26] 0.0006808758 0.0006786777 0.0006727905 0.0006702576 0.0006655065
+[31] 0.0006645796 0.0006618124 0.0006572473 0.0006540584 0.0006496932
+[36] 0.0006469387 0.0006449884 0.0006354304 0.0006346617 0.0006306330
+[41] 0.0006282250 0.0006235593 0.0006222961 0.0006201662 0.0006155826
+[46] 0.0006088098 0.0006025323 0.0005998508 0.0005967562 0.0005929008
+[51] 0.0005912822 0.0005879763 0.0005836465 0.0005776742 0.0005766734
+[56] 0.0005740828 0.0005677760 0.0005646788 0.0005607586 0.0005605307
+[61] 0.0005579946 0.0005510173 0.0005485390 0.0005449979 0.0005429859
+[66] 0.0005409879 0.0005372521 0.0005331304 0.0005287587 0.0005266191
+[71] 0.0005256475 0.0005220410 0.0005170326 0.0005142256 0.0005118923
+[76] 0.0005097794 0.0005083819 0.0005047134 0.0004987687 0.0004952033</code></pre>
+<pre class="r"><code>sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.9999937</code></pre>
+<pre><code>[1] 1.797122</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
