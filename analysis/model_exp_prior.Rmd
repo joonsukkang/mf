@@ -1,0 +1,232 @@
+---
+title: "The Model with Exponential Prior"
+author: "Joonsuk Kang"
+date: "2020-11-6"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+Here we implement the model with exponential prior: $g_l(w_i)=\exp(w_i|\frac{1}{\eta})$. 
+ 
+# Data
+
+```{r}
+# code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+
+# take transpose
+X2 <- t(X2)
+X2n_a <- t(X2n_a)
+X2n_b <- t(X2n_b)
+
+# svd
+X2.svd = svd(X2)
+X2n_a.svd = svd(X2n_a)
+X2n_b.svd = svd(X2n_b)
+rm(X)
+```
+
+# Demo Functions
+
+## Initialization
+
+```{r}
+# initialization of l using svd
+demo.init.svd <- function(mat.X){
+      
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
+    
+    mat.X.svd <- svd(mat.X)
+    init.l <- mat.X.svd$u[,1]
+    init.w <- init.l^2
+    init.eta <- mean(init.w)
+    
+    init.sigmasq <- c((norm(mat.X, type='f')^2-t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/((N-1)*P))
+    init.delta <- c((t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/(P*init.sigmasq)-1)
+
+    init.Ew.inv <- 1/init.w
+    
+    out.list = list()
+    out.list$l <- init.l
+    out.list$w <- init.w
+    out.list$eta <- init.eta
+    out.list$Ew.inv <- init.Ew.inv
+    out.list$sigmasq <- init.sigmasq
+    out.list$delta <- init.delta
+
+    return(out.list)
+}
+```
+
+
+## Updates
+
+
+```{r}
+# leg A: given w, update l (essentially, Sigma.star), sigmasq, delta
+demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv){
+    # input: mat.X; sigmasq, delta, Ew.inv, 
+    # output: Sigma.star, Elsq, Elxxl; updated sigmasq, delta; u1 (first left singular vector of Y)
+  
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
+  
+    Y <- mat.X%*%t(mat.X)/(sigmasq*(1+1/delta)) - diag(x=Ew.inv)
+    Y.eigen <- eigen(Y)
+    
+    eval.expectation <- function(k){(sum(1/(k/(sigmasq*(1+1/delta))-Y.eigen$values))-1)^2}
+    find.k.star <- optimize(f=eval.expectation,
+                            interval = c((Y.eigen$values[1]+1)*sigmasq*(1+1/delta), (Y.eigen$values[1]+N)*sigmasq*(1+1/delta))
+                            )
+    k.star <- find.k.star$minimum
+  
+    d.tilde <- 1/(k.star/(sigmasq*(1+1/delta))-Y.eigen$values)
+    Sigma.star <- Y.eigen$vectors %*% diag(x=d.tilde) %*% t(Y.eigen$vectors)
+    log.det.Sigma.star <- sum(log(d.tilde))
+
+    Elsq <- diag(Sigma.star)
+    ElXXl <- sum(diag((t(mat.X) %*% Sigma.star %*% mat.X)))
+    
+    sigmasq <- (norm(mat.X, type='f')^2-ElXXl/(1+1/delta))/(N*P)
+    delta <- max(ElXXl/(P*sigmasq)-1,10^(-10)) # lower bound at 10^(-10)
+    
+    out.list = list()
+    out.list$log.det.Sigma.star = log.det.Sigma.star
+    out.list$Sigma.star = Sigma.star
+    out.list$Elsq = Elsq
+    out.list$ElXXl = ElXXl
+    out.list$sigmasq = sigmasq
+    out.list$delta = delta
+    out.list$u1 = Y.eigen$vectors[,1]
+
+    
+    return(out.list)
+}
+
+
+# leg B: update eta and Ew.inv
+demo.update.B <- function(mat.X, Elsq, eta=eta, niter.updates = 10){
+  
+    for (i in 1:niter.updates){
+    Ew <- sqrt(eta/2)*sqrt(Elsq)+(eta/2)
+    Ew.inv <- sqrt(2/(eta*Elsq))
+    eta <- mean(Ew)
+    }
+    
+    out.list = list()
+    out.list$eta = eta
+    out.list$Ew.inv = Ew.inv
+    
+    return(out.list)
+}
+```
+
+
+## initialization + updates
+
+```{r}
+demo.fit <- function(mat.X, niter){
+  
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
+  
+    par.init <- demo.init.svd(mat.X) 
+                                               
+    l <- par.init$l
+    w <- par.init$w
+    Ew.inv <- par.init$Ew.inv
+    sigmasq <- par.init$sigmasq
+    delta <- par.init$delta
+    eta <- par.init$eta
+    
+    for (i in 1:niter){
+    # leg A
+    temp.A <- demo.update.A(mat.X,
+                          sigmasq=sigmasq,
+                          delta=delta,
+                          Ew.inv=Ew.inv)
+    Sigma.star <- temp.A$Sigma.star
+    log.det.Sigma.star <- temp.A$log.det.Sigma.star
+    Elsq <- temp.A$Elsq
+    ElXXl <- temp.A$ElXXl
+    sigmasq <- temp.A$sigmasq
+    delta <- temp.A$delta
+  
+    # leg B
+    temp.B <- demo.update.B(mat.X,
+                          Elsq=Elsq,
+                          eta=eta)
+    eta <- temp.B$eta
+    Ew.inv <- temp.B$Ew.inv
+    }
+    
+    out.list = list()
+    out.list$log.det.Sigma.star <- log.det.Sigma.star
+    out.list$Sigma.star <- Sigma.star
+    out.list$Elsq <- Elsq
+    out.list$ElXXl <- ElXXl
+    out.list$sigmasq <- sigmasq
+    out.list$delta <- delta
+    out.list$eta <- eta
+    out.list$Ew.inv <- Ew.inv
+    out.list$u1 <- temp.A$u1
+    return(out.list)
+}
+```
+
+
+# Analysis 
+
+```{r, fig.height=5, fig.width=10}
+par(mfrow=c(1,2))
+
+# X2
+mat.X <- X2
+obj.fit    <- demo.fit(mat.X, niter=10) 
+plot(obj.fit$u1, ylab='fitted', main='fitted l')
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+
+# X2n_a hard
+mat.X <- X2n_a
+obj.fit    <- demo.fit(mat.X, niter=10) 
+plot(obj.fit$u1, ylab='fitted', main='fitted l')
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+
+# X2n_b easy
+mat.X <- X2n_b
+obj.fit    <- demo.fit(mat.X, niter=10) 
+plot(obj.fit$u1, ylab='fitted', main='fitted l')
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+```
+
+
