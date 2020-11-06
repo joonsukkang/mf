@@ -214,19 +214,30 @@ par(mfrow=c(1,2))
 mat.X <- X2
 obj.fit    <- demo.fit(mat.X, niter=10) 
 plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
+     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+d.tilde <- eigen(obj.fit$Sigma.star)$values
+d.tilde
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
 
 # X2n_a hard
 mat.X <- X2n_a
 obj.fit    <- demo.fit(mat.X, niter=10) 
 plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+d.tilde <- eigen(obj.fit$Sigma.star)$values
+d.tilde
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
 
 # X2n_b easy
 mat.X <- X2n_b
 obj.fit    <- demo.fit(mat.X, niter=10) 
 plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
+d.tilde <- eigen(obj.fit$Sigma.star)$values
+d.tilde
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
+
 ```
-
-
