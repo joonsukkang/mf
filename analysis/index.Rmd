@@ -27,12 +27,12 @@ editor_options:
 <img src="https://joonsukkang.github.io/mf/figure/demo2_toy.Rmd/unnamed-chunk-7-1.png" width="400">
 :::
 ::: {}
-+ demo version 2: [demo2_toy](demo2_toy.html)
++ demo version 2: [demo2](demo2_toy.html)
   + The model is fitted with a fixed sparse binary prior (for $w$) setting.
   + A grid of the binary values (a value close to zero and a large value) are explored.
   + This shows that there exist settings in which the method works.
-+ archive
-  + [demo_toy](demo_toy.html) with general discrete prior
++ demo version 3: [demo3](model_exp_prior.html)
+  + The model is fitted with an exponential prior (for $w$) setting.
 :::
 ::::
 
@@ -52,6 +52,15 @@ editor_options:
 :::
 ::::
 
+## archive
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+:::
+::: {}
 
++ [demo1](demo_toy.html) with general discrete prior
+
+:::
+::::
 
 
