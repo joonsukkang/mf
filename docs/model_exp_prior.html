@@ -11,6 +11,7 @@
 
 <meta name="author" content="Joonsuk Kang" />
 
+<meta name="date" content="2020-11-10" />
 
 <title>The Model with Exponential Prior</title>
 
@@ -396,7 +397,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">The Model with Exponential Prior</h1>
 <h4 class="author">Joonsuk Kang</h4>
-<h4 class="date">2020-11-6</h4>
+<h4 class="date">2020-11-10</h4>
 
 </div>
 
@@ -421,7 +422,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-11-06
+<strong>Last updated:</strong> 2020-11-10
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -512,16 +513,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree457638c4583f346fb2f798e9f7cff800c9ed6c0atargetblank457638ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/457638c4583f346fb2f798e9f7cff800c9ed6c0a" target="_blank">457638c</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree09b42cd5703fd08cab905dbe273819a5c6ed18a4targetblank09b42cda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/09b42cd5703fd08cab905dbe273819a5c6ed18a4" target="_blank">09b42cd</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree457638c4583f346fb2f798e9f7cff800c9ed6c0atargetblank457638ca" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree09b42cd5703fd08cab905dbe273819a5c6ed18a4targetblank09b42cda" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/457638c4583f346fb2f798e9f7cff800c9ed6c0a" target="_blank">457638c</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/09b42cd5703fd08cab905dbe273819a5c6ed18a4" target="_blank">09b42cd</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -534,6 +535,7 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/infinitefactor_toy.Rmd
     Untracked:  analysis/model_invgam_prior.Rmd
     Untracked:  code/code_wflow_publish.R
     Untracked:  output/Likelihood.gif
@@ -580,6 +582,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/09b42cd5703fd08cab905dbe273819a5c6ed18a4/analysis/model_exp_prior.Rmd" target="_blank">09b42cd</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-10
+</td>
+<td>
+The model with exponential prior
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/3803a827fb018b3ff589110aa633cb57e2371924/docs/model_exp_prior.html" target="_blank">3803a82</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -638,7 +674,6 @@ The model with exponential prior
 </div>
 </div>
 </div>
-<p>Here we implement the model with exponential prior: <span class="math inline">\(g_l(w_i)=\exp(w_i|\frac{1}{\eta})\)</span>.</p>
 <div id="data" class="section level1">
 <h1>Data</h1>
 <pre class="r"><code># code originally from https://stephens999.github.io/misc/tree_pca_03.html.
@@ -677,18 +712,14 @@ X2 &lt;- t(X2)
 X2n_a &lt;- t(X2n_a)
 X2n_b &lt;- t(X2n_b)
 
-# svd
-X2.svd = svd(X2)
-X2n_a.svd = svd(X2n_a)
-X2n_b.svd = svd(X2n_b)
-rm(X)</code></pre>
+rm(X, X.svd, f, i, n, p)</code></pre>
 </div>
 <div id="demo-functions" class="section level1">
 <h1>Demo Functions</h1>
 <div id="initialization" class="section level2">
 <h2>Initialization</h2>
 <pre class="r"><code># initialization of l using svd
-demo.init.svd &lt;- function(mat.X){
+demo.init.svd &lt;- function(mat.X, r2){
       
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
@@ -696,10 +727,10 @@ demo.init.svd &lt;- function(mat.X){
     mat.X.svd &lt;- svd(mat.X)
     init.l &lt;- mat.X.svd$u[,1]
     init.w &lt;- init.l^2
-    init.eta &lt;- mean(init.w)
+    init.eta &lt;- r2/N
     
-    init.sigmasq &lt;- c((norm(mat.X, type=&#39;f&#39;)^2-t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/((N-1)*P))
-    init.delta &lt;- c((t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/(P*init.sigmasq)-1)
+    init.sigmasq &lt;- c((norm(mat.X, type=&#39;f&#39;)^2-t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/((N+1)*P))
+    init.delta &lt;- c((t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/(P*init.sigmasq*r2)-1)/r2
 
     init.Ew.inv &lt;- 1/init.w
     
@@ -717,31 +748,31 @@ demo.init.svd &lt;- function(mat.X){
 <div id="updates" class="section level2">
 <h2>Updates</h2>
 <pre class="r"><code># leg A: given w, update l (essentially, Sigma.star), sigmasq, delta
-demo.update.A &lt;- function(mat.X, sigmasq, delta, Ew.inv){
+demo.update.A &lt;- function(mat.X, sigmasq, delta, Ew.inv,r2){
     # input: mat.X; sigmasq, delta, Ew.inv, 
     # output: Sigma.star, Elsq, Elxxl; updated sigmasq, delta; u1 (first left singular vector of Y)
   
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
   
-    Y &lt;- mat.X%*%t(mat.X)/(sigmasq*(1+1/delta)) - diag(x=Ew.inv)
+    Y &lt;- mat.X%*%t(mat.X)/(sigmasq*(r2+1/delta)) - diag(x=Ew.inv)
     Y.eigen &lt;- eigen(Y)
     
-    eval.expectation &lt;- function(k){(sum(1/(k/(sigmasq*(1+1/delta))-Y.eigen$values))-1)^2}
+    eval.expectation &lt;- function(k){(sum(1/(k/(sigmasq*(r2+1/delta))-Y.eigen$values))-r2)^2}
     find.k.star &lt;- optimize(f=eval.expectation,
-                            interval = c((Y.eigen$values[1]+1)*sigmasq*(1+1/delta), (Y.eigen$values[1]+N)*sigmasq*(1+1/delta))
+                            interval = c((Y.eigen$values[1]+r2)*sigmasq*(r2+1/delta), (Y.eigen$values[1]+N)*sigmasq*(r2+1/delta))
                             )
     k.star &lt;- find.k.star$minimum
   
-    d.tilde &lt;- 1/(k.star/(sigmasq*(1+1/delta))-Y.eigen$values)
+    d.tilde &lt;- 1/(k.star/(sigmasq*(r2+1/delta))-Y.eigen$values)
     Sigma.star &lt;- Y.eigen$vectors %*% diag(x=d.tilde) %*% t(Y.eigen$vectors)
     log.det.Sigma.star &lt;- sum(log(d.tilde))
 
     Elsq &lt;- diag(Sigma.star)
     ElXXl &lt;- sum(diag((t(mat.X) %*% Sigma.star %*% mat.X)))
     
-    sigmasq &lt;- (norm(mat.X, type=&#39;f&#39;)^2-ElXXl/(1+1/delta))/(N*P)
-    delta &lt;- max(ElXXl/(P*sigmasq)-1,10^(-10)) # lower bound at 10^(-10)
+    sigmasq &lt;- (norm(mat.X, type=&#39;f&#39;)^2-ElXXl/(r2+1/delta))/(N*P)
+    delta &lt;- max((ElXXl/(P*sigmasq*r2)-1)/r2,10^(-10)) # lower bound at 10^(-10)
     
     out.list = list()
     out.list$log.det.Sigma.star = log.det.Sigma.star
@@ -763,11 +794,9 @@ demo.update.B &lt;- function(mat.X, Elsq, eta=eta, niter.updates = 10){
     for (i in 1:niter.updates){
     Ew &lt;- sqrt(eta/2)*sqrt(Elsq)+(eta/2)
     Ew.inv &lt;- sqrt(2/(eta*Elsq))
-    eta &lt;- mean(Ew)
     }
     
     out.list = list()
-    out.list$eta = eta
     out.list$Ew.inv = Ew.inv
     
     return(out.list)
@@ -775,12 +804,12 @@ demo.update.B &lt;- function(mat.X, Elsq, eta=eta, niter.updates = 10){
 </div>
 <div id="initialization-updates" class="section level2">
 <h2>initialization + updates</h2>
-<pre class="r"><code>demo.fit &lt;- function(mat.X, niter){
+<pre class="r"><code>demo.fit &lt;- function(mat.X, niter, r2){
   
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
   
-    par.init &lt;- demo.init.svd(mat.X) 
+    par.init &lt;- demo.init.svd(mat.X, r2) 
                                                
     l &lt;- par.init$l
     w &lt;- par.init$w
@@ -794,7 +823,8 @@ demo.update.B &lt;- function(mat.X, Elsq, eta=eta, niter.updates = 10){
     temp.A &lt;- demo.update.A(mat.X,
                           sigmasq=sigmasq,
                           delta=delta,
-                          Ew.inv=Ew.inv)
+                          Ew.inv=Ew.inv,
+                          r2=r2)
     Sigma.star &lt;- temp.A$Sigma.star
     log.det.Sigma.star &lt;- temp.A$log.det.Sigma.star
     Elsq &lt;- temp.A$Elsq
@@ -806,7 +836,6 @@ demo.update.B &lt;- function(mat.X, Elsq, eta=eta, niter.updates = 10){
     temp.B &lt;- demo.update.B(mat.X,
                           Elsq=Elsq,
                           eta=eta)
-    eta &lt;- temp.B$eta
     Ew.inv &lt;- temp.B$Ew.inv
     }
     
@@ -824,13 +853,18 @@ demo.update.B &lt;- function(mat.X, Elsq, eta=eta, niter.updates = 10){
 }</code></pre>
 </div>
 </div>
-<div id="analysis" class="section level1">
+<div id="analysis" class="section level1 tabset tabset-fade">
 <h1>Analysis</h1>
+<div id="r21" class="section level2">
+<h2><span class="math inline">\(r^2=1\)</span></h2>
 <pre class="r"><code>par(mfrow=c(1,2))
+
+setr2 &lt;- 1
+
 
 # X2
 mat.X &lt;- X2
-obj.fit    &lt;- demo.fit(mat.X, niter=10) 
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
 plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
      xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
@@ -873,29 +907,12 @@ Joonsuk Kang
 </div>
 </div>
 <pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
-d.tilde</code></pre>
-<pre><code> [1] 9.982127e-01 1.456654e-04 1.180018e-05 1.180018e-05 1.180018e-05
- [6] 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05
-[11] 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05
-[16] 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05 1.180018e-05
-[21] 1.180018e-05 1.179944e-05 1.179888e-05 1.179888e-05 1.179888e-05
-[26] 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05
-[31] 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05
-[36] 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05 1.179888e-05
-[41] 1.179888e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
-[46] 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
-[51] 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
-[56] 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05 1.179043e-05
-[61] 1.179029e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05
-[66] 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05
-[71] 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05
-[76] 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05 1.179014e-05</code></pre>
-<pre class="r"><code>sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
-<pre><code>[1] 0.9992784</code></pre>
-<pre><code>[1] 1.992857</code></pre>
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.9992776</code></pre>
+<pre><code>[1] 1.992856</code></pre>
 <pre class="r"><code># X2n_a hard
 mat.X &lt;- X2n_a
-obj.fit    &lt;- demo.fit(mat.X, niter=10) 
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
 plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
      xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
@@ -938,29 +955,12 @@ Joonsuk Kang
 </div>
 </div>
 <pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
-d.tilde</code></pre>
-<pre><code> [1] 0.9399069562 0.0056021078 0.0009414144 0.0009165970 0.0009016915
- [6] 0.0008844991 0.0008789741 0.0008706081 0.0008565388 0.0008541135
-[11] 0.0008458513 0.0008394023 0.0008381368 0.0008282749 0.0008146330
-[16] 0.0008089763 0.0008007258 0.0007947508 0.0007873748 0.0007836141
-[21] 0.0007766458 0.0007701809 0.0007622419 0.0007561796 0.0007517493
-[26] 0.0007480074 0.0007444239 0.0007413441 0.0007354612 0.0007260134
-[31] 0.0007219168 0.0007111853 0.0007077682 0.0007034780 0.0007017215
-[36] 0.0006967447 0.0006948100 0.0006927592 0.0006908396 0.0006843098
-[41] 0.0006800373 0.0006775842 0.0006732646 0.0006704370 0.0006674565
-[46] 0.0006641283 0.0006632037 0.0006597896 0.0006574266 0.0006566626
-[51] 0.0006519832 0.0006457932 0.0006435929 0.0006402566 0.0006389404
-[56] 0.0006337450 0.0006323043 0.0006277457 0.0006213161 0.0006177289
-[61] 0.0006169141 0.0006127171 0.0006073892 0.0006065187 0.0006037721
-[66] 0.0006023469 0.0005983250 0.0005952478 0.0005910553 0.0005875531
-[71] 0.0005859429 0.0005822196 0.0005800342 0.0005778737 0.0005730931
-[76] 0.0005684380 0.0005647778 0.0005582155 0.0005486837 0.0005429092</code></pre>
-<pre class="r"><code>sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
-<pre><code>[1] 1</code></pre>
-<pre><code>[1] 1.766991</code></pre>
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.999996</code></pre>
+<pre><code>[1] 1.77849</code></pre>
 <pre class="r"><code># X2n_b easy
 mat.X &lt;- X2n_b
-obj.fit    &lt;- demo.fit(mat.X, niter=10) 
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
 plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
      xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
@@ -1003,26 +1003,177 @@ Joonsuk Kang
 </div>
 </div>
 <pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
-d.tilde</code></pre>
-<pre><code> [1] 0.9479044719 0.0023384040 0.0008738298 0.0008468223 0.0008330404
- [6] 0.0008288662 0.0008180034 0.0008013198 0.0007948054 0.0007805784
-[11] 0.0007759162 0.0007707917 0.0007579579 0.0007480127 0.0007459079
-[16] 0.0007451647 0.0007390499 0.0007282562 0.0007204987 0.0007174841
-[21] 0.0007065114 0.0007043136 0.0007035109 0.0006954875 0.0006907955
-[26] 0.0006808758 0.0006786777 0.0006727905 0.0006702576 0.0006655065
-[31] 0.0006645796 0.0006618124 0.0006572473 0.0006540584 0.0006496932
-[36] 0.0006469387 0.0006449884 0.0006354304 0.0006346617 0.0006306330
-[41] 0.0006282250 0.0006235593 0.0006222961 0.0006201662 0.0006155826
-[46] 0.0006088098 0.0006025323 0.0005998508 0.0005967562 0.0005929008
-[51] 0.0005912822 0.0005879763 0.0005836465 0.0005776742 0.0005766734
-[56] 0.0005740828 0.0005677760 0.0005646788 0.0005607586 0.0005605307
-[61] 0.0005579946 0.0005510173 0.0005485390 0.0005449979 0.0005429859
-[66] 0.0005409879 0.0005372521 0.0005331304 0.0005287587 0.0005266191
-[71] 0.0005256475 0.0005220410 0.0005170326 0.0005142256 0.0005118923
-[76] 0.0005097794 0.0005083819 0.0005047134 0.0004987687 0.0004952033</code></pre>
-<pre class="r"><code>sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
-<pre><code>[1] 0.9999937</code></pre>
-<pre><code>[1] 1.797122</code></pre>
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.9999931</code></pre>
+<pre><code>[1] 1.800842</code></pre>
+</div>
+<div id="r21.5" class="section level2">
+<h2><span class="math inline">\(r^2=1.5\)</span></h2>
+<pre class="r"><code>par(mfrow=c(1,2))
+
+setr2 &lt;- 1.5
+
+
+# X2
+mat.X &lt;- X2
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.6690136</code></pre>
+<pre><code>[1] 0.8881239</code></pre>
+<pre class="r"><code># X2n_a hard
+mat.X &lt;- X2n_a
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-6-2.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.8357324</code></pre>
+<pre><code>[1] 0.889664</code></pre>
+<pre class="r"><code># X2n_b easy
+mat.X &lt;- X2n_b
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-6-3.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.8201723</code></pre>
+<pre><code>[1] 0.8895044</code></pre>
+</div>
+<div id="r22" class="section level2">
+<h2><span class="math inline">\(r^2=2\)</span></h2>
+<pre class="r"><code>par(mfrow=c(1,2))
+
+setr2 &lt;- 2
+
+
+# X2
+mat.X &lt;- X2
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.5040528</code></pre>
+<pre><code>[1] 0.4998079</code></pre>
+<pre class="r"><code># X2n_a hard
+mat.X &lt;- X2n_a
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-7-2.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 2</code></pre>
+<pre><code>[1] 0.1171656</code></pre>
+<pre class="r"><code># X2n_b easy
+mat.X &lt;- X2n_b
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-7-3.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 2</code></pre>
+<pre><code>[1] 0.3468795</code></pre>
+</div>
+<div id="r22.5" class="section level2">
+<h2><span class="math inline">\(r^2=2.5\)</span></h2>
+<pre class="r"><code>par(mfrow=c(1,2))
+
+setr2 &lt;- 2.5
+
+
+# X2
+mat.X &lt;- X2
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-8-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.4057233</code></pre>
+<pre><code>[1] 0.3198836</code></pre>
+<pre class="r"><code># X2n_a hard
+mat.X &lt;- X2n_a
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-8-2.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 1.924536</code></pre>
+<pre><code>[1] 0.3968199</code></pre>
+<pre class="r"><code># X2n_b easy
+mat.X &lt;- X2n_b
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-8-3.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 2.306887</code></pre>
+<pre><code>[1] 0.4122081</code></pre>
+</div>
+<div id="r23" class="section level2">
+<h2><span class="math inline">\(r^2=3\)</span></h2>
+<pre class="r"><code>par(mfrow=c(1,2))
+
+setr2 &lt;- 3
+
+
+# X2
+mat.X &lt;- X2
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-9-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 0.3410274</code></pre>
+<pre><code>[1] 0.2221863</code></pre>
+<pre class="r"><code># X2n_a hard
+mat.X &lt;- X2n_a
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-9-2.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 1.434063</code></pre>
+<pre><code>[1] 0.2700592</code></pre>
+<pre class="r"><code># X2n_b easy
+mat.X &lt;- X2n_b
+obj.fit    &lt;- demo.fit(mat.X, r2=setr2, niter=10) 
+plot(obj.fit$u1, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
+     xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted vs singular vector&#39;); abline(0,1)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-9-3.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>d.tilde &lt;- eigen(obj.fit$Sigma.star)$values
+sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)</code></pre>
+<pre><code>[1] 2.833834</code></pre>
+<pre><code>[1] 0.3808785</code></pre>
+</div>
+</div>
+<div id="section" class="section level1">
+<h1></h1>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
