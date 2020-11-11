@@ -49,19 +49,36 @@ X2n_b <- t(X2n_b)
 rm(X, X.svd, f, i, n, p)
 ```
 
+## What-If Data: when the first two singular vectors are equal
+
+```{r}
+mat.X <- X2
+mat.svd <- svd(mat.X); mat.svd$d[2] <- mat.svd$d[1]
+X2.equal <- mat.svd$u %*% diag(x=mat.svd$d) %*% t(mat.svd$v); 
+
+mat.X <- X2n_a
+mat.svd <- svd(mat.X); mat.svd$d[2] <- mat.svd$d[1]
+X2n_a.equal <- mat.svd$u %*% diag(x=mat.svd$d) %*% t(mat.svd$v); 
+
+mat.X <- X2n_b
+mat.svd <- svd(mat.X); mat.svd$d[2] <- mat.svd$d[1]
+X2n_b.equal <- mat.svd$u %*% diag(x=mat.svd$d) %*% t(mat.svd$v); 
+
+rm(mat.X, mat.svd)
+```
+
 # Demo Functions
 
 ## Initialization
 
 ```{r}
-# initialization of l using svd
-demo.init.svd <- function(mat.X, r2){
+demo.init <- function(mat.X, r2){
       
     N <- nrow(mat.X)
     P <- ncol(mat.X)
     
-    mat.X.svd <- svd(mat.X)
-    init.l <- sqrt(r2)*(mat.X.svd$u[,1])
+    eig.XXt <- eigen(mat.X%*%t(mat.X))
+    init.l <- sqrt(r2)*(eig.XXt$vectors[,1])
     init.w <- init.l^2
     init.eta <- r2/N
     
@@ -152,7 +169,7 @@ demo.fit <- function(mat.X, niter, r2){
     N <- nrow(mat.X)
     P <- ncol(mat.X)
   
-    par.init <- demo.init.svd(mat.X, r2) 
+    par.init <- demo.init(mat.X, r2) 
                                                
     Ew.inv <- par.init$Ew.inv
     sigmasq <- par.init$sigmasq
@@ -210,15 +227,15 @@ par(mfrow=c(1,3))
 
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
 
 obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
 
 obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
 ```
 
 ## `X2n_a`
@@ -229,15 +246,15 @@ par(mfrow=c(1,3))
 
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
 
 obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
 
 obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
 ```
 
 ## `X2n_b`
@@ -248,15 +265,73 @@ par(mfrow=c(1,3))
 
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
 
 obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
 
 obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+```
+
+
+## `X2.equal`
+
+```{r, fig.height=4, fig.width=12}
+mat.X <- X2.equal
+par(mfrow=c(1,3))
+
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+
+obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+```
+
+## `X2n_a.equal`
+
+```{r, fig.height=4, fig.width=12}
+mat.X <- X2n_a.equal
+par(mfrow=c(1,3))
+
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+
+obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+```
+
+## `X2n_b.equal`
+
+```{r, fig.height=4, fig.width=12}
+mat.X <- X2n_b.equal
+par(mfrow=c(1,3))
+
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+
+obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
 ```
 
 #
