@@ -513,16 +513,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee5bdf35db84807aa92660325de5a14d7ec562a1ftargetblanke5bdf35a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/e5bdf35db84807aa92660325de5a14d7ec562a1f" target="_blank">e5bdf35</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeb74cdd563fa76926bb5cc4edfac034a702a0108ctargetblankb74cdd5a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/b74cdd563fa76926bb5cc4edfac034a702a0108c" target="_blank">b74cdd5</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee5bdf35db84807aa92660325de5a14d7ec562a1ftargetblanke5bdf35a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeb74cdd563fa76926bb5cc4edfac034a702a0108ctargetblankb74cdd5a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/e5bdf35db84807aa92660325de5a14d7ec562a1f" target="_blank">e5bdf35</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/b74cdd563fa76926bb5cc4edfac034a702a0108c" target="_blank">b74cdd5</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -538,6 +538,7 @@ Untracked files:
     Untracked:  analysis/infinitefactor_toy.Rmd
     Untracked:  analysis/model_exp_prior_v20201110m.Rmd
     Untracked:  analysis/model_invgam_prior.Rmd
+    Untracked:  analysis/temp.Rmd
     Untracked:  code/code_wflow_publish.R
     Untracked:  code/model_exp_v20201110.R
     Untracked:  output/Likelihood.gif
@@ -584,6 +585,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/b74cdd563fa76926bb5cc4edfac034a702a0108c/analysis/model_exp_prior.Rmd" target="_blank">b74cdd5</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-11
+</td>
+<td>
+The model with exponential prior
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/eb939dd605265ad8aa45500edc6227baac99d554/docs/model_exp_prior.html" target="_blank">eb939dd</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-11
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -749,19 +784,34 @@ X2n_a &lt;- t(X2n_a)
 X2n_b &lt;- t(X2n_b)
 
 rm(X, X.svd, f, i, n, p)</code></pre>
+<div id="what-if-data-when-the-first-two-singular-vectors-are-equal" class="section level2">
+<h2>What-If Data: when the first two singular vectors are equal</h2>
+<pre class="r"><code>mat.X &lt;- X2
+mat.svd &lt;- svd(mat.X); mat.svd$d[2] &lt;- mat.svd$d[1]
+X2.equal &lt;- mat.svd$u %*% diag(x=mat.svd$d) %*% t(mat.svd$v); 
+
+mat.X &lt;- X2n_a
+mat.svd &lt;- svd(mat.X); mat.svd$d[2] &lt;- mat.svd$d[1]
+X2n_a.equal &lt;- mat.svd$u %*% diag(x=mat.svd$d) %*% t(mat.svd$v); 
+
+mat.X &lt;- X2n_b
+mat.svd &lt;- svd(mat.X); mat.svd$d[2] &lt;- mat.svd$d[1]
+X2n_b.equal &lt;- mat.svd$u %*% diag(x=mat.svd$d) %*% t(mat.svd$v); 
+
+rm(mat.X, mat.svd)</code></pre>
+</div>
 </div>
 <div id="demo-functions" class="section level1">
 <h1>Demo Functions</h1>
 <div id="initialization" class="section level2">
 <h2>Initialization</h2>
-<pre class="r"><code># initialization of l using svd
-demo.init.svd &lt;- function(mat.X, r2){
+<pre class="r"><code>demo.init &lt;- function(mat.X, r2){
       
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
     
-    mat.X.svd &lt;- svd(mat.X)
-    init.l &lt;- sqrt(r2)*(mat.X.svd$u[,1])
+    eig.XXt &lt;- eigen(mat.X%*%t(mat.X))
+    init.l &lt;- sqrt(r2)*(eig.XXt$vectors[,1])
     init.w &lt;- init.l^2
     init.eta &lt;- r2/N
     
@@ -845,7 +895,7 @@ demo.update.B &lt;- function(mat.X, Elsq, eta=eta, niter.updates = 10){
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
   
-    par.init &lt;- demo.init.svd(mat.X, r2) 
+    par.init &lt;- demo.init(mat.X, r2) 
                                                
     Ew.inv &lt;- par.init$Ew.inv
     sigmasq &lt;- par.init$sigmasq
@@ -897,79 +947,12 @@ par(mfrow=c(1,3))
 
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1]  0.2294084 84.6204299</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1]  0.2294084 84.6204299  0.9992776</code></pre>
 <pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1]  0.2294084 42.3102149</code></pre>
-<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=4, niter=10) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
-<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-5-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
-Past versions of unnamed-chunk-5-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-5-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/joonsukkang/mf/blob/afbb51baaa7582c0185d22ed658dd2e4ab01205e/docs/figure/model_exp_prior.Rmd/unnamed-chunk-5-1.png" target="_blank">afbb51b</a>
-</td>
-<td>
-Joonsuk Kang
-</td>
-<td>
-2020-11-10
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/joonsukkang/mf/blob/4281e673ab3b934a8359f42cd3bb0a045ed89b57/docs/figure/model_exp_prior.Rmd/unnamed-chunk-5-1.png" target="_blank">4281e67</a>
-</td>
-<td>
-Joonsuk Kang
-</td>
-<td>
-2020-11-06
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1]  0.2294084 21.1551075</code></pre>
-</div>
-<div id="x2n_a" class="section level2">
-<h2><code>X2n_a</code></h2>
-<pre class="r"><code>mat.X &lt;- X2n_a
-par(mfrow=c(1,3))
-
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1] 9.216184 1.960787</code></pre>
-<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1] 9.2161830 0.9803955</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1]  0.2294084 42.3102149  1.9985552</code></pre>
 <pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=4, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
 <p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-6-1.png" width="1152" style="display: block; margin: auto;" /></p>
@@ -997,6 +980,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/eb939dd605265ad8aa45500edc6227baac99d554/docs/figure/model_exp_prior.Rmd/unnamed-chunk-6-1.png" target="_blank">eb939dd</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-11
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/afbb51baaa7582c0185d22ed658dd2e4ab01205e/docs/figure/model_exp_prior.Rmd/unnamed-chunk-6-1.png" target="_blank">afbb51b</a>
 </td>
 <td>
@@ -1010,22 +1004,22 @@ Joonsuk Kang
 </table>
 </div>
 </div>
-<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1] 9.2161819 0.4901998</code></pre>
+<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1]  0.2294084 21.1551075  3.9971104</code></pre>
 </div>
-<div id="x2n_b" class="section level2">
-<h2><code>X2n_b</code></h2>
-<pre class="r"><code>mat.X &lt;- X2n_b
+<div id="x2n_a" class="section level2">
+<h2><code>X2n_a</code></h2>
+<pre class="r"><code>mat.X &lt;- X2n_a
 par(mfrow=c(1,3))
 
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1] 9.336069 2.044180</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1] 9.216184 1.960787 0.999996</code></pre>
 <pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1] 9.336069 1.022090</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.2161830 0.9803955 1.9999921</code></pre>
 <pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=4, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
 <p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-7-1.png" width="1152" style="display: block; margin: auto;" /></p>
@@ -1053,6 +1047,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/eb939dd605265ad8aa45500edc6227baac99d554/docs/figure/model_exp_prior.Rmd/unnamed-chunk-7-1.png" target="_blank">eb939dd</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-11
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/afbb51baaa7582c0185d22ed658dd2e4ab01205e/docs/figure/model_exp_prior.Rmd/unnamed-chunk-7-1.png" target="_blank">afbb51b</a>
 </td>
 <td>
@@ -1066,8 +1071,180 @@ Joonsuk Kang
 </table>
 </div>
 </div>
-<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta)</code></pre>
-<pre><code>[1] 9.3360692 0.5110449</code></pre>
+<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.2161819 0.4901998 3.9999841</code></pre>
+</div>
+<div id="x2n_b" class="section level2">
+<h2><code>X2n_b</code></h2>
+<pre class="r"><code>mat.X &lt;- X2n_b
+par(mfrow=c(1,3))
+
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1] 9.3360692 2.0441795 0.9999931</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.336069 1.022090 1.999986</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-8-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/eb939dd605265ad8aa45500edc6227baac99d554/docs/figure/model_exp_prior.Rmd/unnamed-chunk-8-1.png" target="_blank">eb939dd</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-11
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/afbb51baaa7582c0185d22ed658dd2e4ab01205e/docs/figure/model_exp_prior.Rmd/unnamed-chunk-8-1.png" target="_blank">afbb51b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.3360692 0.5110449 3.9999723</code></pre>
+</div>
+<div id="x2.equal" class="section level2">
+<h2><code>X2.equal</code></h2>
+<pre class="r"><code>mat.X &lt;- X2.equal
+par(mfrow=c(1,3))
+
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1]  0.2495501 77.6808578  0.9989617</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1]  0.249550 38.840452  1.997924</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-9-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/eb939dd605265ad8aa45500edc6227baac99d554/docs/figure/model_exp_prior.Rmd/unnamed-chunk-9-1.png" target="_blank">eb939dd</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-11
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/afbb51baaa7582c0185d22ed658dd2e4ab01205e/docs/figure/model_exp_prior.Rmd/unnamed-chunk-9-1.png" target="_blank">afbb51b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1]  0.2495499 19.4202310  3.9958486</code></pre>
+</div>
+<div id="x2n_a.equal" class="section level2">
+<h2><code>X2n_a.equal</code></h2>
+<pre class="r"><code>mat.X &lt;- X2n_a.equal
+par(mfrow=c(1,3))
+
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1] 9.2293360 1.9816644 0.9999945</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.2293360 0.9908322 1.9999890</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-10-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.2293360 0.4954161 3.9999781</code></pre>
+</div>
+<div id="x2n_b.equal" class="section level2">
+<h2><code>X2n_b.equal</code></h2>
+<pre class="r"><code>mat.X &lt;- X2n_b.equal
+par(mfrow=c(1,3))
+
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1] 9.3664127 2.0346357 0.9999939</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.366413 1.017318 1.999988</code></pre>
+<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
+<p><img src="figure/model_exp_prior.Rmd/unnamed-chunk-11-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
+<pre><code>[1] 9.3664127 0.5086589 3.9999758</code></pre>
 </div>
 </div>
 <div id="section" class="section level1">
