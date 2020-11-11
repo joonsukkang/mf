@@ -61,7 +61,7 @@ demo.init.svd <- function(mat.X, r2){
     P <- ncol(mat.X)
     
     mat.X.svd <- svd(mat.X)
-    init.l <- mat.X.svd$u[,1]
+    init.l <- sqrt(r2)*(mat.X.svd$u[,1])
     init.w <- init.l^2
     init.eta <- r2/N
     
@@ -100,7 +100,8 @@ demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv,r2){
     
     eval.expectation <- function(k){(sum(1/(k/(sigmasq*(r2+1/delta))-Y.eigen$values))-r2)^2}
     find.k.star <- optimize(f=eval.expectation,
-                            interval = c((Y.eigen$values[1]+r2)*sigmasq*(r2+1/delta), (Y.eigen$values[1]+N)*sigmasq*(r2+1/delta))
+                            interval = c((Y.eigen$values[1]+1/r2)*sigmasq*(r2+1/delta),
+                                         (Y.eigen$values[1]+N/r2)*sigmasq*(r2+1/delta))
                             )
     k.star <- find.k.star$minimum
   
@@ -121,9 +122,8 @@ demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv,r2){
     out.list$ElXXl = ElXXl
     out.list$sigmasq = sigmasq
     out.list$delta = delta
-    out.list$u1 = Y.eigen$vectors[,1]
+    out.list$l = sqrt(r2)*(Y.eigen$vectors[,1])
 
-    
     return(out.list)
 }
 
@@ -154,8 +154,6 @@ demo.fit <- function(mat.X, niter, r2){
   
     par.init <- demo.init.svd(mat.X, r2) 
                                                
-    l <- par.init$l
-    w <- par.init$w
     Ew.inv <- par.init$Ew.inv
     sigmasq <- par.init$sigmasq
     delta <- par.init$delta
@@ -191,204 +189,74 @@ demo.fit <- function(mat.X, niter, r2){
     out.list$delta <- delta
     out.list$eta <- eta
     out.list$Ew.inv <- Ew.inv
-    out.list$u1 <- temp.A$u1
+    out.list$l <- temp.A$l
     return(out.list)
 }
 ```
 
 
 
+
+
 # Analysis {.tabset .tabset-fade}
 
+The fit is invariant to $r^2$. $\delta \propto 1/r^2$ nullifies the effect of $r^2$.
 
-## $r^2=1$ 
+## `X2`
 
-```{r, fig.height=5, fig.width=10}
-par(mfrow=c(1,2))
-
-setr2 <- 1
-
-
-# X2
+```{r, fig.height=4, fig.width=12}
 mat.X <- X2
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
+par(mfrow=c(1,3))
 
-# X2n_a hard
-mat.X <- X2n_a
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
 
-# X2n_b easy
-mat.X <- X2n_b
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
 
+obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
 ```
 
+## `X2n_a`
 
-## $r^2=1.5$ 
-
-```{r, fig.height=5, fig.width=10}
-par(mfrow=c(1,2))
-
-setr2 <- 1.5
-
-
-# X2
-mat.X <- X2
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-# X2n_a hard
+```{r, fig.height=4, fig.width=12}
 mat.X <- X2n_a
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
+par(mfrow=c(1,3))
 
-# X2n_b easy
-mat.X <- X2n_b
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
 
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
+
+obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
 ```
 
+## `X2n_b`
 
-## $r^2=2$ 
-
-```{r, fig.height=5, fig.width=10}
-par(mfrow=c(1,2))
-
-setr2 <- 2
-
-
-# X2
-mat.X <- X2
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-# X2n_a hard
-mat.X <- X2n_a
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-# X2n_b easy
+```{r, fig.height=4, fig.width=12}
 mat.X <- X2n_b
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
+par(mfrow=c(1,3))
 
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
+
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
+
+obj.fit    <- demo.fit(mat.X, r2=4, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta)
 ```
-
-
-## $r^2=2.5$ 
-
-```{r, fig.height=5, fig.width=10}
-par(mfrow=c(1,2))
-
-setr2 <- 2.5
-
-
-# X2
-mat.X <- X2
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-# X2n_a hard
-mat.X <- X2n_a
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-# X2n_b easy
-mat.X <- X2n_b
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-```
-
-
-## $r^2=3$ 
-
-```{r, fig.height=5, fig.width=10}
-par(mfrow=c(1,2))
-
-setr2 <- 3
-
-
-# X2
-mat.X <- X2
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1,
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-# X2n_a hard
-mat.X <- X2n_a
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-# X2n_b easy
-mat.X <- X2n_b
-obj.fit    <- demo.fit(mat.X, r2=setr2, niter=10) 
-plot(obj.fit$u1, ylab='fitted', main='fitted l')
-plot(x=svd(mat.X)$u[,1], y=obj.fit$u1, 
-     xlab='singular vector', ylab='fitted', main='fitted vs singular vector'); abline(0,1)
-d.tilde <- eigen(obj.fit$Sigma.star)$values
-sum(d.tilde); 2*sum(d.tilde^2) # mean and variance of Z^TZ where Z \sim N(0,Sigma.star)
-
-```
-
 
 #
