@@ -1,0 +1,546 @@
+---
+title: "The Model with Exponential Mixture Prior"
+author: "Joonsuk Kang"
+date: "2020-11-12"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+ 
+# Data
+
+```{r}
+# code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+
+# take transpose
+X2 <- t(X2)
+X2n_a <- t(X2n_a)
+X2n_b <- t(X2n_b)
+
+rm(X, X.svd, f, i, n, p)
+```
+
+
+# Demo Functions
+
+## Initialization
+
+```{r}
+demo.init <- function(mat.X, r2, n.grid){
+      
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
+    
+    eig.XXt <- eigen(mat.X%*%t(mat.X))
+    init.l <- sqrt(r2)*(eig.XXt$vectors[,1])
+    init.w <- init.l^2
+    
+    K <- n.grid # number of grid points
+    pi.grid <-rep(1/K, times=K)
+    eta.grid <- (K/(2^K-1))*(r2/N)*2^seq(0,K-1,by=1) # eta grid points are multiplied by 2; the scales are set to satisfy E_{g_l}[l^Tl]=r^2
+    
+    init.sigmasq <- c((norm(mat.X, type='f')^2-t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/((N+1)*P))
+    init.delta <- c((t(init.l)%*%mat.X%*%t(mat.X)%*%init.l)/(P*init.sigmasq*r2)-1)/r2
+
+    init.Ew.inv <- 1/init.w
+    
+    out.list = list()
+    out.list$l <- init.l
+    out.list$w <- init.w
+    out.list$eta.grid <- eta.grid
+    out.list$pi.grid <- pi.grid
+    out.list$Ew.inv <- init.Ew.inv
+    out.list$sigmasq <- init.sigmasq
+    out.list$delta <- init.delta
+
+    return(out.list)
+}
+```
+
+
+## Updates
+
+
+```{r}
+demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv,r2){
+
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
+  
+    Y <- mat.X%*%t(mat.X)/(sigmasq*(r2+1/delta)) - diag(x=Ew.inv)
+    Y.eigen <- eigen(Y)
+    
+    eval.expectation <- function(k){(sum(1/(k/(sigmasq*(r2+1/delta))-Y.eigen$values))-r2)^2}
+    find.k.star <- optimize(f=eval.expectation,
+                            interval = c((Y.eigen$values[1]+1/r2)*sigmasq*(r2+1/delta),
+                                         (Y.eigen$values[1]+N/r2)*sigmasq*(r2+1/delta))
+                            )
+    k.star <- find.k.star$minimum
+  
+    d.tilde <- 1/(k.star/(sigmasq*(r2+1/delta))-Y.eigen$values)
+    Sigma.star <- Y.eigen$vectors %*% diag(x=d.tilde) %*% t(Y.eigen$vectors)
+    log.det.Sigma.star <- sum(log(d.tilde))
+
+    Elsq <- diag(Sigma.star)
+    ElXXl <- sum(diag((t(mat.X) %*% Sigma.star %*% mat.X)))
+    
+    sigmasq <- (norm(mat.X, type='f')^2-ElXXl/(r2+1/delta))/(N*P)
+    delta <- max((ElXXl/(P*sigmasq*r2)-1)/r2,10^(-10)) # lower bound at 10^(-10)
+    
+    out.list = list()
+    out.list$log.det.Sigma.star = log.det.Sigma.star
+    out.list$Sigma.star = Sigma.star
+    out.list$Elsq = Elsq
+    out.list$ElXXl = ElXXl
+    out.list$sigmasq = sigmasq
+    out.list$delta = delta
+    out.list$l = sqrt(r2)*(Y.eigen$vectors[,1])
+
+    return(out.list)
+}
+
+demo.update.B <- function(mat.X, Elsq, eta.grid, pi.grid, niter.updates = 10){
+  
+    for (i in 1:niter.updates){
+    Ew <- sqrt(Elsq)*sum(pi.grid*sqrt(eta.grid/2))+sum(pi.grid*eta.grid/2)
+    Ew.inv <-  sum(pi.grid*sqrt(1/eta.grid))*sqrt(2/Elsq)
+    }
+    
+    out.list = list()
+    out.list$Ew.inv = Ew.inv
+    
+    return(out.list)
+}
+```
+
+
+## initialization + updates
+
+```{r}
+demo.fit <- function(mat.X, niter, r2, n.grid=10){
+  
+    N <- nrow(mat.X)
+    P <- ncol(mat.X)
+  
+    par.init <- demo.init(mat.X, r2, n.grid=n.grid) 
+                                               
+    Ew.inv <- par.init$Ew.inv
+    sigmasq <- par.init$sigmasq
+    delta <- par.init$delta
+    eta.grid <- par.init$eta.grid
+    pi.grid <- par.init$pi.grid
+
+    for (i in 1:niter){
+    # leg A
+    temp.A <- demo.update.A(mat.X,
+                          sigmasq=sigmasq,
+                          delta=delta,
+                          Ew.inv=Ew.inv,
+                          r2=r2)
+    Sigma.star <- temp.A$Sigma.star
+    log.det.Sigma.star <- temp.A$log.det.Sigma.star
+    Elsq <- temp.A$Elsq
+    ElXXl <- temp.A$ElXXl
+    sigmasq <- temp.A$sigmasq
+    delta <- temp.A$delta
+  
+    # leg B
+    temp.B <- demo.update.B(mat.X,
+                          Elsq=Elsq,
+                          eta.grid=eta.grid,
+                          pi.grid=pi.grid)
+    Ew.inv <- temp.B$Ew.inv
+    }
+    
+    out.list = list()
+    out.list$log.det.Sigma.star <- log.det.Sigma.star
+    out.list$Sigma.star <- Sigma.star
+    out.list$Elsq <- Elsq
+    out.list$ElXXl <- ElXXl
+    out.list$sigmasq <- sigmasq
+    out.list$delta <- delta
+    out.list$eta.grid <- eta.grid
+    out.list$pi.grid <- pi.grid
+    out.list$Ew.inv <- Ew.inv
+    out.list$l <- temp.A$l
+    return(out.list)
+}
+```
+
+
+
+
+
+# Main Analysis {.tabset .tabset-fade}
+
+## `X2`
+
+```{r, fig.height=4, fig.width=12}
+mat.X <- X2
+par(mfrow=c(1,3))
+
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+
+plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+```
+
+## `X2n_a`
+
+```{r, fig.height=4, fig.width=12}
+mat.X <- X2n_a
+par(mfrow=c(1,3))
+
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+
+plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+```
+
+## `X2n_b`
+
+```{r, fig.height=4, fig.width=12}
+mat.X <- X2n_b
+par(mfrow=c(1,3))
+
+obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+
+plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+abline(a=0,b=1); abline(a=0,b=-1); abline(a=0,b=0)
+```
+
+
+#
+
+
+
+# The Number of Grid Points {.tabset .tabset-fade}
+
+Currently, default number of grid points is set to **K=10** and each of them has probability 1/K.
+
+## `X2`
+
+```{r, fig.height=4, fig.width=16}
+mat.X <- X2
+par(mfrow=c(1,4))
+
+par(mfrow=c(1,4))
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+```
+
+## `X2n_a`
+
+```{r, fig.height=4, fig.width=16}
+mat.X <- X2n_a
+
+par(mfrow=c(1,4))
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+```
+
+## `X2n_b`
+
+```{r, fig.height=4, fig.width=16}
+mat.X <- X2n_b
+
+par(mfrow=c(1,4))
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
+plot(obj.fit$l, ylab='fitted', main='fitted l')
+```
+
+
+#
+
+
+
+
+
+
+
+# More Seeds {.tabset .tabset-fade}
+
+```{r, fig.height=4, fig.width=8}
+
+generate.noiseless <- function(seed.no){
+  
+    set.seed(seed.no)
+  
+    # create X
+    p = 1000
+    n = 20
+    f = list()
+    for(i in 1:6){ 
+      f[[i]] = rnorm(p)
+    }
+    X =matrix(0,ncol=4*n, nrow=p)
+    X[,1:(2*n)] = f[[1]]
+    X[,(2*n+1):(4*n)] = f[[2]]
+    
+    X[,1:n] = X[,1:n]+f[[3]]
+    X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+    X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+    X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+    X.svd = svd(X)
+    
+    # create X2
+    X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+    # take transpose
+    X2 <- t(X2)
+
+    return(X2)
+}
+```
+
+## again, `123`
+
+The noiseless data is identical, but the five noisy data are different from previous noisy data.
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=123) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+
+## seed `773`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=773) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+
+## seed `312`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=312) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+
+## seed `82`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=82) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+
+## seed `1`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=1) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+## seed `2`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=2) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+## seed `3`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=3) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+## seed `4`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=4) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+## seed `5`
+
+```{r, fig.height=12, fig.width=16}
+X.baseline <- generate.noiseless(seed.no=5) 
+
+par(mfrow=c(3,4))
+for (i in 1:6){
+  if(i==1){mat.X <- X.baseline} # noiseless baseline
+  if(i >1){mat.X <- X.baseline+rnorm(4*20*1000, sd=3)} # noisy versions
+  obj.fit <- demo.fit(mat.X, r2=1, niter=10) 
+
+  plot(obj.fit$l, ylab='fitted', main='fitted l')
+  plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
+  abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
+}
+```
+
+#
+
+
