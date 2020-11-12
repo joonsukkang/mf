@@ -24,15 +24,14 @@ editor_options:
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
-<img src="https://joonsukkang.github.io/mf/figure/demo2_toy.Rmd/unnamed-chunk-7-1.png" width="400">
+<img src="https://joonsukkang.github.io/mf/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-13-1.png" width="400">
 :::
 ::: {}
-+ demo version 2: [demo2](demo2_toy.html)
-  + The model is fitted with a fixed sparse binary prior (for $w$) setting.
-  + A grid of the binary values (a value close to zero and a large value) are explored.
-  + This shows that there exist settings in which the method works.
-+ demo version 3: [demo3](model_exp_prior.html)
-  + The model is fitted with an exponential prior (for $w$) setting.
++ [demo4](model_exp_mixture_prior.html): exponential mixture prior (fixed)
++ [demo3](model_exp_prior.html): exponential prior (fixed)
++ [demo2](demo2_toy.html): sparse binary prior (fixed)
+
+
 :::
 ::::
 
