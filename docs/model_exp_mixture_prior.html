@@ -422,7 +422,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-11-12
+<strong>Last updated:</strong> 2020-11-13
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -513,16 +513,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree91f1458f70d93a351927c89e08d047eb4a11d5bftargetblank91f1458a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/91f1458f70d93a351927c89e08d047eb4a11d5bf" target="_blank">91f1458</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree41a74d2b9acfd1029c8bdf20f521a5e14029d3c7targetblank41a74d2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/41a74d2b9acfd1029c8bdf20f521a5e14029d3c7" target="_blank">41a74d2</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree91f1458f70d93a351927c89e08d047eb4a11d5bftargetblank91f1458a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree41a74d2b9acfd1029c8bdf20f521a5e14029d3c7targetblank41a74d2a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/91f1458f70d93a351927c89e08d047eb4a11d5bf" target="_blank">91f1458</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/41a74d2b9acfd1029c8bdf20f521a5e14029d3c7" target="_blank">41a74d2</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -591,6 +591,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/41a74d2b9acfd1029c8bdf20f521a5e14029d3c7/analysis/model_exp_mixture_prior.Rmd" target="_blank">41a74d2</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-13
+</td>
+<td>
+The model with exponential mixture prior
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/model_exp_mixture_prior.html" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/91f1458f70d93a351927c89e08d047eb4a11d5bf/analysis/model_exp_mixture_prior.Rmd" target="_blank">91f1458</a>
 </td>
 <td>
@@ -654,13 +688,17 @@ rm(X, X.svd, f, i, n, p)</code></pre>
 <h1>Demo Functions</h1>
 <div id="initialization" class="section level2">
 <h2>Initialization</h2>
-<pre class="r"><code>demo.init &lt;- function(mat.X, r2, n.grid){
+<pre class="r"><code>demo.init &lt;- function(mat.X, r2, n.grid, oracle=FALSE){
       
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
     
     eig.XXt &lt;- eigen(mat.X%*%t(mat.X))
     init.l &lt;- sqrt(r2)*(eig.XXt$vectors[,1])
+    if(oracle==TRUE){
+      init.l &lt;- c(rnorm(n=40,mean=0,sd=0.01), rnorm(n=20,mean=-1,sd=0.01), rnorm(n=20, mean=1, sd=0.01))
+      init.l &lt;- sqrt(r2)*init.l/sqrt(sum(init.l^2))
+    }
     init.w &lt;- init.l^2
     
     K &lt;- n.grid # number of grid points
@@ -686,7 +724,7 @@ rm(X, X.svd, f, i, n, p)</code></pre>
 </div>
 <div id="updates" class="section level2">
 <h2>Updates</h2>
-<pre class="r"><code>demo.update.A &lt;- function(mat.X, sigmasq, delta, Ew.inv,r2){
+<pre class="r"><code>demo.update.A &lt;- function(mat.X, sigmasq, delta, Ew.inv, r2){
 
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
@@ -721,24 +759,36 @@ rm(X, X.svd, f, i, n, p)</code></pre>
     out.list$l = sqrt(r2)*(Y.eigen$vectors[,1])
 
     return(out.list)
-}
-
-demo.update.B &lt;- function(mat.X, Elsq, eta.grid, pi.grid, niter.updates = 10){
+}</code></pre>
+<pre class="r"><code>demo.update.B &lt;- function(mat.X, Elsq, eta.grid, pi.grid, niter.updates = 10){
   
-    for (i in 1:niter.updates){
-    Ew &lt;- sqrt(Elsq)*sum(pi.grid*sqrt(eta.grid/2))+sum(pi.grid*eta.grid/2)
-    Ew.inv &lt;-  sum(pi.grid*sqrt(1/eta.grid))*sqrt(2/Elsq)
+    N &lt;- nrow(mat.X)
+    K &lt;- length(pi.grid)
+  
+    # &quot;half-normal distribution&quot;: if l &lt;- N(0,s^2), E[abs(l)]=sqrt(s^2*2/pi)
+    # https://en.wikipedia.org/wiki/Half-normal_distribution
+    E.abs.l &lt;-  sqrt(Elsq*2/pi)
+    
+    pi.ik &lt;- matrix(0, nrow=N, ncol=K)
+    for (k in 1:K){
+      pi.ik[,k] &lt;- pi.grid[k]/sqrt(2*eta.grid[k])*exp(-E.abs.l/sqrt(eta.grid[k]/2))
+    }    
+    for (i in 1:N){ # normalize to sum to 1 for each row  
+      pi.ik[i,] &lt;- pi.ik[i,]/sum(pi.ik[i,])   
     }
+    
+    Ew.inv &lt;- c(sqrt(2/Elsq) * (pi.ik %*% (1/sqrt(eta.grid))))
     
     out.list = list()
     out.list$Ew.inv = Ew.inv
+    out.list$pi.ik = pi.ik
     
     return(out.list)
 }</code></pre>
 </div>
 <div id="initialization-updates" class="section level2">
 <h2>initialization + updates</h2>
-<pre class="r"><code>demo.fit &lt;- function(mat.X, niter, r2, n.grid=10){
+<pre class="r"><code>demo.fit &lt;- function(mat.X, niter, r2=1, n.grid=15){
   
     N &lt;- nrow(mat.X)
     P &lt;- ncol(mat.X)
@@ -784,6 +834,7 @@ demo.update.B &lt;- function(mat.X, Elsq, eta.grid, pi.grid, niter.updates = 10)
     out.list$pi.grid &lt;- pi.grid
     out.list$Ew.inv &lt;- Ew.inv
     out.list$l &lt;- temp.A$l
+    out.list$pi.ik &lt;- temp.B$pi.ik
     return(out.list)
 }</code></pre>
 </div>
@@ -797,15 +848,52 @@ par(mfrow=c(1,3))
 
 obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
-<pre><code>[1]  0.2294162 42.3074134  1.9985403</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1]  0.2294118 42.3089980  1.9985500</code></pre>
 <pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
-<pre><code>[1]  0.2294162 84.6148269  0.9992701</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) </code></pre>
+<pre><code>[1]  0.2294118 84.6179960  0.9992750</code></pre>
 <pre class="r"><code>plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-5-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-6-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-6-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="x2n_a" class="section level2">
 <h2><code>X2n_a</code></h2>
@@ -814,15 +902,52 @@ par(mfrow=c(1,3))
 
 obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
-<pre><code>[1] 9.2173119 0.9753785 2.0000009</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1] 9.2167626 0.9777053 2.0000016</code></pre>
 <pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
-<pre><code>[1] 9.217312 1.950756 1.000000</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) </code></pre>
+<pre><code>[1] 9.216761 1.955427 1.000001</code></pre>
 <pre class="r"><code>plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-6-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-7-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
+Past versions of unnamed-chunk-7-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-7-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="x2n_b" class="section level2">
 <h2><code>X2n_b</code></h2>
@@ -831,15 +956,52 @@ par(mfrow=c(1,3))
 
 obj.fit    &lt;- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))</code></pre>
-<pre><code>[1] 9.335172 1.026031 2.000001</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
+<pre><code>[1] 9.334849 1.027372 2.000001</code></pre>
 <pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]</code></pre>
-<pre><code>[1] 9.335172 2.052062 1.000001</code></pre>
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) </code></pre>
+<pre><code>[1] 9.334850 2.054738 1.000000</code></pre>
 <pre class="r"><code>plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 abline(a=0,b=1); abline(a=0,b=-1); abline(a=0,b=0)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-7-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-8-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-8-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="section" class="section level1">
@@ -847,79 +1009,125 @@ abline(a=0,b=1); abline(a=0,b=-1); abline(a=0,b=0)</code></pre>
 </div>
 <div id="the-number-of-grid-points" class="section level1 tabset tabset-fade">
 <h1>The Number of Grid Points</h1>
-<p>Currently, default number of grid points is set to <strong>K=10</strong> and each of them has probability 1/K.</p>
+<p>Currently, default number of grid points is set to <strong>K=15</strong> and each of them has probability 1/K.</p>
 <div id="x2-1" class="section level2">
 <h2><code>X2</code></h2>
 <pre class="r"><code>mat.X &lt;- X2
-par(mfrow=c(1,4))
 
 par(mfrow=c(1,4))
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=5) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-8-1.png" width="1536" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=15) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-8-2.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-9-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-9-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="x2n_a-1" class="section level2">
 <h2><code>X2n_a</code></h2>
 <pre class="r"><code>mat.X &lt;- X2n_a
 
 par(mfrow=c(1,4))
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=5) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-9-1.png" width="1536" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=15) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-9-2.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-10-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-10-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="x2n_b-1" class="section level2">
 <h2><code>X2n_b</code></h2>
 <pre class="r"><code>mat.X &lt;- X2n_b
 
 par(mfrow=c(1,4))
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=5) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-10-1.png" width="1536" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
-plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
-obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=15) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
 obj.fit    &lt;- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
 plot(obj.fit$l, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-10-2.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-11-1.png" width="1536" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="section-1" class="section level1">
@@ -971,7 +1179,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-12-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-13-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-13-1">
+Past versions of unnamed-chunk-13-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-13-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-13-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-773" class="section level2">
 <h2>seed <code>773</code></h2>
@@ -987,7 +1232,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-13-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-14-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-1">
+Past versions of unnamed-chunk-14-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-14-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-14-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-312" class="section level2">
 <h2>seed <code>312</code></h2>
@@ -1003,7 +1285,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-14-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-15-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-15-1">
+Past versions of unnamed-chunk-15-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-15-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-15-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-82" class="section level2">
 <h2>seed <code>82</code></h2>
@@ -1019,7 +1338,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-15-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-16-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-16-1">
+Past versions of unnamed-chunk-16-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-16-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-16-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-1" class="section level2">
 <h2>seed <code>1</code></h2>
@@ -1035,7 +1391,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-16-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-17-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-17-1">
+Past versions of unnamed-chunk-17-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-17-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-17-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-2" class="section level2">
 <h2>seed <code>2</code></h2>
@@ -1051,7 +1444,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-17-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-18-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-18-1">
+Past versions of unnamed-chunk-18-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-18-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-18-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-3" class="section level2">
 <h2>seed <code>3</code></h2>
@@ -1067,7 +1497,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-18-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-19-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-19-1">
+Past versions of unnamed-chunk-19-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-19-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-19-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-4" class="section level2">
 <h2>seed <code>4</code></h2>
@@ -1083,7 +1550,44 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-19-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-20-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-20-1">
+Past versions of unnamed-chunk-20-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-20-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/1994b0534fcd7b4fc48e528dc668af74c1e5b9de/docs/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-20-1.png" target="_blank">1994b05</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2020-11-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="seed-5" class="section level2">
 <h2>seed <code>5</code></h2>
@@ -1099,7 +1603,7 @@ for (i in 1:6){
   plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab=&#39;singular vector&#39;, ylab=&#39;fitted&#39;, main=&#39;fitted l&#39;)
   abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
 }</code></pre>
-<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-20-1.png" width="1536" style="display: block; margin: auto;" /></p>
+<p><img src="figure/model_exp_mixture_prior.Rmd/unnamed-chunk-21-1.png" width="1536" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="section-2" class="section level1">
@@ -1114,7 +1618,7 @@ for (i in 1:6){
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.0.2 (2020-06-22)
 Platform: x86_64-apple-darwin17.0 (64-bit)
-Running under: macOS Catalina 10.15.7
+Running under: macOS  10.16
 
 Matrix products: default
 BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
