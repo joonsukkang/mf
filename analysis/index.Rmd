@@ -12,6 +12,22 @@ editor_options:
 ## integrating f out
 
 
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-15-1.png" width="400">
+:::
+::: {}
++ [demo4](model_exp_mixture_prior.html): exponential mixture prior (fixed)
++ [demo3](model_exp_prior.html): exponential prior (fixed)
+
+
+:::
+::::
+
+
+## miscellaneous
+
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
 <img src="https://joonsukkang.github.io/mf/figure/rank1_setup.Rmd/unnamed-chunk-7-1.png" width="400">
@@ -24,29 +40,12 @@ editor_options:
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
-<img src="https://joonsukkang.github.io/mf/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-13-1.png" width="400">
-:::
-::: {}
-+ [demo4](model_exp_mixture_prior.html): exponential mixture prior (fixed)
-+ [demo3](model_exp_prior.html): exponential prior (fixed)
-+ [demo2](demo2_toy.html): sparse binary prior (fixed)
-
-
-:::
-::::
-
-
-## miscellaneous
-
-
-:::: {style="display: flex;"}
-::: {style="min-width: 300px; max-width: 300px"}
 <img src="https://joonsukkang.github.io/mf/figure/warmstart.Rmd/unnamed-chunk-7-1.png" width="400">
 :::
 ::: {}
 
 + investigation of warmstart advantage  : [warmstart](warmstart.html)
-  + The warmstart advantage disappears when we restrict to rank-1 approximation. Rather than the current marginal fitting of factors, joint estimation of multiple factors may be the key to obtaining a better solution.
+  + The warmstart advantage of `flash` disappears when we restrict to rank-1 approximation.
 
 :::
 ::::
@@ -57,7 +56,9 @@ editor_options:
 :::
 ::: {}
 
++ [demo2](demo2_toy.html): sparse binary prior (fixed)
 + [demo1](demo_toy.html) with general discrete prior
+
 
 :::
 ::::
