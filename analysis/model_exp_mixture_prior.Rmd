@@ -55,13 +55,17 @@ rm(X, X.svd, f, i, n, p)
 ## Initialization
 
 ```{r}
-demo.init <- function(mat.X, r2, n.grid){
+demo.init <- function(mat.X, r2, n.grid, oracle=FALSE){
       
     N <- nrow(mat.X)
     P <- ncol(mat.X)
     
     eig.XXt <- eigen(mat.X%*%t(mat.X))
     init.l <- sqrt(r2)*(eig.XXt$vectors[,1])
+    if(oracle==TRUE){
+      init.l <- c(rnorm(n=40,mean=0,sd=0.01), rnorm(n=20,mean=-1,sd=0.01), rnorm(n=20, mean=1, sd=0.01))
+      init.l <- sqrt(r2)*init.l/sqrt(sum(init.l^2))
+    }
     init.w <- init.l^2
     
     K <- n.grid # number of grid points
@@ -91,7 +95,7 @@ demo.init <- function(mat.X, r2, n.grid){
 
 
 ```{r}
-demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv,r2){
+demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv, r2){
 
     N <- nrow(mat.X)
     P <- ncol(mat.X)
@@ -127,16 +131,31 @@ demo.update.A <- function(mat.X, sigmasq, delta, Ew.inv,r2){
 
     return(out.list)
 }
+```
 
+```{r}
 demo.update.B <- function(mat.X, Elsq, eta.grid, pi.grid, niter.updates = 10){
   
-    for (i in 1:niter.updates){
-    Ew <- sqrt(Elsq)*sum(pi.grid*sqrt(eta.grid/2))+sum(pi.grid*eta.grid/2)
-    Ew.inv <-  sum(pi.grid*sqrt(1/eta.grid))*sqrt(2/Elsq)
+    N <- nrow(mat.X)
+    K <- length(pi.grid)
+  
+    # "half-normal distribution": if l <- N(0,s^2), E[abs(l)]=sqrt(s^2*2/pi)
+    # https://en.wikipedia.org/wiki/Half-normal_distribution
+    E.abs.l <-  sqrt(Elsq*2/pi)
+    
+    pi.ik <- matrix(0, nrow=N, ncol=K)
+    for (k in 1:K){
+      pi.ik[,k] <- pi.grid[k]/sqrt(2*eta.grid[k])*exp(-E.abs.l/sqrt(eta.grid[k]/2))
+    }    
+    for (i in 1:N){ # normalize to sum to 1 for each row  
+      pi.ik[i,] <- pi.ik[i,]/sum(pi.ik[i,])   
     }
+    
+    Ew.inv <- c(sqrt(2/Elsq) * (pi.ik %*% (1/sqrt(eta.grid))))
     
     out.list = list()
     out.list$Ew.inv = Ew.inv
+    out.list$pi.ik = pi.ik
     
     return(out.list)
 }
@@ -146,7 +165,7 @@ demo.update.B <- function(mat.X, Elsq, eta.grid, pi.grid, niter.updates = 10){
 ## initialization + updates
 
 ```{r}
-demo.fit <- function(mat.X, niter, r2, n.grid=10){
+demo.fit <- function(mat.X, niter, r2=1, n.grid=15){
   
     N <- nrow(mat.X)
     P <- ncol(mat.X)
@@ -192,6 +211,7 @@ demo.fit <- function(mat.X, niter, r2, n.grid=10){
     out.list$pi.grid <- pi.grid
     out.list$Ew.inv <- Ew.inv
     out.list$l <- temp.A$l
+    out.list$pi.ik <- temp.B$pi.ik
     return(out.list)
 }
 ```
@@ -210,11 +230,11 @@ par(mfrow=c(1,3))
 
 obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
 
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) 
 
 plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
 abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
@@ -228,11 +248,11 @@ par(mfrow=c(1,3))
 
 obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
 
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) 
 
 plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
 abline(a=0,b=1); abline(a=0,b=-1); abline(a=0, b=0)
@@ -246,11 +266,11 @@ par(mfrow=c(1,3))
 
 obj.fit    <- demo.fit(mat.X, r2=2, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star)))
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
 
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) # sigma^2, delta, E[l^Tl]
+c(obj.fit$sigmasq, obj.fit$delta, sum(diag(obj.fit$Sigma.star))) 
 
 plot(x=svd(mat.X)$u[,1], y=obj.fit$l, xlab='singular vector', ylab='fitted', main='fitted l')
 abline(a=0,b=1); abline(a=0,b=-1); abline(a=0,b=0)
@@ -263,28 +283,19 @@ abline(a=0,b=1); abline(a=0,b=-1); abline(a=0,b=0)
 
 # The Number of Grid Points {.tabset .tabset-fade}
 
-Currently, default number of grid points is set to **K=10** and each of them has probability 1/K.
+Currently, default number of grid points is set to **K=15** and each of them has probability 1/K.
 
 ## `X2`
 
 ```{r, fig.height=4, fig.width=16}
 mat.X <- X2
-par(mfrow=c(1,4))
 
 par(mfrow=c(1,4))
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=5) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=15) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
@@ -296,19 +307,11 @@ plot(obj.fit$l, ylab='fitted', main='fitted l')
 mat.X <- X2n_a
 
 par(mfrow=c(1,4))
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=5) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=15) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
@@ -320,19 +323,11 @@ plot(obj.fit$l, ylab='fitted', main='fitted l')
 mat.X <- X2n_b
 
 par(mfrow=c(1,4))
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=6) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=8) 
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=5) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=10) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=12) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=14) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=16) 
-plot(obj.fit$l, ylab='fitted', main='fitted l')
-obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=18) 
+obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=15) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
 obj.fit    <- demo.fit(mat.X, r2=1, niter=10, n.grid=20) 
 plot(obj.fit$l, ylab='fitted', main='fitted l')
@@ -542,5 +537,7 @@ for (i in 1:6){
 ```
 
 #
+
+
 
 
