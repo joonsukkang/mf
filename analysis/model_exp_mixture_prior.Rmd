@@ -1,7 +1,7 @@
 ---
 title: "The Model with Exponential Mixture Prior"
 author: "Joonsuk Kang"
-date: "2020-11-12"
+date: "2020-11-16"
 output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
@@ -143,19 +143,20 @@ demo.update.B <- function(mat.X, Elsq, eta.grid, pi.grid, niter.updates = 10){
     # https://en.wikipedia.org/wiki/Half-normal_distribution
     E.abs.l <-  sqrt(Elsq*2/pi)
     
-    pi.ik <- matrix(0, nrow=N, ncol=K)
+    pi.tilde <- matrix(0, nrow=N, ncol=K)
     for (k in 1:K){
-      pi.ik[,k] <- pi.grid[k]/sqrt(2*eta.grid[k])*exp(-E.abs.l/sqrt(eta.grid[k]/2))
+      pi.tilde[,k] <- pi.grid[k]/sqrt(2*eta.grid[k])*exp(-E.abs.l/sqrt(eta.grid[k]/2))
     }    
     for (i in 1:N){ # normalize to sum to 1 for each row  
-      pi.ik[i,] <- pi.ik[i,]/sum(pi.ik[i,])   
+      pi.tilde[i,] <- pi.tilde[i,]/sum(pi.tilde[i,])   
     }
     
-    Ew.inv <- c(sqrt(2/Elsq) * (pi.ik %*% (1/sqrt(eta.grid))))
+    Ew.inv <- c(sqrt(2/Elsq) * sqrt(pi.tilde %*% (1/eta.grid)))
+    
     
     out.list = list()
     out.list$Ew.inv = Ew.inv
-    out.list$pi.ik = pi.ik
+    out.list$pi.tilde = pi.tilde
     
     return(out.list)
 }
@@ -211,7 +212,7 @@ demo.fit <- function(mat.X, niter, r2=1, n.grid=15){
     out.list$pi.grid <- pi.grid
     out.list$Ew.inv <- Ew.inv
     out.list$l <- temp.A$l
-    out.list$pi.ik <- temp.B$pi.ik
+    out.list$pi.tilde <- temp.B$pi.tilde
     return(out.list)
 }
 ```
