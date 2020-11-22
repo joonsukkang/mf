@@ -15,11 +15,10 @@ editor_options:
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
-<img src="https://joonsukkang.github.io/mf/figure/model_exp_mixture_prior.Rmd/unnamed-chunk-15-1.png" width="400">
+<img src="https://joonsukkang.github.io/mf/figure/demo5_model_exp_or_expmix.Rmd/unnamed-chunk-20-1.png" width="400">
 :::
 ::: {}
-+ [demo4](model_exp_mixture_prior.html): exponential mixture prior (fixed)
-+ [demo3](model_exp_prior.html): exponential prior (fixed)
++ [demo5](demo5_model_exp_or_expmix.html): exponential or exponential mixture prior
 
 
 :::
@@ -56,6 +55,8 @@ editor_options:
 :::
 ::: {}
 
++ [demo4](model_exp_mixture_prior.html): exponential mixture prior (fixed)
++ [demo3](model_exp_prior.html): exponential prior (fixed)
 + [demo2](demo2_toy.html): sparse binary prior (fixed)
 + [demo1](demo_toy.html) with general discrete prior
 
