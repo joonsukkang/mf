@@ -1,0 +1,127 @@
+---
+title: "Bingham Variance Approximation"
+author: "Joonsuk Kang"
+date: "2/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+cov.approx <- function(A, method){
+  p <- nrow(A)
+  Ip <- diag(x=rep(1, times=p))
+  if(method=="Dryden"){mat.approx <- 1/p*solve(Ip+2/p*A)}
+  if(method=="KW"    ){mat.approx <- 1/p*Ip - 2/(p*(p+2))*A + 2*sum(diag(A))/(p^2*(p+2))*Ip}
+  if(method=="optc"  ){
+    
+    eigvals <- eigen(A)$values
+    optcondition <- function(c){   (1/2*sum((eigvals+c)^(-1)) -1)^2    }
+    optc <- optimize(optcondition, lower=-min(eigvals)+0.5, upper= -min(eigvals)+p/2)$minimum
+    mat.approx <- 1/(2*optc)*solve(Ip+1/optc*A)
+      }
+  return(mat.approx)
+}
+```
+
+
+```{r}
+generate.A <- function(lambda.h, p){
+  
+  lambda.h # signal strength
+  h <- length(lambda.h) 
+  
+  # generate Sigma and A
+  lambda <- c(lambda.h, rep(1, times=p-h))
+  gamma <- pracma::randortho(n=p, type='orthonormal')
+  Sigma <- gamma %*% diag(lambda) %*% t(gamma)
+  A <- -p/2*(diag(rep(1, p)) -solve(Sigma))
+}
+
+```
+
+
+```{r}
+A <- generate.A(lambda.h=c(5,3,2), p=20)
+
+# sample covariance as benchmark
+samples <- Directional::rbingham(n=10^6, A=A)
+mat.sample <- cov(samples)
+mat.Dryden <- cov.approx(A=A, method='Dryden')
+mat.KW     <- cov.approx(A=A, method='KW')
+mat.optc   <- cov.approx(A=A, method='optc')
+
+# diagonals
+cbind(diag(mat.sample), diag(mat.Dryden), diag(mat.KW), diag(mat.optc))
+
+# diagonal distance (from sample covariance)
+diag.dist <- c(sqrt(sum((diag(mat.sample)-diag(mat.Dryden))^2)),
+               sqrt(sum((diag(mat.sample)-diag(mat.KW))^2)),
+               sqrt(sum((diag(mat.sample)-diag(mat.optc))^2))
+               )
+
+# matrix distance (from sample covariance; Frob norm)
+mat.dist <- c(norm(mat.sample-mat.Dryden, type='F'),
+              norm(mat.sample-mat.KW, type='F'),
+              norm(mat.sample-mat.optc, type='F')
+)
+
+df <- data.frame(rbind(diag.dist, mat.dist))
+colnames(df) <- c('Dryden', 'KW', 'optc')
+df.relative <- df/df[,3]
+df.result <- rbind(df, df.relative)
+rownames(df.result) <- c('diagonal distance', 'matrix distance', 
+                         'relative diagonal distance', 'relative matrix distance')
+
+df.result
+```
+
+
+```{r}
+# more scenarios
+performances <- function(A){
+  
+    # sample covariance as benchmark
+    samples <- Directional::rbingham(n=10^6, A=A)
+    mat.sample <- cov(samples)
+    mat.Dryden <- cov.approx(A=A, method='Dryden')
+    mat.KW     <- cov.approx(A=A, method='KW')
+    mat.optc   <- cov.approx(A=A, method='optc')
+    
+    # diagonals
+    #diag <- cbind(diag(mat.sample), diag(mat.Dryden), diag(mat.KW), diag(mat.optc))
+    
+    # diagonal distance (from sample covariance)
+    diag.dist <- c(sqrt(sum((diag(mat.sample)-diag(mat.Dryden))^2)),
+                   sqrt(sum((diag(mat.sample)-diag(mat.KW))^2)),
+                   sqrt(sum((diag(mat.sample)-diag(mat.optc))^2))
+                   )
+    
+    # matrix distance (from sample covariance; Frob norm)
+    mat.dist <- c(norm(mat.sample-mat.Dryden, type='F'),
+                  norm(mat.sample-mat.KW, type='F'),
+                  norm(mat.sample-mat.optc, type='F')
+    )
+    
+    df <- data.frame(rbind(diag.dist, mat.dist))
+    colnames(df) <- c('Dryden', 'KW', 'optc')
+    df.relative <- df/df[,3]
+    df.result <- rbind(df, df.relative)
+    rownames(df.result) <- c('diagonal distance', 'matrix distance', 
+                             'relative diagonal distance', 'relative matrix distance')
+    
+    return(df.result)
+}
+
+performances(A=generate.A(lambda.h=c(5,3,2), p=30))
+performances(A=generate.A(lambda.h=c(5,3,2), p=50))
+
+performances(A=generate.A(lambda.h=c(10,5,4,3,2), p=20))
+performances(A=generate.A(lambda.h=c(10,5,4,3,2), p=30))
+performances(A=generate.A(lambda.h=c(10,5,4,3,2), p=50))
+```
+
+
