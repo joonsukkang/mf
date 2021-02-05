@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Joonsuk Kang" />
+
+
+<title>Hierarchical ebmf</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+      </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/joonsukkang/mf">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Hierarchical ebmf</h1>
+<h4 class="author">Joonsuk Kang</h4>
+<h4 class="date">Feb 4, 2021</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-02-04
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mf/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201010code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201010)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201010code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201010)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreec5a625b93680fbc746b409175963f91fb3a9c8e9targetblankc5a625ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/c5a625b93680fbc746b409175963f91fb3a9c8e9" target="_blank">c5a625b</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreec5a625b93680fbc746b409175963f91fb3a9c8e9targetblankc5a625ba" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/c5a625b93680fbc746b409175963f91fb3a9c8e9" target="_blank">c5a625b</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.Rhistory
+
+Untracked files:
+    Untracked:  analysis/bingham.Rmd
+    Untracked:  analysis/bingham_constant.Rmd
+    Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/flip_correlation.Rmd
+    Untracked:  analysis/flipping_pdf.Rmd
+    Untracked:  analysis/infinitefactor_toy.Rmd
+    Untracked:  analysis/model_exp_prior_v20201110m.Rmd
+    Untracked:  analysis/model_invgam_prior.Rmd
+    Untracked:  analysis/multiplicative.Rmd
+    Untracked:  analysis/sliding_correlation.Rmd
+    Untracked:  analysis/sliding_pdf.Rmd
+    Untracked:  analysis/temp.Rmd
+    Untracked:  code/code_wflow_publish.R
+    Untracked:  code/model_exp_v20201110.R
+    Untracked:  data/eigvals.rds
+    Untracked:  data/metro_results.txt
+    Untracked:  figure/
+    Untracked:  output/Likelihood.gif
+    Untracked:  writing/
+
+Unstaged changes:
+    Deleted:    analysis/ChoosingW.Rmd
+    Deleted:    analysis/concentration.Rmd
+    Modified:   analysis/model_exp_prior.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/hierarchical.Rmd</code>) and HTML (<code>docs/hierarchical.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/c5a625b93680fbc746b409175963f91fb3a9c8e9/analysis/hierarchical.Rmd" target="_blank">c5a625b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-02-04
+</td>
+<td>
+Hierarchical ebmf
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="toy-data" class="section level1">
+<h1>toy data</h1>
+<pre class="r"><code># code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000 # original toy data setting: p=1000, n=20
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn&#39;t work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+
+# take transpose
+X2 &lt;- t(X2)
+X2n_a &lt;- t(X2n_a)
+X2n_b &lt;- t(X2n_b)
+
+rm(X, X.svd, f, i, n, p)</code></pre>
+</div>
+<div id="building-blocks" class="section level1">
+<h1>Building Blocks</h1>
+<div id="ebnv-solver" class="section level2">
+<h2><code>EBNV</code> solver</h2>
+<pre class="r"><code>EBNV &lt;- function(b, G, eta.grid=NULL){
+  
+  p &lt;- length(b)
+  K &lt;- length(eta.grid)
+  
+  if(G==&quot;exp&quot;){ # exponential family
+    
+    eta &lt;- 2*mean(abs(b))^2
+    EWinv &lt;- sqrt(2/eta)*diag(x=1/abs(b))
+    EW &lt;- diag(sqrt(eta/2)*abs(b) + eta/2)
+
+    out.list &lt;- list(EWinv=EWinv, EW=EW, 
+                     eta=eta)
+  }
+  
+  if(G==&quot;point.mix&quot;| G==&quot;exp.mix&quot;){  # exponential scale mixture or point mass scale mixture
+
+    L &lt;- matrix(0, nrow=p, ncol=K)
+    for (k in 1:K){
+      eta.k &lt;- eta.grid[k]
+      if(G==&quot;point.mix&quot;){L[,k] &lt;- sqrt(1/eta.k)*exp(-b^2/(2*eta.k))}
+      if(G==&quot;exp.mix&quot;  ){L[,k] &lt;- sqrt(pi/eta.k)*exp(-sqrt(2/eta.k)*abs(b))}
+    }
+    pi.star &lt;- mixsqp::mixsqp(L, control=list(verbose=FALSE))$x
+    pi.tilde &lt;- matrix(0, nrow=p, ncol=K)
+    for (k in 1:K){
+      pi.tilde[,k] &lt;- pi.star[k]*L[,k]
+    }
+    pi.tilde &lt;- pi.tilde/rowSums(pi.tilde)
+    
+    if(G==&quot;point.mix&quot;){
+      EWinv &lt;- diag(as.numeric(pi.tilde %*%(1/eta.grid)))
+      EW &lt;- diag(as.numeric(pi.tilde %*%(eta.grid)))
+    }
+    if(G==&quot;exp.mix&quot;){
+      EWinv &lt;- diag(as.numeric(pi.tilde %*% sqrt(2/eta.grid))/abs(b))
+      EW &lt;- diag(as.numeric(pi.tilde %*% sqrt(eta.grid/2))*abs(b) + as.numeric(pi.tilde %*% (eta.grid/2)))
+    }
+
+    out.list &lt;- list(EWinv=EWinv, EW=EW, L=L,
+                     pi.star=pi.star, pi.tilde=pi.tilde)
+
+  }
+  
+  if(G==&quot;exp.mix+point.mix&quot;){  # exponential scale mixture + point mass scale mixture
+
+    L &lt;- matrix(0, nrow=p, ncol=2*K)
+    for (k in 1:K){
+      eta.k &lt;- eta.grid[k]
+      L[,k] &lt;- sqrt(1/eta.k)*exp(-b^2/(2*eta.k)) # for point mixture
+      L[,(K+k)] &lt;- sqrt(pi/eta.k)*exp(-sqrt(2/eta.k)*abs(b)) # for exp mixture
+    }
+    pi.star &lt;- mixsqp::mixsqp(L, control=list(verbose=FALSE))$x
+    pi.tilde &lt;- matrix(0, nrow=p, ncol=2*K)
+    for (k in 1:(2*K)){
+      pi.tilde[,k] &lt;- pi.star[k]*L[,k]
+    }
+    pi.tilde &lt;- pi.tilde/rowSums(pi.tilde)
+    
+    
+    EWinv &lt;- diag(
+      as.numeric(pi.tilde[,1:K] %*%(1/eta.grid)) +
+        as.numeric(pi.tilde[,(K+1):(2*K)] %*% sqrt(2/eta.grid))/abs(b)
+      )
+
+    EW &lt;- diag(
+       as.numeric(pi.tilde[,1:K] %*%(eta.grid)) +
+         as.numeric(pi.tilde[,(K+1):(2*K)]%*% sqrt(eta.grid/2))*abs(b) +
+         as.numeric(pi.tilde[,(K+1):(2*K)] %*% (eta.grid/2))
+       )
+    
+
+    out.list &lt;- list(EWinv=EWinv, EW=EW, L=L,
+                     pi.star=pi.star, pi.tilde=pi.tilde)
+
+  }  
+  
+  return(out.list)
+}</code></pre>
+</div>
+<div id="ebmf-bingham-solver" class="section level2">
+<h2><code>EBMF-Bingham</code> solver</h2>
+<div id="intermediate-functions-for-calculating-two-parts-g1-and-g2" class="section level3">
+<h3>Intermediate functions for calculating two parts (“G1” and “G2”)</h3>
+<pre class="r"><code>calc.G1 &lt;- function(k, n, p, r2, Xfsq){ # calculate &quot;G1&quot; part of the equation
+    sigmasq &lt;- ((n*p*k + Xfsq)-
+                       sqrt((n*p*k + Xfsq)^2-4*p*(n-1)*k*Xfsq)
+                     )/(2*p*(n-1))
+    delta &lt;- sigmasq/(k-sigmasq)/r2
+    G1 &lt;- -n*p/2*log(sigmasq)-
+          p/2*log(1+delta*r2)-
+          Xfsq/(2*sigmasq)
+return(c(sigmasq, delta, G1))
+}
+
+calc.G2 &lt;- function(k, EWinv, XXT, n, r2){ # calculate &quot;G2&quot; part of the equation
+  
+  temp.eig &lt;- eigen(EWinv*r2/2-XXT/(2*k))
+  eigvals &lt;- temp.eig$values
+  lambda1 &lt;- min(eigvals)
+  G2 &lt;- -lambda1-1/2*sum(log(1+2*(eigvals-lambda1)/n))+log(2*pi^(n/2))-log(gamma(n/2))
+  
+  return(G2)
+}</code></pre>
+</div>
+<div id="main-function" class="section level3">
+<h3>Main function</h3>
+<pre class="r"><code>EBMF.Bingham &lt;- function(EWinv, XXT, Xfsq, n, p, r2){
+  
+    sum.G &lt;- function(k){
+      calc.G1(k=k, n=n, p=p, r2=r2, Xfsq = Xfsq)[3] + 
+        calc.G2(k=k, EWinv=EWinv, XXT=XXT, n, r2=r2)
+    }
+    
+    optimal.k &lt;- optimize(sum.G, lower=0, upper=100, maximum=TRUE, tol=.Machine$double.eps)$maximum
+    sigmasq &lt;- ((n*p*optimal.k + Xfsq)-sqrt((n*p*optimal.k + Xfsq)^2-4*p*(n-1)*optimal.k*Xfsq)
+                     )/(2*p*(n-1))
+    delta &lt;- sigmasq/(optimal.k-sigmasq)/r2
+    G2 &lt;- calc.G2(k=optimal.k, EWinv=EWinv, XXT=XXT, n=n, r2=r2)
+    
+    # computing sqrt.Elsq
+    temp.A &lt;- r2/2*EWinv-XXT/(2*sigmasq*(1+1/(delta*r2)))
+    tilde.lambda &lt;- eigen(temp.A)$values
+    optcondition &lt;- function(c){  (1/2*sum((tilde.lambda+c)^(-1)) -1)^2 }
+    optc &lt;- optimize(optcondition, 
+                     lower=-min(tilde.lambda)+0.5, 
+                     upper= -min(tilde.lambda)+p/2
+                     )$minimum
+    tilde.mat.approx &lt;- 1/(2*optc)*solve(diag(x=rep(1, times=n))+1/optc*temp.A)
+    sqrt.Elsq &lt;- sqrt(r2*diag(tilde.mat.approx))
+
+    out.list &lt;- list(optimal.k=optimal.k, sigmasq=sigmasq, delta=delta, G2=G2, sqrt.Elsq=sqrt.Elsq)
+
+  return(out.list)
+}</code></pre>
+</div>
+</div>
+</div>
+<div id="hebmf-solver" class="section level1">
+<h1><code>hEBMF</code> solver</h1>
+<pre class="r"><code>hEBMF &lt;- function(X, r, G, 
+                  min.updates=5, # minimum number of updates
+                  fig.intermediate=FALSE, fig.final=TRUE,
+                  elbo.tol=10^(-6), rand.init=FALSE){
+      
+    # setup -----------------------------------------------------------------------
+    n &lt;- nrow(X); p &lt;- ncol(X)
+    
+    Xfsq &lt;- norm(X, &#39;F&#39;)^2
+    XXT &lt;- X %*% t(X)
+    r2 &lt;- r^2
+    XXT.eig &lt;- eigen(XXT)
+    XXT.eigvalues &lt;- XXT.eig$values
+    l.eigvector &lt;- r*XXT.eig$vectors[,1] # estimate as the eigenvector
+    
+    # initialization ---------------------------------------------------------------
+    sqrt.Elsq &lt;- abs(l.eigvector)
+    if(rand.init==TRUE){sqrt.Elsq=sample(sqrt.Elsq)} # permute the eigenvalue to randomize initialization
+    
+    # create eta grid
+    eta.grid &lt;- sort(sqrt.Elsq^2)
+
+    # EBNV
+    temp.ebnv &lt;- EBNV(b=sqrt.Elsq, G=G, eta.grid=eta.grid)
+    EWinv &lt;- temp.ebnv$EWinv
+    EW &lt;- temp.ebnv$EW
+    
+    # EBMF-Bingham
+    temp.ebmf &lt;- EBMF.Bingham(EWinv=EWinv,
+                          XXT = XXT, Xfsq=Xfsq, n=n, p=p, r2=r2)
+    sigmasq &lt;- temp.ebmf$sigmasq
+    delta &lt;- temp.ebmf$delta
+    sqrt.Elsq.prev &lt;- sqrt.Elsq
+    sqrt.Elsq &lt;- temp.ebmf$sqrt.Elsq
+    
+    # ELBO 
+    if(G!=&#39;exp&#39;){
+    F1 &lt;- -n*p/(2*pi)-n*p/2*log(sigmasq)-p/2*log(1+delta*r2)-Xfsq/(2*sigmasq)+
+      (1/2)*sum(sqrt.Elsq^2*diag(EWinv))+n/2*log(r2)+ temp.ebmf$G2
+    F2.F3 &lt;- (-1/2)*sum((sqrt.Elsq^2-sqrt.Elsq.prev^2)*diag(EWinv))+
+      sum(log(temp.ebnv$L %*% temp.ebnv$pi.star))-n/2*log(2*pi)
+    elbo &lt;- F1+F2.F3
+    mat.elbo &lt;- c(F1, F2.F3, elbo)
+    }
+    
+    n.iter &lt;- 1
+    par(mfrow=c(1,5))
+    # fig.intermediate
+    eigen.A &lt;- eigen(-EWinv/2+XXT/(2*sigmasq*(1/delta+r2)))
+    l.map &lt;- r*eigen.A$vectors[,1] # point estimate: MAP
+    if(fig.intermediate==TRUE){
+      plot(l.eigvector, l.map, main=paste0(&quot;iteration: &quot;,n.iter))
+      abline(a=0,b=0); abline(a=0,b=1); abline(a=0,b=-1)
+    }
+    
+    # updates  ---------------------------------------
+    elbo.diff &lt;- 0
+    while ( (n.iter &lt; min.updates) | (elbo.diff &gt; elbo.tol) ){
+        
+        # EBNV
+        temp.ebnv &lt;- EBNV(b=sqrt.Elsq, G=G, eta.grid=eta.grid)
+        EWinv.prev &lt;- EWinv
+        EWinv &lt;- temp.ebnv$EWinv
+        EW &lt;- temp.ebnv$EW
+        
+        # ELBO
+        if(G!=&#39;exp&#39;){
+        F1 &lt;- -n*p/(2*pi)-n*p/2*log(sigmasq)-p/2*log(1+delta*r2)-Xfsq/(2*sigmasq)+
+          (1/2)*sum(sqrt.Elsq^2*diag(EWinv.prev))+n/2*log(r2)+ temp.ebmf$G2
+        F2.F3 &lt;- sum(log(temp.ebnv$L %*% temp.ebnv$pi.star))-n/2*log(2*pi)
+        elbo &lt;- F1+F2.F3
+        mat.elbo &lt;- rbind(mat.elbo, c(F1, F2.F3, elbo))    
+        }
+        
+        # EBMF-Bingham
+        temp.ebmf &lt;- EBMF.Bingham(EWinv=EWinv, XXT = XXT, Xfsq=Xfsq, n=n, p=p, r2=r2)
+        sigmasq &lt;- temp.ebmf$sigmasq
+        delta &lt;- temp.ebmf$delta
+        sqrt.Elsq.prev &lt;- sqrt.Elsq
+        sqrt.Elsq &lt;- temp.ebmf$sqrt.Elsq
+
+        # ELBO
+        if(G!=&#39;exp&#39;){
+        F1 &lt;- -n*p/(2*pi)-n*p/2*log(sigmasq)-p/2*log(1+delta*r2)-Xfsq/(2*sigmasq)+
+          (1/2)*sum(sqrt.Elsq^2*diag(EWinv))+n/2*log(r2)+ temp.ebmf$G2
+        F2.F3 &lt;- (-1/2)*sum((sqrt.Elsq^2-sqrt.Elsq.prev^2)*diag(EWinv))+
+          sum(log(temp.ebnv$L %*% temp.ebnv$pi.star))-n/2*log(2*pi)
+        elbo &lt;- F1+F2.F3
+        mat.elbo &lt;- rbind(mat.elbo, c(F1, F2.F3, elbo))    
+        }
+        
+        n.iter &lt;- n.iter + 1
+        if(G!=&#39;exp&#39;){elbo.diff &lt;- mat.elbo[nrow(mat.elbo),3] - mat.elbo[nrow(mat.elbo)-2,3] }
+        # compare to last post-EBMF-Bingham elbo
+        
+        # fig.intermediate
+        eigen.A &lt;- eigen(-EWinv/2+XXT/(2*sigmasq*(1/delta+r2)))
+        l.map &lt;- r*eigen.A$vectors[,1] # point estimate: MAP
+        if(fig.intermediate==TRUE){
+          plot(l.eigvector, l.map, main=paste0(&quot;iteration: &quot;,n.iter))
+          abline(a=0,b=0); abline(a=0,b=1); abline(a=0,b=-1)
+        }
+     }
+     
+    # fig.final
+    par(mfrow=c(1,4))
+    if(fig.final==TRUE){
+      if(G!=&#39;exp&#39;){plot(mat.elbo[,3], main=&#39;ELBO&#39;)}
+    plot(l.eigvector, main=&quot;eigenvector&quot;)
+    plot(l.map, main=&quot;final MAP estimate&quot;)
+    plot(l.eigvector, l.map, main=&#39;eig vs MAP&#39;)
+    abline(a=0,b=0); abline(a=0,b=1); abline(a=0,b=-1)
+    }
+    
+    # return output
+    out.list &lt;- list(l.map = l.map, 
+                     sigmasq = sigmasq, 
+                     delta = delta, 
+                     sqrt.Elsq = sqrt.Elsq,
+                     EWinv = EWinv,
+                     l.eigvector = l.eigvector, 
+                     eigen.A=eigen.A)
+    if(G==&#39;exp&#39;){
+      out.list &lt;- c(out.list,
+                    list(eta=temp.ebnv$eta))
+    }
+    if(G==&#39;exp.mix&#39; | G==&#39;point.mix&#39; | G==&quot;exp.mix+point.mix&quot;){
+      out.list &lt;- c(out.list,
+                    list(eta.grid = eta.grid,
+                     pi.star = temp.ebnv$pi.star,
+                     pi.tilde = temp.ebnv$pi.tilde))
+    }  
+    
+    return(out.list)
+}</code></pre>
+</div>
+<div id="hebmf-on-toy-data-x2n_a" class="section level1 tabset tabset-fade">
+<h1><code>hEBMF</code> on toy data <code>X2n_a</code></h1>
+<pre class="r"><code>set.r &lt;- 1
+set.X &lt;- X2n_a</code></pre>
+<p><code>rand.init=TRUE</code> is used to randomize initialization of the algorithm by permuting the eigenvalues.</p>
+<div id="exp" class="section level2">
+<h2><code>exp</code></h2>
+<pre class="r"><code>fit1 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp&#39;, fig.intermediate = TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit1 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp&#39;, fig.intermediate = TRUE, rand.init=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-7-2.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-7-3.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-7-4.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp.mix" class="section level2">
+<h2><code>exp.mix</code></h2>
+<pre class="r"><code>fit2 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix&#39;, fig.intermediate = TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-8-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-2.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-3.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-4.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-5.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-6.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit2 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix&#39;, fig.intermediate = TRUE, rand.init=TRUE) </code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-8-7.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-8.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-9.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-8-10.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="point.mix" class="section level2">
+<h2><code>point.mix</code></h2>
+<pre class="r"><code>fit3 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;point.mix&#39;, fig.intermediate=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-9-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-9-2.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit3 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;point.mix&#39;, fig.intermediate=TRUE, rand.init=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-9-3.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-9-4.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp.mixpoint.mix" class="section level2">
+<h2><code>exp.mix+point.mix</code></h2>
+<pre class="r"><code>fit4 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix+point.mix&#39;, fig.intermediate=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-10-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-10-2.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit4 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix+point.mix&#39;, fig.intermediate=TRUE, rand.init=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-10-3.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-10-4.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-10-5.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="section" class="section level1">
+<h1></h1>
+</div>
+<div id="hebmf-on-toy-data-x2n_b" class="section level1 tabset tabset-fade">
+<h1><code>hEBMF</code> on toy data <code>X2n_b</code></h1>
+<pre class="r"><code>set.r &lt;- 1
+set.X &lt;- X2n_b</code></pre>
+<p><code>rand.init=TRUE</code> is used to randomize initialization of the algorithm by permuting the eigenvalues.</p>
+<div id="exp-1" class="section level2">
+<h2><code>exp</code></h2>
+<pre class="r"><code>fit1 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp&#39;, fig.intermediate = TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-12-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit1 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp&#39;, fig.intermediate = TRUE, rand.init=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-12-2.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-12-3.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-12-4.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp.mix-1" class="section level2">
+<h2><code>exp.mix</code></h2>
+<pre class="r"><code>fit2 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix&#39;, fig.intermediate = TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-13-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-13-2.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit2 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix&#39;, fig.intermediate = TRUE, rand.init=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-13-3.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-13-4.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-13-5.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="point.mix-1" class="section level2">
+<h2><code>point.mix</code></h2>
+<pre class="r"><code>fit3 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;point.mix&#39;, fig.intermediate=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-14-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-14-2.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-14-3.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit3 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;point.mix&#39;, fig.intermediate=TRUE, rand.init=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-14-4.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-14-5.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp.mixpoint.mix-1" class="section level2">
+<h2><code>exp.mix+point.mix</code></h2>
+<pre class="r"><code>fit4 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix+point.mix&#39;, fig.intermediate=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-15-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-15-2.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-15-3.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit4 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix+point.mix&#39;, fig.intermediate=TRUE, rand.init=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-15-4.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-15-5.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="section-1" class="section level1">
+<h1></h1>
+</div>
+<div id="hebmf-on-toy-data-x2" class="section level1 tabset tabset-fade">
+<h1><code>hEBMF</code> on toy data <code>X2</code></h1>
+<pre class="r"><code>set.r &lt;- 2
+set.X &lt;- X2</code></pre>
+<div id="exp-2" class="section level2">
+<h2><code>exp</code></h2>
+<pre class="r"><code>fit1 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp&#39;, fig.intermediate = TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-17-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-17-2.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp.mix-2" class="section level2">
+<h2><code>exp.mix</code></h2>
+<pre class="r"><code>fit2 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix&#39;, fig.intermediate = TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-18-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-18-2.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="point.mix-2" class="section level2">
+<h2><code>point.mix</code></h2>
+<pre class="r"><code>fit3 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;point.mix&#39;, fig.intermediate=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-19-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-19-2.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exp.mixpoint.mix-2" class="section level2">
+<h2><code>exp.mix+point.mix</code></h2>
+<pre class="r"><code>fit4 &lt;- hEBMF(X=set.X, r=set.r, G=&#39;exp.mix+point.mix&#39;, fig.intermediate=TRUE)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-20-1.png" width="960" style="display: block; margin: auto;" /><img src="figure/hierarchical.Rmd/unnamed-chunk-20-2.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="section-2" class="section level1">
+<h1></h1>
+</div>
+<div id="more-toy-data" class="section level1 tabset tabset-fade">
+<h1>More toy data</h1>
+<pre class="r"><code>more.toy &lt;- function(seed.no){
+  
+    set.seed(seed.no)
+  
+    # create X
+    p = 1000
+    n = 20
+    f = list()
+    for(i in 1:6){ 
+      f[[i]] = rnorm(p)
+    }
+    X =matrix(0,ncol=4*n, nrow=p)
+    X[,1:(2*n)] = f[[1]]
+    X[,(2*n+1):(4*n)] = f[[2]]
+    
+    X[,1:n] = X[,1:n]+f[[3]]
+    X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+    X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+    X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+    X.svd = svd(X)
+    
+    # create X2
+    X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+    # take transpose
+    X2 &lt;- t(X2)
+    
+    mat.X &lt;- X2 + rnorm(4*20*1000, sd=3)
+    
+    
+    obj.fit1 &lt;-  hEBMF(X=mat.X, r=1, G=&#39;exp.mix&#39;, fig.final=FALSE)
+    obj.fit2 &lt;-  hEBMF(X=mat.X, r=1, G=&#39;point.mix&#39;, fig.final=FALSE)
+    obj.fit3 &lt;-  hEBMF(X=mat.X, r=1, G=&#39;exp.mix+point.mix&#39;, fig.final=FALSE)
+    
+    par(mfrow=c(1,4))
+    plot(obj.fit1$l.eigvector, main=&#39;eigvector&#39;, ylab=&#39;eigenvector&#39;)
+    plot(obj.fit1$l.eigvector, obj.fit1$l.map, main=&#39;vs. exp.mix&#39;, ylab=&#39;map&#39;, xlab=&#39;eigvector&#39;); 
+      abline(a=0, b=1); abline(a=0, b=-1); abline(a=0, b=0)
+    plot(obj.fit2$l.eigvector, obj.fit2$l.map, main=&#39;vs. point.mix&#39;, ylab=&#39;map&#39;, xlab=&#39;eigvector&#39;); 
+      abline(a=0, b=1); abline(a=0, b=-1); abline(a=0, b=0)
+    plot(obj.fit3$l.eigvector, obj.fit3$l.map, main=&#39;vs. exp.mix+point.mix&#39;, ylab=&#39;map&#39;, xlab=&#39;eigvector&#39;); 
+      abline(a=0, b=1); abline(a=0, b=-1); abline(a=0, b=0)
+    
+}</code></pre>
+<div id="section-3" class="section level2">
+<h2><code>773</code></h2>
+<pre class="r"><code>more.toy(seed.no=773)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-22-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-4" class="section level2">
+<h2><code>312</code></h2>
+<pre class="r"><code>more.toy(seed.no=312)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-23-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-5" class="section level2">
+<h2><code>1</code></h2>
+<pre class="r"><code>more.toy(seed.no=1)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-24-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-6" class="section level2">
+<h2><code>2</code></h2>
+<pre class="r"><code>more.toy(seed.no=2)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-25-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-7" class="section level2">
+<h2><code>3</code></h2>
+<pre class="r"><code>more.toy(seed.no=3)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-26-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-8" class="section level2">
+<h2><code>4</code></h2>
+<pre class="r"><code>more.toy(seed.no=4)</code></pre>
+<pre><code>Warning in mixsqp::mixsqp(L, control = list(verbose = FALSE)): One or more
+columns of &quot;L&quot; are all zeros; solution entries associated with these columns are
+trivially zero
+
+Warning in mixsqp::mixsqp(L, control = list(verbose = FALSE)): One or more
+columns of &quot;L&quot; are all zeros; solution entries associated with these columns are
+trivially zero
+
+Warning in mixsqp::mixsqp(L, control = list(verbose = FALSE)): One or more
+columns of &quot;L&quot; are all zeros; solution entries associated with these columns are
+trivially zero
+
+Warning in mixsqp::mixsqp(L, control = list(verbose = FALSE)): One or more
+columns of &quot;L&quot; are all zeros; solution entries associated with these columns are
+trivially zero
+
+Warning in mixsqp::mixsqp(L, control = list(verbose = FALSE)): One or more
+columns of &quot;L&quot; are all zeros; solution entries associated with these columns are
+trivially zero
+
+Warning in mixsqp::mixsqp(L, control = list(verbose = FALSE)): One or more
+columns of &quot;L&quot; are all zeros; solution entries associated with these columns are
+trivially zero</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-27-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-9" class="section level2">
+<h2><code>5</code></h2>
+<pre class="r"><code>more.toy(seed.no=5)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-28-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-10" class="section level2">
+<h2><code>6</code></h2>
+<pre class="r"><code>more.toy(seed.no=6)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-29-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-11" class="section level2">
+<h2><code>7</code></h2>
+<pre class="r"><code>more.toy(seed.no=7)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-30-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-12" class="section level2">
+<h2><code>8</code></h2>
+<pre class="r"><code>more.toy(seed.no=8)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-31-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-13" class="section level2">
+<h2><code>9</code></h2>
+<pre class="r"><code>more.toy(seed.no=9)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-32-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-14" class="section level2">
+<h2><code>10</code></h2>
+<pre class="r"><code>more.toy(seed.no=10)</code></pre>
+<p><img src="figure/hierarchical.Rmd/unnamed-chunk-33-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="section-15" class="section level1">
+<h1></h1>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.2 (2020-06-22)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS  10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.5       rstudioapi_0.11  whisker_0.4      knitr_1.30      
+ [5] magrittr_1.5     lattice_0.20-41  R6_2.4.1         rlang_0.4.7     
+ [9] stringr_1.4.0    tools_4.0.2      grid_4.0.2       xfun_0.18       
+[13] irlba_2.3.3      git2r_0.27.1     htmltools_0.5.0  ellipsis_0.3.1  
+[17] rprojroot_1.3-2  yaml_2.2.1       digest_0.6.25    tibble_3.0.3    
+[21] lifecycle_0.2.0  crayon_1.3.4     Matrix_1.2-18    mixsqp_0.3-43   
+[25] later_1.1.0.1    vctrs_0.3.4      promises_1.1.1   fs_1.5.0        
+[29] glue_1.4.2       evaluate_0.14    rmarkdown_2.4    stringi_1.5.3   
+[33] compiler_4.0.2   pillar_1.4.6     backports_1.1.10 httpuv_1.5.4    
+[37] pkgconfig_2.0.3 </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
