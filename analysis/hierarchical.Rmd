@@ -1,0 +1,598 @@
+---
+title: "Hierarchical ebmf"
+author: "Joonsuk Kang"
+date: "Feb 4, 2021"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# toy data
+
+```{r}
+# code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000 # original toy data setting: p=1000, n=20
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+
+# take transpose
+X2 <- t(X2)
+X2n_a <- t(X2n_a)
+X2n_b <- t(X2n_b)
+
+rm(X, X.svd, f, i, n, p)
+```
+
+
+# Building Blocks
+
+## `EBNV` solver
+
+```{r}
+EBNV <- function(b, G, eta.grid=NULL){
+  
+  p <- length(b)
+  K <- length(eta.grid)
+  
+  if(G=="exp"){ # exponential family
+    
+    eta <- 2*mean(abs(b))^2
+    EWinv <- sqrt(2/eta)*diag(x=1/abs(b))
+    EW <- diag(sqrt(eta/2)*abs(b) + eta/2)
+
+    out.list <- list(EWinv=EWinv, EW=EW, 
+                     eta=eta)
+  }
+  
+  if(G=="point.mix"| G=="exp.mix"){  # exponential scale mixture or point mass scale mixture
+
+    L <- matrix(0, nrow=p, ncol=K)
+    for (k in 1:K){
+      eta.k <- eta.grid[k]
+      if(G=="point.mix"){L[,k] <- sqrt(1/eta.k)*exp(-b^2/(2*eta.k))}
+      if(G=="exp.mix"  ){L[,k] <- sqrt(pi/eta.k)*exp(-sqrt(2/eta.k)*abs(b))}
+    }
+    pi.star <- mixsqp::mixsqp(L, control=list(verbose=FALSE))$x
+    pi.tilde <- matrix(0, nrow=p, ncol=K)
+    for (k in 1:K){
+      pi.tilde[,k] <- pi.star[k]*L[,k]
+    }
+    pi.tilde <- pi.tilde/rowSums(pi.tilde)
+    
+    if(G=="point.mix"){
+      EWinv <- diag(as.numeric(pi.tilde %*%(1/eta.grid)))
+      EW <- diag(as.numeric(pi.tilde %*%(eta.grid)))
+    }
+    if(G=="exp.mix"){
+      EWinv <- diag(as.numeric(pi.tilde %*% sqrt(2/eta.grid))/abs(b))
+      EW <- diag(as.numeric(pi.tilde %*% sqrt(eta.grid/2))*abs(b) + as.numeric(pi.tilde %*% (eta.grid/2)))
+    }
+
+    out.list <- list(EWinv=EWinv, EW=EW, L=L,
+                     pi.star=pi.star, pi.tilde=pi.tilde)
+
+  }
+  
+  if(G=="exp.mix+point.mix"){  # exponential scale mixture + point mass scale mixture
+
+    L <- matrix(0, nrow=p, ncol=2*K)
+    for (k in 1:K){
+      eta.k <- eta.grid[k]
+      L[,k] <- sqrt(1/eta.k)*exp(-b^2/(2*eta.k)) # for point mixture
+      L[,(K+k)] <- sqrt(pi/eta.k)*exp(-sqrt(2/eta.k)*abs(b)) # for exp mixture
+    }
+    pi.star <- mixsqp::mixsqp(L, control=list(verbose=FALSE))$x
+    pi.tilde <- matrix(0, nrow=p, ncol=2*K)
+    for (k in 1:(2*K)){
+      pi.tilde[,k] <- pi.star[k]*L[,k]
+    }
+    pi.tilde <- pi.tilde/rowSums(pi.tilde)
+    
+    
+    EWinv <- diag(
+      as.numeric(pi.tilde[,1:K] %*%(1/eta.grid)) +
+        as.numeric(pi.tilde[,(K+1):(2*K)] %*% sqrt(2/eta.grid))/abs(b)
+      )
+
+    EW <- diag(
+       as.numeric(pi.tilde[,1:K] %*%(eta.grid)) +
+         as.numeric(pi.tilde[,(K+1):(2*K)]%*% sqrt(eta.grid/2))*abs(b) +
+         as.numeric(pi.tilde[,(K+1):(2*K)] %*% (eta.grid/2))
+       )
+    
+
+    out.list <- list(EWinv=EWinv, EW=EW, L=L,
+                     pi.star=pi.star, pi.tilde=pi.tilde)
+
+  }  
+  
+  return(out.list)
+}
+```
+
+
+## `EBMF-Bingham` solver
+
+### Intermediate functions for calculating two parts ("G1" and "G2")
+
+```{r}
+calc.G1 <- function(k, n, p, r2, Xfsq){ # calculate "G1" part of the equation
+    sigmasq <- ((n*p*k + Xfsq)-
+                       sqrt((n*p*k + Xfsq)^2-4*p*(n-1)*k*Xfsq)
+                     )/(2*p*(n-1))
+    delta <- sigmasq/(k-sigmasq)/r2
+    G1 <- -n*p/2*log(sigmasq)-
+          p/2*log(1+delta*r2)-
+          Xfsq/(2*sigmasq)
+return(c(sigmasq, delta, G1))
+}
+
+calc.G2 <- function(k, EWinv, XXT, n, r2){ # calculate "G2" part of the equation
+  
+  temp.eig <- eigen(EWinv*r2/2-XXT/(2*k))
+  eigvals <- temp.eig$values
+  lambda1 <- min(eigvals)
+  G2 <- -lambda1-1/2*sum(log(1+2*(eigvals-lambda1)/n))+log(2*pi^(n/2))-log(gamma(n/2))
+  
+  return(G2)
+}
+```
+
+### Main function
+
+```{r}
+EBMF.Bingham <- function(EWinv, XXT, Xfsq, n, p, r2){
+  
+    sum.G <- function(k){
+      calc.G1(k=k, n=n, p=p, r2=r2, Xfsq = Xfsq)[3] + 
+        calc.G2(k=k, EWinv=EWinv, XXT=XXT, n, r2=r2)
+    }
+    
+    optimal.k <- optimize(sum.G, lower=0, upper=100, maximum=TRUE, tol=.Machine$double.eps)$maximum
+    sigmasq <- ((n*p*optimal.k + Xfsq)-sqrt((n*p*optimal.k + Xfsq)^2-4*p*(n-1)*optimal.k*Xfsq)
+                     )/(2*p*(n-1))
+    delta <- sigmasq/(optimal.k-sigmasq)/r2
+    G2 <- calc.G2(k=optimal.k, EWinv=EWinv, XXT=XXT, n=n, r2=r2)
+    
+    # computing sqrt.Elsq
+    temp.A <- r2/2*EWinv-XXT/(2*sigmasq*(1+1/(delta*r2)))
+    tilde.lambda <- eigen(temp.A)$values
+    optcondition <- function(c){  (1/2*sum((tilde.lambda+c)^(-1)) -1)^2 }
+    optc <- optimize(optcondition, 
+                     lower=-min(tilde.lambda)+0.5, 
+                     upper= -min(tilde.lambda)+p/2
+                     )$minimum
+    tilde.mat.approx <- 1/(2*optc)*solve(diag(x=rep(1, times=n))+1/optc*temp.A)
+    sqrt.Elsq <- sqrt(r2*diag(tilde.mat.approx))
+
+    out.list <- list(optimal.k=optimal.k, sigmasq=sigmasq, delta=delta, G2=G2, sqrt.Elsq=sqrt.Elsq)
+
+  return(out.list)
+}
+```
+
+
+# `hEBMF` solver
+
+```{r}
+hEBMF <- function(X, r, G, 
+                  min.updates=5, # minimum number of updates
+                  fig.intermediate=FALSE, fig.final=TRUE,
+                  elbo.tol=10^(-6), rand.init=FALSE){
+      
+    # setup -----------------------------------------------------------------------
+    n <- nrow(X); p <- ncol(X)
+    
+    Xfsq <- norm(X, 'F')^2
+    XXT <- X %*% t(X)
+    r2 <- r^2
+    XXT.eig <- eigen(XXT)
+    XXT.eigvalues <- XXT.eig$values
+    l.eigvector <- r*XXT.eig$vectors[,1] # estimate as the eigenvector
+    
+    # initialization ---------------------------------------------------------------
+    sqrt.Elsq <- abs(l.eigvector)
+    if(rand.init==TRUE){sqrt.Elsq=sample(sqrt.Elsq)} # permute the eigenvalue to randomize initialization
+    
+    # create eta grid
+    eta.grid <- sort(sqrt.Elsq^2)
+
+    # EBNV
+    temp.ebnv <- EBNV(b=sqrt.Elsq, G=G, eta.grid=eta.grid)
+    EWinv <- temp.ebnv$EWinv
+    EW <- temp.ebnv$EW
+    
+    # EBMF-Bingham
+    temp.ebmf <- EBMF.Bingham(EWinv=EWinv,
+                          XXT = XXT, Xfsq=Xfsq, n=n, p=p, r2=r2)
+    sigmasq <- temp.ebmf$sigmasq
+    delta <- temp.ebmf$delta
+    sqrt.Elsq.prev <- sqrt.Elsq
+    sqrt.Elsq <- temp.ebmf$sqrt.Elsq
+    
+    # ELBO 
+    if(G!='exp'){
+    F1 <- -n*p/(2*pi)-n*p/2*log(sigmasq)-p/2*log(1+delta*r2)-Xfsq/(2*sigmasq)+
+      (1/2)*sum(sqrt.Elsq^2*diag(EWinv))+n/2*log(r2)+ temp.ebmf$G2
+    F2.F3 <- (-1/2)*sum((sqrt.Elsq^2-sqrt.Elsq.prev^2)*diag(EWinv))+
+      sum(log(temp.ebnv$L %*% temp.ebnv$pi.star))-n/2*log(2*pi)
+    elbo <- F1+F2.F3
+    mat.elbo <- c(F1, F2.F3, elbo)
+    }
+    
+    n.iter <- 1
+    par(mfrow=c(1,5))
+    # fig.intermediate
+    eigen.A <- eigen(-EWinv/2+XXT/(2*sigmasq*(1/delta+r2)))
+    l.map <- r*eigen.A$vectors[,1] # point estimate: MAP
+    if(fig.intermediate==TRUE){
+      plot(l.eigvector, l.map, main=paste0("iteration: ",n.iter))
+      abline(a=0,b=0); abline(a=0,b=1); abline(a=0,b=-1)
+    }
+    
+    # updates  ---------------------------------------
+    elbo.diff <- 0
+    while ( (n.iter < min.updates) | (elbo.diff > elbo.tol) ){
+        
+        # EBNV
+        temp.ebnv <- EBNV(b=sqrt.Elsq, G=G, eta.grid=eta.grid)
+        EWinv.prev <- EWinv
+        EWinv <- temp.ebnv$EWinv
+        EW <- temp.ebnv$EW
+        
+        # ELBO
+        if(G!='exp'){
+        F1 <- -n*p/(2*pi)-n*p/2*log(sigmasq)-p/2*log(1+delta*r2)-Xfsq/(2*sigmasq)+
+          (1/2)*sum(sqrt.Elsq^2*diag(EWinv.prev))+n/2*log(r2)+ temp.ebmf$G2
+        F2.F3 <- sum(log(temp.ebnv$L %*% temp.ebnv$pi.star))-n/2*log(2*pi)
+        elbo <- F1+F2.F3
+        mat.elbo <- rbind(mat.elbo, c(F1, F2.F3, elbo))    
+        }
+        
+        # EBMF-Bingham
+        temp.ebmf <- EBMF.Bingham(EWinv=EWinv, XXT = XXT, Xfsq=Xfsq, n=n, p=p, r2=r2)
+        sigmasq <- temp.ebmf$sigmasq
+        delta <- temp.ebmf$delta
+        sqrt.Elsq.prev <- sqrt.Elsq
+        sqrt.Elsq <- temp.ebmf$sqrt.Elsq
+
+        # ELBO
+        if(G!='exp'){
+        F1 <- -n*p/(2*pi)-n*p/2*log(sigmasq)-p/2*log(1+delta*r2)-Xfsq/(2*sigmasq)+
+          (1/2)*sum(sqrt.Elsq^2*diag(EWinv))+n/2*log(r2)+ temp.ebmf$G2
+        F2.F3 <- (-1/2)*sum((sqrt.Elsq^2-sqrt.Elsq.prev^2)*diag(EWinv))+
+          sum(log(temp.ebnv$L %*% temp.ebnv$pi.star))-n/2*log(2*pi)
+        elbo <- F1+F2.F3
+        mat.elbo <- rbind(mat.elbo, c(F1, F2.F3, elbo))    
+        }
+        
+        n.iter <- n.iter + 1
+        if(G!='exp'){elbo.diff <- mat.elbo[nrow(mat.elbo),3] - mat.elbo[nrow(mat.elbo)-2,3] }
+        # compare to last post-EBMF-Bingham elbo
+        
+        # fig.intermediate
+        eigen.A <- eigen(-EWinv/2+XXT/(2*sigmasq*(1/delta+r2)))
+        l.map <- r*eigen.A$vectors[,1] # point estimate: MAP
+        if(fig.intermediate==TRUE){
+          plot(l.eigvector, l.map, main=paste0("iteration: ",n.iter))
+          abline(a=0,b=0); abline(a=0,b=1); abline(a=0,b=-1)
+        }
+     }
+     
+    # fig.final
+    par(mfrow=c(1,4))
+    if(fig.final==TRUE){
+      if(G!='exp'){plot(mat.elbo[,3], main='ELBO')}
+    plot(l.eigvector, main="eigenvector")
+    plot(l.map, main="final MAP estimate")
+    plot(l.eigvector, l.map, main='eig vs MAP')
+    abline(a=0,b=0); abline(a=0,b=1); abline(a=0,b=-1)
+    }
+    
+    # return output
+    out.list <- list(l.map = l.map, 
+                     sigmasq = sigmasq, 
+                     delta = delta, 
+                     sqrt.Elsq = sqrt.Elsq,
+                     EWinv = EWinv,
+                     l.eigvector = l.eigvector, 
+                     eigen.A=eigen.A)
+    if(G=='exp'){
+      out.list <- c(out.list,
+                    list(eta=temp.ebnv$eta))
+    }
+    if(G=='exp.mix' | G=='point.mix' | G=="exp.mix+point.mix"){
+      out.list <- c(out.list,
+                    list(eta.grid = eta.grid,
+                     pi.star = temp.ebnv$pi.star,
+                     pi.tilde = temp.ebnv$pi.tilde))
+    }  
+    
+    return(out.list)
+}
+```
+
+
+
+
+# `hEBMF` on toy data `X2n_a` {.tabset .tabset-fade}
+```{r}
+set.r <- 1
+set.X <- X2n_a
+```
+
+`rand.init=TRUE` is used to randomize initialization of the algorithm by permuting the eigenvalues.
+
+## `exp`
+
+```{r, fig.width=10, fig.height=3}
+fit1 <- hEBMF(X=set.X, r=set.r, G='exp', fig.intermediate = TRUE)
+fit1 <- hEBMF(X=set.X, r=set.r, G='exp', fig.intermediate = TRUE, rand.init=TRUE)
+```
+
+## `exp.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit2 <- hEBMF(X=set.X, r=set.r, G='exp.mix', fig.intermediate = TRUE)
+fit2 <- hEBMF(X=set.X, r=set.r, G='exp.mix', fig.intermediate = TRUE, rand.init=TRUE) 
+```
+
+## `point.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit3 <- hEBMF(X=set.X, r=set.r, G='point.mix', fig.intermediate=TRUE)
+fit3 <- hEBMF(X=set.X, r=set.r, G='point.mix', fig.intermediate=TRUE, rand.init=TRUE)
+```
+
+## `exp.mix+point.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit4 <- hEBMF(X=set.X, r=set.r, G='exp.mix+point.mix', fig.intermediate=TRUE)
+fit4 <- hEBMF(X=set.X, r=set.r, G='exp.mix+point.mix', fig.intermediate=TRUE, rand.init=TRUE)
+```
+
+
+
+#
+
+
+
+
+# `hEBMF` on toy data `X2n_b` {.tabset .tabset-fade}
+```{r}
+set.r <- 1
+set.X <- X2n_b
+```
+
+`rand.init=TRUE` is used to randomize initialization of the algorithm by permuting the eigenvalues.
+
+
+## `exp`
+
+```{r, fig.width=10, fig.height=3}
+fit1 <- hEBMF(X=set.X, r=set.r, G='exp', fig.intermediate = TRUE)
+fit1 <- hEBMF(X=set.X, r=set.r, G='exp', fig.intermediate = TRUE, rand.init=TRUE)
+```
+
+
+## `exp.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit2 <- hEBMF(X=set.X, r=set.r, G='exp.mix', fig.intermediate = TRUE)
+fit2 <- hEBMF(X=set.X, r=set.r, G='exp.mix', fig.intermediate = TRUE, rand.init=TRUE)
+```
+
+## `point.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit3 <- hEBMF(X=set.X, r=set.r, G='point.mix', fig.intermediate=TRUE)
+fit3 <- hEBMF(X=set.X, r=set.r, G='point.mix', fig.intermediate=TRUE, rand.init=TRUE)
+```
+
+## `exp.mix+point.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit4 <- hEBMF(X=set.X, r=set.r, G='exp.mix+point.mix', fig.intermediate=TRUE)
+fit4 <- hEBMF(X=set.X, r=set.r, G='exp.mix+point.mix', fig.intermediate=TRUE, rand.init=TRUE)
+```
+
+
+
+
+#
+
+
+
+
+# `hEBMF` on toy data `X2` {.tabset .tabset-fade}
+```{r}
+set.r <- 2
+set.X <- X2
+```
+
+## `exp`
+
+```{r, fig.width=10, fig.height=3}
+fit1 <- hEBMF(X=set.X, r=set.r, G='exp', fig.intermediate = TRUE)
+```
+
+## `exp.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit2 <- hEBMF(X=set.X, r=set.r, G='exp.mix', fig.intermediate = TRUE)
+```
+
+## `point.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit3 <- hEBMF(X=set.X, r=set.r, G='point.mix', fig.intermediate=TRUE)
+```
+
+## `exp.mix+point.mix`
+
+```{r, fig.width=10, fig.height=3}
+fit4 <- hEBMF(X=set.X, r=set.r, G='exp.mix+point.mix', fig.intermediate=TRUE)
+```
+
+#
+
+
+
+
+
+
+
+# More toy data {.tabset .tabset-fade}
+
+```{r, fig.width=10, fig.height=2}
+more.toy <- function(seed.no){
+  
+    set.seed(seed.no)
+  
+    # create X
+    p = 1000
+    n = 20
+    f = list()
+    for(i in 1:6){ 
+      f[[i]] = rnorm(p)
+    }
+    X =matrix(0,ncol=4*n, nrow=p)
+    X[,1:(2*n)] = f[[1]]
+    X[,(2*n+1):(4*n)] = f[[2]]
+    
+    X[,1:n] = X[,1:n]+f[[3]]
+    X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+    X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+    X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+    X.svd = svd(X)
+    
+    # create X2
+    X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+    # take transpose
+    X2 <- t(X2)
+    
+    mat.X <- X2 + rnorm(4*20*1000, sd=3)
+    
+    
+    obj.fit1 <-  hEBMF(X=mat.X, r=1, G='exp.mix', fig.final=FALSE)
+    obj.fit2 <-  hEBMF(X=mat.X, r=1, G='point.mix', fig.final=FALSE)
+    obj.fit3 <-  hEBMF(X=mat.X, r=1, G='exp.mix+point.mix', fig.final=FALSE)
+    
+    par(mfrow=c(1,4))
+    plot(obj.fit1$l.eigvector, main='eigvector', ylab='eigenvector')
+    plot(obj.fit1$l.eigvector, obj.fit1$l.map, main='vs. exp.mix', ylab='map', xlab='eigvector'); 
+      abline(a=0, b=1); abline(a=0, b=-1); abline(a=0, b=0)
+    plot(obj.fit2$l.eigvector, obj.fit2$l.map, main='vs. point.mix', ylab='map', xlab='eigvector'); 
+      abline(a=0, b=1); abline(a=0, b=-1); abline(a=0, b=0)
+    plot(obj.fit3$l.eigvector, obj.fit3$l.map, main='vs. exp.mix+point.mix', ylab='map', xlab='eigvector'); 
+      abline(a=0, b=1); abline(a=0, b=-1); abline(a=0, b=0)
+    
+}
+```
+
+## `773`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=773)
+```
+
+## `312`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=312)
+```
+
+## `1`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=1)
+```
+
+## `2`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=2)
+```
+
+## `3`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=3)
+```
+
+## `4`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=4)
+```
+
+## `5`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=5)
+```
+
+## `6`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=6)
+```
+
+## `7`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=7)
+```
+
+## `8`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=8)
+```
+
+## `9`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=9)
+```
+
+## `10`
+
+```{r, fig.width=10, fig.height=3}
+more.toy(seed.no=10)
+```
+
+#
+
