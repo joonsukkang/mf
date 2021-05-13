@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Joonsuk Kang" />
+
+
+<title>Empirical Bayes Factor Analysis with Hierarchical Bingham Prior: G2</title>
+
+<script src="site_libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/joonsukkang/mf">
+    <span class="fas fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Empirical Bayes Factor Analysis with Hierarchical Bingham Prior: G2</h1>
+<h4 class="author">Joonsuk Kang</h4>
+<h4 class="date">2021-5-13</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-05-13
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mf/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201010code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201010)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201010code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201010)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreecf60c83db0b54eb802a166186519e367b77c7c91targetblankcf60c83a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/cf60c83db0b54eb802a166186519e367b77c7c91" target="_blank">cf60c83</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreecf60c83db0b54eb802a166186519e367b77c7c91targetblankcf60c83a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/cf60c83db0b54eb802a166186519e367b77c7c91" target="_blank">cf60c83</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.Rhistory
+
+Untracked files:
+    Untracked:  analysis/bingham.Rmd
+    Untracked:  analysis/bingham_constant.Rmd
+    Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/flip_correlation.Rmd
+    Untracked:  analysis/flipping_pdf.Rmd
+    Untracked:  analysis/infinitefactor_toy.Rmd
+    Untracked:  analysis/model_exp_prior_v20201110m.Rmd
+    Untracked:  analysis/model_invgam_prior.Rmd
+    Untracked:  analysis/multiplicative.Rmd
+    Untracked:  analysis/sliding_correlation.Rmd
+    Untracked:  analysis/sliding_pdf.Rmd
+    Untracked:  analysis/temp.Rmd
+    Untracked:  code/code_wflow_publish.R
+    Untracked:  code/model_exp_v20201110.R
+    Untracked:  data/eigvals.rds
+    Untracked:  data/metro_results.txt
+    Untracked:  figure/
+    Untracked:  output/Likelihood.gif
+    Untracked:  writing/
+
+Unstaged changes:
+    Deleted:    analysis/ChoosingW.Rmd
+    Deleted:    analysis/concentration.Rmd
+    Modified:   analysis/model_exp_prior.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/demo6_ebfa_hb_g2.Rmd</code>) and HTML (<code>docs/demo6_ebfa_hb_g2.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/cf60c83db0b54eb802a166186519e367b77c7c91/analysis/demo6_ebfa_hb_g2.Rmd" target="_blank">cf60c83</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-13
+</td>
+<td>
+Empirical Bayes Factor Analysis with Hierarchical Bingham Prior (G2)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="toy-data" class="section level1">
+<h1>Toy Data</h1>
+<pre class="r"><code># code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn&#39;t work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+rm(X, X.svd, f, i, n, p)</code></pre>
+<p>I did not take transpose. The matrices are of dimension 1000 X 80.</p>
+</div>
+<div id="ebfa_hb_g2" class="section level1">
+<h1><code>ebfa_hb_g2</code></h1>
+<pre class="r"><code>ebfa_hb_g2 &lt;- function(X, vec.a, vec.pi, update.a, update.pi, N.EM, N.updates){
+
+  # Set up
+  ##############################################################
+  if (length(vec.a)!=length(vec.pi)) stop(&quot;length of a and pi not equal&quot;)
+  K &lt;- length(vec.a)
+  
+  # X-related quantities
+  X.svd &lt;- svd(X)
+  n &lt;- nrow(X)
+  p &lt;- ncol(X)
+  X.Fsq &lt;- norm(X, type=&quot;F&quot;)^2 # Frobenius norm squared
+  XTX &lt;- t(X)%*%X # Gram matrix
+    
+  # define erfc function
+  erfc &lt;- function(x){ 2 * pnorm(x * sqrt(2), lower = FALSE)}
+  logerfc &lt;- function(x) { log(2)+pnorm(x * sqrt(2), lower = FALSE, log.p=TRUE)}
+  
+  ############ Functions for L-step
+  sigmasq.k &lt;- function(k){((n*p*k+X.Fsq)-sqrt((n*p*k+X.Fsq)^2-4*n*(p-1)*k*X.Fsq))/(2*n*(p-1))}
+  delta.k &lt;- function(k){sigmasq.k(k)/(k-sigmasq.k(k))}
+  G1.k &lt;- function(k){-n*p/2*log(sigmasq.k(k))-n/2*log(1+delta.k(k))-X.Fsq/(2*sigmasq.k(k))}
+  G2.k &lt;- function(k, E.w.inv){
+    lambda &lt;- eigen(diag(E.w.inv)-XTX/(2*k))$values
+    lambda.p &lt;- min(lambda)
+    G2 &lt;- -lambda.p-0.5*sum(log(1+2*(lambda-lambda.p)/p))+log(2*pi^(p/2))-log(gamma(p/2))
+    return(G2)
+  }
+  c.k &lt;- function(k, E.w.inv){
+    lambda.for.c &lt;- eigen(diag(E.w.inv)-XTX/(2*k))$values
+    optimality &lt;- function(c) {(sum((lambda.for.c+c)^(-1))/2-1)^2}
+    c &lt;- optimize(optimality, interval=c(-min(lambda.for.c)+0.5, -min(lambda.for.c)+p/2), maximum=FALSE)
+    return(c)
+  }
+  
+  # Initialization
+  ##############################################################
+
+  # initialize using the first singular vector
+  E.L1.sq &lt;- X.svd$v[,1]^2
+
+  mat.pi.tilde &lt;- matrix(0, nrow=p, ncol=K)
+  for (k in 1:K){
+    mat.pi.tilde[,k] &lt;- vec.pi[k]*erfc(sqrt(vec.a[k]/p))^(-1)*exp(-vec.a[k]/p-sqrt(2*vec.a[k])*sqrt(E.L1.sq))
+  }
+  mat.pi.tilde &lt;- mat.pi.tilde/rowSums(mat.pi.tilde)
+  
+  E.w.inv &lt;- as.vector(mat.pi.tilde %*% sqrt(vec.a)) / sqrt(2*E.L1.sq)
+
+  # Updates
+  ##############################################################  
+  par(mfcol=c(2,5))
+  for (n.updates in 1:N.updates){
+        
+      ############ L-step
+      G.k &lt;- function(k){G1.k(k)+G2.k(k, E.w.inv)}
+      kappa &lt;- optimize(G.k, interval=c(0,1000), maximum=TRUE)$maximum
+      c.star &lt;- c.k(kappa, E.w.inv)$minimum
+      E.L1.sq &lt;- diag(0.5*solve(diag(E.w.inv)-XTX/(2*kappa)+c.star*diag(rep(1,p))))
+      
+      if(n.updates%%100==1){
+          L1.map &lt;- eigen(XTX/(2*kappa)-diag(E.w.inv))$vectors[,1]
+          plot(L1.map, type=&#39;l&#39;, ylab=&#39;map&#39;, main=paste0(&quot;iter : &quot;,n.updates))
+          plot(X.svd$v[,1], L1.map); abline(a=0,b=1); abline(a=0,b=-1)
+      }
+      
+      ############ W-step
+      
+          ######## EM algorithm -----------------------------
+          for(n.EM in 1:N.EM){
+          # E-step
+          mat.phi &lt;- matrix(0, nrow=p, ncol=K)
+          for (k in 1:K){
+            mat.phi[,k]&lt;- vec.pi[k]*erfc(sqrt(vec.a[k]/p))^(-1)*exp(-vec.a[k]/p-sqrt(2*vec.a[k])*sqrt(E.L1.sq))
+          }
+          mat.phi &lt;- mat.phi/rowSums(mat.phi)
+          
+          # M-step
+          if(update.pi==TRUE){vec.pi &lt;- colMeans(mat.phi)}
+          if(update.a==TRUE){
+            for (k in 1:K){
+              temp.obj &lt;- function(a){
+                sum(mat.phi[,k]*(logerfc(sqrt(a/p))+a/p+sqrt(2*a)*sqrt(E.L1.sq)))
+              }
+              vec.a[k]  &lt;- optimize(temp.obj, interval=c(10^(-6), 10^6), maximum=FALSE)$minimum
+            }
+          }
+          }
+          ######## end.  -----------------------------
+      
+     
+      mat.pi.tilde &lt;- matrix(0, nrow=p, ncol=K)
+      for (k in 1:K){
+        mat.pi.tilde[,k] &lt;- vec.pi[k]*erfc(sqrt(vec.a[k]/p))^(-1)*exp(-vec.a[k]/p-sqrt(2*vec.a[k])*sqrt(E.L1.sq))
+      }
+      mat.pi.tilde &lt;- mat.pi.tilde/rowSums(mat.pi.tilde)
+      
+      E.w.inv &lt;- as.vector(mat.pi.tilde %*% sqrt(vec.a)) / sqrt(2*E.L1.sq)
+  }
+  
+  out.list &lt;- list(kappa=kappa, E.L1.sq=E.L1.sq, L1.map=L1.map, E.w.inv=E.w.inv, vec.a = vec.a, vec.pi=vec.pi)
+  return(out.list)
+}</code></pre>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<pre class="r"><code>ebfa_hb_g2(X=X2n_a, 
+           vec.a = c(100,1000), 
+           vec.pi = c(0.5,0.5),
+           update.a=FALSE,
+           update.pi = FALSE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>      [,1]  [,2]
+[1,] 100.0 1e+03
+[2,]   0.5 5e-01</code></pre>
+<pre class="r"><code>ebfa_hb_g2(X=X2n_a, 
+           vec.a = c(100,1000), 
+           vec.pi = c(0.5,0.5),
+           update.a=TRUE,
+           update.pi = TRUE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>             [,1]         [,2]
+[1,] 5.333352e-05 5.333352e-05
+[2,] 8.624220e-01 1.375780e-01</code></pre>
+<pre class="r"><code>grid.a &lt;- exp(seq(log(10), log(10000),by=log(2)))
+K &lt;- length(grid.a)
+
+ebfa_hb_g2(X=X2n_a, 
+           vec.a = grid.a, 
+           vec.pi = rep(1/K, times=K),
+           update.a=FALSE,
+           update.pi = FALSE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>     [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]   [,8]   [,9]  [,10]
+[1,] 10.0 20.0 40.0 80.0 160.0 320.0 640.0 1280.0 2560.0 5120.0
+[2,]  0.1  0.1  0.1  0.1   0.1   0.1   0.1    0.1    0.1    0.1</code></pre>
+<pre class="r"><code>ebfa_hb_g2(X=X2n_a, 
+           vec.a = grid.a, 
+           vec.pi = rep(1/K, times=K),
+           update.a=FALSE,
+           update.pi = TRUE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>     [,1]         [,2]         [,3]         [,4]          [,5]          [,6]
+[1,]   10 2.000000e+01 4.000000e+01 8.000000e+01  1.600000e+02  3.200000e+02
+[2,]    1 1.147697e-12 2.293246e-31 1.754667e-60 5.648305e-105 8.247578e-171
+              [,7] [,8] [,9] [,10]
+[1,]  6.400000e+02 1280 2560  5120
+[2,] 2.518172e-264    0    0     0</code></pre>
+<pre class="r"><code>ebfa_hb_g2(X=X2n_b, 
+           vec.a = c(100,1000), 
+           vec.pi = c(0.5,0.5),
+           update.a=FALSE,
+           update.pi = FALSE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>      [,1]  [,2]
+[1,] 100.0 1e+03
+[2,]   0.5 5e-01</code></pre>
+<pre class="r"><code>ebfa_hb_g2(X=X2n_b, 
+           vec.a = c(100,1000), 
+           vec.pi = c(0.5,0.5),
+           update.a=TRUE,
+           update.pi = TRUE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>             [,1]         [,2]
+[1,] 5.333352e-05 5.333352e-05
+[2,] 8.941959e-01 1.058041e-01</code></pre>
+<pre class="r"><code>ebfa_hb_g2(X=X2n_b, 
+           vec.a = grid.a, 
+           vec.pi = rep(1/K, times=K),
+           update.a=FALSE,
+           update.pi = FALSE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>     [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]   [,8]   [,9]  [,10]
+[1,] 10.0 20.0 40.0 80.0 160.0 320.0 640.0 1280.0 2560.0 5120.0
+[2,]  0.1  0.1  0.1  0.1   0.1   0.1   0.1    0.1    0.1    0.1</code></pre>
+<pre class="r"><code>ebfa_hb_g2(X=X2n_b, 
+           vec.a = grid.a, 
+           vec.pi = rep(1/K, times=K),
+           update.a=FALSE,
+           update.pi = TRUE,
+           N.EM=1, 
+           N.updates=401) -&gt; temp.result</code></pre>
+<p><img src="figure/demo6_ebfa_hb_g2.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rbind(temp.result$vec.a,
+      temp.result$vec.pi)</code></pre>
+<pre><code>           [,1]         [,2]        [,3]         [,4]         [,5]         [,6]
+[1,] 10.0000000 2.000000e+01 4.00000e+01 8.000000e+01 1.600000e+02 3.200000e+02
+[2,]  0.9999999 9.322021e-08 5.57935e-17 2.766838e-28 4.498661e-41 2.248342e-55
+            [,7]          [,8]        [,9]         [,10]
+[1,] 6.40000e+02  1.280000e+03  2.5600e+03  5.120000e+03
+[2,] 1.18086e-74 7.962494e-108 8.2258e-168 1.582199e-269</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.2 (2020-06-22)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS  10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.6       rstudioapi_0.11  whisker_0.4      knitr_1.30      
+ [5] magrittr_1.5     R6_2.4.1         rlang_0.4.7      stringr_1.4.0   
+ [9] tools_4.0.2      xfun_0.22        git2r_0.27.1     htmltools_0.5.0 
+[13] ellipsis_0.3.1   rprojroot_1.3-2  yaml_2.2.1       digest_0.6.25   
+[17] tibble_3.0.3     lifecycle_0.2.0  crayon_1.3.4     later_1.1.0.1   
+[21] vctrs_0.3.4      promises_1.1.1   fs_1.5.0         glue_1.4.2      
+[25] evaluate_0.14    rmarkdown_2.8    stringi_1.5.3    compiler_4.0.2  
+[29] pillar_1.4.6     backports_1.1.10 httpuv_1.5.4     pkgconfig_2.0.3 </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
