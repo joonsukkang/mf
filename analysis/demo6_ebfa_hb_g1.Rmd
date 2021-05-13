@@ -1,0 +1,213 @@
+---
+title: "Empirical Bayes Factor Analysis with Hierarchical Bingham Prior: G1"
+author: "Joonsuk Kang"
+date: "2021-5-13"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+ 
+# Toy Data
+
+```{r}
+# code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+rm(X, X.svd, f, i, n, p)
+```
+
+I did not take transpose. The matrices are of dimension 1000 X 80.
+
+
+
+# `ebfa_hb_g1`
+
+```{r}
+ebfa_hb_g1 <- function(X, a, update.a, N.updates, active.initialization=FALSE, warmstart=FALSE){
+    
+  # Set up
+  ##############################################################
+  
+  # X-related quantities
+  X.svd <- svd(X)
+  n <- nrow(X)
+  p <- ncol(X)
+  X.Fsq <- norm(X, type="F")^2 # Frobenius norm squared
+  XTX <- t(X)%*%X # Gram matrix
+  
+  # define erfc function
+  erfc <- function(x){ 2 * pnorm(x * sqrt(2), lower = FALSE)}
+  logerfc <- function(x) { log(2)+pnorm(x * sqrt(2), lower = FALSE, log.p=TRUE)}
+  
+  ############ Functions for L-step
+  sigmasq.k <- function(k){((n*p*k+X.Fsq)-sqrt((n*p*k+X.Fsq)^2-4*n*(p-1)*k*X.Fsq))/(2*n*(p-1))}
+  delta.k <- function(k){sigmasq.k(k)/(k-sigmasq.k(k))}
+  G1.k <- function(k){-n*p/2*log(sigmasq.k(k))-n/2*log(1+delta.k(k))-X.Fsq/(2*sigmasq.k(k))}
+  G2.k <- function(k, E.w.inv){
+    lambda <- eigen(diag(E.w.inv)-XTX/(2*k))$values
+    lambda.p <- min(lambda)
+    G2 <- -lambda.p-0.5*sum(log(1+2*(lambda-lambda.p)/p))+log(2*pi^(p/2))-log(gamma(p/2))
+    return(G2)
+  }
+  c.k <- function(k, E.w.inv){
+    lambda.for.c <- eigen(diag(E.w.inv)-XTX/(2*k))$values
+    optimality <- function(c) {(sum((lambda.for.c+c)^(-1))/2-1)^2}
+    c <- optimize(optimality, interval=c(-min(lambda.for.c)+0.5, -min(lambda.for.c)+p/2), maximum=FALSE)
+    return(c)
+  }
+  
+  # Initialization
+  ##############################################################
+  # initialize using the first singular vector
+  E.L1.sq <- X.svd$v[,1]^2
+  
+  if(warmstart==TRUE){
+    E.L1.sq <- rep(c(10^(-10),1), times=c(40,40))
+    E.L1.sq <- E.L1.sq/sum(E.L1.sq)
+  }
+  
+  if(active.initialization==TRUE){
+      a.init <- 0
+      epsilon <- 1/(p*10^3)
+    
+      while(a.init<a){
+        # replacing smallest (in size) nonzero coordinate to zero, and rescale to norm 1
+        E.L1.sq[E.L1.sq==min(E.L1.sq[E.L1.sq>0])] <- 0
+        E.L1.sq <- E.L1.sq/sum(E.L1.sq)
+    
+        # check whether initialization of E.L1.sq is consistent with initial 'a'
+        optimality <- function(a){
+          a + p*logerfc(sqrt(a/p)) + sqrt(a)*sqrt(2)*sum(sqrt(E.L1.sq))
+        }
+        a.init <- optimize(optimality, interval=c(0,10^3), maximum=FALSE)$minimum
+      }
+    
+      sum(E.L1.sq>0)/p # ratio of nonzero coordinates
+      sum(E.L1.sq>0) # number of nonzero coordinates
+    
+      # replace 0 with a small number epsilon to avoid numerical issues
+      E.L1.sq[E.L1.sq==0] <- epsilon
+      E.L1.sq <- E.L1.sq/sum(E.L1.sq)
+      sum(sqrt(E.L1.sq))
+  }
+  
+  E.w.inv <- sqrt(a/(2*E.L1.sq))
+  
+  # Updates
+  ##############################################################
+  par(mfcol=c(2,5))
+  for (n.updates in 1:N.updates){
+        
+      ############ L-step
+      G.k <- function(k){G1.k(k)+G2.k(k, E.w.inv)}
+      kappa <- optimize(G.k, interval=c(0,1000), maximum=TRUE)$maximum
+      c.star <- c.k(kappa, E.w.inv)$minimum
+      E.L1.sq <- diag(0.5*solve(diag(E.w.inv)-XTX/(2*kappa)+c.star*diag(rep(1,p))))
+      
+      if(n.updates%%10==1){
+        L1.map <- eigen(XTX/(2*kappa)-diag(E.w.inv))$vectors[,1]
+        plot(L1.map, type='l', ylab='map', main=paste0("iter : ",n.updates))
+        plot(X.svd$v[,1], L1.map)
+      }
+      
+      ############ W-step
+      if(update.a==TRUE){
+         optimality <- function(a){
+          a + p*logerfc(sqrt(a/p)) + sqrt(a)*sqrt(2)*sum(sqrt(E.L1.sq)) 
+        }
+        a <- optimize(optimality, interval=c(0,10^3), maximum=FALSE)$minimum
+      }
+      E.w.inv <- sqrt(a/(2*E.L1.sq))
+  }
+  out.list <- list(kappa=kappa, E.L1.sq=E.L1.sq, L1.map=L1.map, E.w.inv=E.w.inv, a=a)
+  return(out.list)
+  }
+```
+
+
+# Results {.tabset}
+
+## Data: `X2`
+
+```{r, fig.height=4}
+ebfa_hb_g1(X=X2, a=10^6, update.a=FALSE, N.updates=41) -> temp.result
+ebfa_hb_g1(X=X2, a=10^5, update.a=FALSE, N.updates=41) -> temp.result
+
+# update a
+ebfa_hb_g1(X=X2, a=10^6, update.a=TRUE, N.updates=41) -> temp.result 
+temp.result$a
+
+# update a with warmstart
+ebfa_hb_g1(X=X2, a=10^6, update.a=TRUE, N.updates=41, warmstart=TRUE) -> temp.result 
+temp.result$a
+```
+
+## Data: `X2n_a`
+
+```{r, fig.height=4}
+ebfa_hb_g1(X=X2n_a, a=10^4, update.a=FALSE, N.updates=41) -> temp.result
+ebfa_hb_g1(X=X2n_a, a=10^3, update.a=FALSE, N.updates=41) -> temp.result
+ebfa_hb_g1(X=X2n_a, a=10^2, update.a=FALSE, N.updates=41) -> temp.result
+
+# update a
+ebfa_hb_g1(X=X2n_a, a=10^3, update.a=TRUE, N.updates=41) -> temp.result 
+temp.result$a
+
+# update a with warmstart
+ebfa_hb_g1(X=X2n_a, a=10^3, update.a=TRUE, N.updates=41, warmstart=TRUE) -> temp.result 
+temp.result$a
+```
+
+## Data: `X2n_b`
+
+```{r, fig.height}
+ebfa_hb_g1(X=X2n_b, a=10^4, update.a=FALSE, N.updates=41) -> temp.result
+ebfa_hb_g1(X=X2n_b, a=10^3, update.a=FALSE, N.updates=41) -> temp.result
+ebfa_hb_g1(X=X2n_b, a=10^2, update.a=FALSE, N.updates=41) -> temp.result
+
+# update a
+ebfa_hb_g1(X=X2n_b, a=10^3, update.a=TRUE, N.updates=41) -> temp.result 
+temp.result$a
+
+# update a with warmstart
+ebfa_hb_g1(X=X2n_b, a=10^3, update.a=TRUE, N.updates=41, warmstart=TRUE) -> temp.result 
+temp.result$a
+```
+
+# {-}
+
+
+
+
+
+
+
+
+
