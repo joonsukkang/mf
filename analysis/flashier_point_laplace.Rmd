@@ -1,0 +1,147 @@
+---
+title: "flashier on toy data: point laplace prior"
+author: "Joonsuk Kang"
+date: "2021-5-23"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+ 
+## Toy Data
+
+```{r}
+# code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+rm(X, X.svd, f, i, n, p)
+```
+
+I did not take transpose. The matrices are of dimension 1000 X 80.
+
+## Function for Figures
+
+```{r}
+library(flashier)
+library(gridExtra)
+library(ggplot2)
+
+fig.one.K2 <- function(fit, title){
+
+  L1.hat <- fit$loadings.pm[[2]][,1]
+  L2.hat <- fit$loadings.pm[[2]][,2]
+  
+  ggplot()+
+    geom_point(aes(x=1:80, y=L1.hat, col='L1.hat'))+
+    geom_point(aes(x=1:80, y=L2.hat, col='L2.hat'))+
+    ggtitle(title)+
+    geom_abline(slope=0)+xlab("index")+ylab("L") -> fig
+  return(fig)
+}
+
+fig.four.K2 <- function(df, idx.backfit){
+  
+                    # default: point normal prior on both l and f
+    fit1 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0) 
+    fit2 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.point.normal(),prior.point.laplace()))
+    fit3 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.point.laplace(),prior.point.normal()))
+    fit4 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.point.laplace(),prior.point.laplace()))
+    
+    fig1 <- fig.one.K2(fit1, title='point-normal (F) + point-normal (L)') 
+    fig2 <- fig.one.K2(fit2, title='point-normal (F) + point-laplace (L)')
+    fig3 <- fig.one.K2(fit3, title='point-laplace (F) + point-normal (L)')
+    fig4 <- fig.one.K2(fit4, title='point-laplace (F) + point-laplace (L)')
+    
+    grid.arrange(fig1, fig2, fig3, fig4)
+}
+```
+
+## Results
+
+### data: `X2n_b` (easy case)
+
+```{r}
+fig.four.K2(X2n_b, idx.backfit=TRUE)
+fig.four.K2(X2n_b, idx.backfit=FALSE)
+```
+
+### data: `X2n_a` (hard case)
+
+```{r}
+fig.four.K2(X2n_a, idx.backfit=TRUE)
+fig.four.K2(X2n_a, idx.backfit=FALSE)
+```
+
+
+### data: `X2` (noiseless case)
+
+```{r}
+fig.four.K2(X2, idx.backfit=TRUE)
+fig.four.K2(X2, idx.backfit=FALSE)
+```
+
+
+
+
+## More Toy
+
+Result for `K=2`, `backfit=TRUE`, `prior.point.laplace` on L and F
+
+
+```{r, fig.height=3}
+p = 1000
+n = 20
+
+more.toy <- function(seed){
+  
+  set.seed(seed)
+  X2n = X2 + rnorm(4*n*p,sd=3)
+  fit <- flash(data=X2n, greedy.Kmax = 2, backfit=TRUE, verbose.lvl=0,
+                prior.family=c(prior.point.laplace(),prior.point.laplace()))
+  fig.flash <- fig.one.K2(fit, title='point-laplace (F) + point-laplace (L)')
+  
+  ggplot()+
+    geom_point(aes(x=1:80, y=svd(X2n)$v[,1], col='L1.svd'))+
+    geom_point(aes(x=1:80, y=svd(X2n)$v[,2], col='L2.svd'))+
+    ggtitle("singular vectors")+
+    geom_abline(slope=0)+xlab("index")+ylab("L") -> fig.svd
+  
+  grid.arrange(fig.svd, fig.flash, ncol=2)
+}
+
+
+for (i in 1:20){
+  more.toy(i)
+}
+```
+
+
