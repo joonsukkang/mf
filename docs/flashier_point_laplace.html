@@ -475,16 +475,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreec46820e459d2754baab8aad225871feed82f7e89targetblankc46820ea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/c46820e459d2754baab8aad225871feed82f7e89" target="_blank">c46820e</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee03ab6648a2028a8501374e80b3400f41b8f904btargetblanke03ab66a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/e03ab6648a2028a8501374e80b3400f41b8f904b" target="_blank">e03ab66</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreec46820e459d2754baab8aad225871feed82f7e89targetblankc46820ea" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee03ab6648a2028a8501374e80b3400f41b8f904btargetblanke03ab66a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/c46820e459d2754baab8aad225871feed82f7e89" target="_blank">c46820e</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/e03ab6648a2028a8501374e80b3400f41b8f904b" target="_blank">e03ab66</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -508,6 +508,7 @@ Untracked files:
     Untracked:  analysis/sliding_correlation.Rmd
     Untracked:  analysis/sliding_pdf.Rmd
     Untracked:  analysis/temp.Rmd
+    Untracked:  analysis/y2_eb.Rmd
     Untracked:  analysis/y2_toy.Rmd
     Untracked:  analysis/y2_toy_500.Rmd
     Untracked:  code/code_wflow_publish.R
@@ -564,6 +565,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/e03ab6648a2028a8501374e80b3400f41b8f904b/analysis/flashier_point_laplace.Rmd" target="_blank">e03ab66</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+<td>
+added normal results
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/flashier_point_laplace.html" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -693,7 +728,7 @@ fig.one.K2 &lt;- function(fit, title){
   return(fig)
 }
 
-fig.nine.K2 &lt;- function(df, idx.backfit){
+fig.twelve.K2 &lt;- function(df, idx.backfit){
   
                     # default: point normal prior on both l and f
     fit1 &lt;- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
@@ -714,7 +749,12 @@ fig.nine.K2 &lt;- function(df, idx.backfit){
                   prior.family=c(prior.normal.scale.mix(),prior.point.laplace()))
     fit9 &lt;- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
                   prior.family=c(prior.normal.scale.mix(),prior.normal.scale.mix()))
-    
+    fit10&lt;- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.normal(), prior.point.normal())) 
+    fit11&lt;- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.normal(),prior.point.laplace()))
+    fit12&lt;- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.normal(),prior.normal.scale.mix()))    
     fig1 &lt;- fig.one.K2(fit1, title=&#39;point-normal (F) + point-normal (L)&#39;) 
     fig2 &lt;- fig.one.K2(fit2, title=&#39;point-normal (F) + point-laplace (L)&#39;)
     fig3 &lt;- fig.one.K2(fit3, title=&#39;point-normal (F) + normal-scale-mix (L)&#39;)
@@ -724,15 +764,21 @@ fig.nine.K2 &lt;- function(df, idx.backfit){
     fig7 &lt;- fig.one.K2(fit7, title=&#39;normal-scale-mix (F) + point-normal (L)&#39;) 
     fig8 &lt;- fig.one.K2(fit8, title=&#39;normal-scale-mix (F) + point-laplace (L)&#39;)
     fig9 &lt;- fig.one.K2(fit9, title=&#39;normal-scale-mix (F) + normal-scale-mix (L)&#39;)
-    
-    grid.arrange(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, nrow=3, ncol=3)
+    fig10&lt;- fig.one.K2(fit10, title=&#39;normal (F) + point-normal (L)&#39;) 
+    fig11&lt;- fig.one.K2(fit11, title=&#39;normal (F) + point-laplace (L)&#39;)
+    fig12&lt;- fig.one.K2(fit12, title=&#39;normal (F) + normal-scale-mix (L)&#39;)
+
+        
+    grid.arrange(fig1, fig2, fig3, fig4, fig5, fig6, 
+                 fig7, fig8, fig9, fig10, fig11, fig12,
+                 nrow=4, ncol=3)
 }</code></pre>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
 <div id="data-x2n_b-easy-case" class="section level3">
 <h3>data: <code>X2n_b</code> (easy case)</h3>
-<pre class="r"><code>fig.nine.K2(X2n_b, idx.backfit=TRUE)</code></pre>
+<pre class="r"><code>fig.twelve.K2(X2n_b, idx.backfit=TRUE)</code></pre>
 <p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-3-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
@@ -758,6 +804,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-3-1.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/af040d9f6ea7ad3345ae4031ee0c67454d5476bc/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-3-1.png" target="_blank">af040d9</a>
 </td>
 <td>
@@ -771,7 +828,7 @@ Joonsuk Kang
 </table>
 </div>
 </div>
-<pre class="r"><code>fig.nine.K2(X2n_b, idx.backfit=FALSE)</code></pre>
+<pre class="r"><code>fig.twelve.K2(X2n_b, idx.backfit=FALSE)</code></pre>
 <p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-3-2.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-2">
@@ -797,6 +854,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-3-2.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/af040d9f6ea7ad3345ae4031ee0c67454d5476bc/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-3-2.png" target="_blank">af040d9</a>
 </td>
 <td>
@@ -813,7 +881,7 @@ Joonsuk Kang
 </div>
 <div id="data-x2n_a-hard-case" class="section level3">
 <h3>data: <code>X2n_a</code> (hard case)</h3>
-<pre class="r"><code>fig.nine.K2(X2n_a, idx.backfit=TRUE)</code></pre>
+<pre class="r"><code>fig.twelve.K2(X2n_a, idx.backfit=TRUE)</code></pre>
 <p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
@@ -839,6 +907,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-4-1.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/af040d9f6ea7ad3345ae4031ee0c67454d5476bc/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-4-1.png" target="_blank">af040d9</a>
 </td>
 <td>
@@ -852,7 +931,7 @@ Joonsuk Kang
 </table>
 </div>
 </div>
-<pre class="r"><code>fig.nine.K2(X2n_a, idx.backfit=FALSE)</code></pre>
+<pre class="r"><code>fig.twelve.K2(X2n_a, idx.backfit=FALSE)</code></pre>
 <p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-4-2.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-2">
@@ -878,6 +957,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-4-2.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/af040d9f6ea7ad3345ae4031ee0c67454d5476bc/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-4-2.png" target="_blank">af040d9</a>
 </td>
 <td>
@@ -895,7 +985,7 @@ Joonsuk Kang
 </div>
 <div id="more-toy" class="section level2">
 <h2>More Toy</h2>
-<p>Result for <code>K=2</code>, <code>backfit=TRUE</code>, <code>prior.point.laplace</code> on L and F</p>
+<p>Result for <code>K=2</code>, <code>backfit=TRUE</code>, <code>prior.point.laplace</code> on L and <code>prior.normal</code> on F</p>
 <pre class="r"><code>p = 1000
 n = 20
 
@@ -904,8 +994,8 @@ more.toy &lt;- function(seed){
   set.seed(seed)
   X2n = X2 + rnorm(4*n*p,sd=3)
   fit &lt;- flash(data=X2n, greedy.Kmax = 2, backfit=TRUE, verbose.lvl=0,
-                prior.family=c(prior.point.laplace(),prior.point.laplace()))
-  fig.flash &lt;- fig.one.K2(fit, title=&#39;point-laplace (F) + point-laplace (L)&#39;)
+                prior.family=c(prior.normal(),prior.point.laplace()))
+  fig.flash &lt;- fig.one.K2(fit, title=&#39;normal (F) + point-laplace (L)&#39;)
   
   ggplot()+
     geom_point(aes(x=1:80, y=svd(X2n)$v[,1], col=&#39;L1.svd&#39;))+
@@ -943,6 +1033,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-1.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/joonsukkang/mf/blob/af040d9f6ea7ad3345ae4031ee0c67454d5476bc/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-1.png" target="_blank">af040d9</a>
@@ -983,6 +1084,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-2.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/af040d9f6ea7ad3345ae4031ee0c67454d5476bc/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-2.png" target="_blank">af040d9</a>
 </td>
 <td>
@@ -996,7 +1108,690 @@ Joonsuk Kang
 </table>
 </div>
 </div>
-<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-10.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-20.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-3">
+Past versions of unnamed-chunk-5-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-3.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-4">
+Past versions of unnamed-chunk-5-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-4.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-5">
+Past versions of unnamed-chunk-5-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-5.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-6.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-6">
+Past versions of unnamed-chunk-5-6.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-6" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-6.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-7.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-7">
+Past versions of unnamed-chunk-5-7.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-7" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-7.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-8.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-8">
+Past versions of unnamed-chunk-5-8.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-8" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-8.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-9.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-9">
+Past versions of unnamed-chunk-5-9.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-9" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-9.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-10.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-10">
+Past versions of unnamed-chunk-5-10.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-10" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-10.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-11.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-11">
+Past versions of unnamed-chunk-5-11.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-11" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-11.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-12.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-12">
+Past versions of unnamed-chunk-5-12.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-12" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-12.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-13.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-13">
+Past versions of unnamed-chunk-5-13.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-13" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-13.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-14.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-14">
+Past versions of unnamed-chunk-5-14.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-14" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-14.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-15.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-15">
+Past versions of unnamed-chunk-5-15.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-15" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-15.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-16.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-16">
+Past versions of unnamed-chunk-5-16.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-16" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-16.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-17.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-17">
+Past versions of unnamed-chunk-5-17.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-17" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-17.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-18.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-18">
+Past versions of unnamed-chunk-5-18.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-18" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-18.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-19.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-19">
+Past versions of unnamed-chunk-5-19.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-19" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-19.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/flashier_point_laplace.Rmd/unnamed-chunk-5-20.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-20">
+Past versions of unnamed-chunk-5-20.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-20" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/534275435f2ffa23c36d5d0ed904eb3ccc5afc28/docs/figure/flashier_point_laplace.Rmd/unnamed-chunk-5-20.png" target="_blank">5342754</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
