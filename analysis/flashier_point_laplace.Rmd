@@ -65,23 +65,39 @@ fig.one.K2 <- function(fit, title){
   return(fig)
 }
 
-fig.four.K2 <- function(df, idx.backfit){
+fig.nine.K2 <- function(df, idx.backfit){
   
                     # default: point normal prior on both l and f
-    fit1 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0) 
+    fit1 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.point.normal(), prior.point.normal())) 
     fit2 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
                   prior.family=c(prior.point.normal(),prior.point.laplace()))
     fit3 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
-                  prior.family=c(prior.point.laplace(),prior.point.normal()))
+                  prior.family=c(prior.point.normal(),prior.normal.scale.mix()))
     fit4 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.point.laplace(), prior.point.normal())) 
+    fit5 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
                   prior.family=c(prior.point.laplace(),prior.point.laplace()))
+    fit6 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.point.laplace(),prior.normal.scale.mix()))
+    fit7 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.normal.scale.mix(), prior.point.normal())) 
+    fit8 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.normal.scale.mix(),prior.point.laplace()))
+    fit9 <- flash(data=df, greedy.Kmax = 2, backfit=idx.backfit, verbose.lvl=0,
+                  prior.family=c(prior.normal.scale.mix(),prior.normal.scale.mix()))
     
     fig1 <- fig.one.K2(fit1, title='point-normal (F) + point-normal (L)') 
     fig2 <- fig.one.K2(fit2, title='point-normal (F) + point-laplace (L)')
-    fig3 <- fig.one.K2(fit3, title='point-laplace (F) + point-normal (L)')
-    fig4 <- fig.one.K2(fit4, title='point-laplace (F) + point-laplace (L)')
+    fig3 <- fig.one.K2(fit3, title='point-normal (F) + normal-scale-mix (L)')
+    fig4 <- fig.one.K2(fit4, title='point-laplace (F) + point-normal (L)') 
+    fig5 <- fig.one.K2(fit5, title='point-laplace (F) + point-laplace (L)')
+    fig6 <- fig.one.K2(fit6, title='point-laplace (F) + normal-scale-mix (L)')
+    fig7 <- fig.one.K2(fit7, title='normal-scale-mix (F) + point-normal (L)') 
+    fig8 <- fig.one.K2(fit8, title='normal-scale-mix (F) + point-laplace (L)')
+    fig9 <- fig.one.K2(fit9, title='normal-scale-mix (F) + normal-scale-mix (L)')
     
-    grid.arrange(fig1, fig2, fig3, fig4)
+    grid.arrange(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, nrow=3, ncol=3)
 }
 ```
 
@@ -89,24 +105,16 @@ fig.four.K2 <- function(df, idx.backfit){
 
 ### data: `X2n_b` (easy case)
 
-```{r}
-fig.four.K2(X2n_b, idx.backfit=TRUE)
-fig.four.K2(X2n_b, idx.backfit=FALSE)
+```{r, fig.height=6, fig.width=12}
+fig.nine.K2(X2n_b, idx.backfit=TRUE)
+fig.nine.K2(X2n_b, idx.backfit=FALSE)
 ```
 
 ### data: `X2n_a` (hard case)
 
-```{r}
-fig.four.K2(X2n_a, idx.backfit=TRUE)
-fig.four.K2(X2n_a, idx.backfit=FALSE)
-```
-
-
-### data: `X2` (noiseless case)
-
-```{r}
-fig.four.K2(X2, idx.backfit=TRUE)
-fig.four.K2(X2, idx.backfit=FALSE)
+```{r, fig.height=6, fig.width=12}
+fig.nine.K2(X2n_a, idx.backfit=TRUE)
+fig.nine.K2(X2n_a, idx.backfit=FALSE)
 ```
 
 
