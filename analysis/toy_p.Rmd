@@ -121,6 +121,14 @@ plot.for.p.v2 <- function(set.p, seed){
       Sigma.hat <- cov(X2n)
       Sigma.hat.nodiag <- Sigma.hat; diag(Sigma.hat.nodiag) <- NA
       
+      eig <- eigen(Sigma.hat)
+      ggplot()+
+      geom_point(aes(x=1:80, y=eig$vectors[,1], col='L1.hat'))+
+      geom_point(aes(x=1:80, y=eig$vectors[,2], col='L2.hat'))+
+      ggtitle('eigvector of cov')+
+      geom_abline(slope=0)+xlab("index")+ylab("L") -> fig[[1]]
+
+      
       fit0 <- flash(data=X2n, greedy.Kmax = 2, backfit=TRUE, verbose.lvl=0,
                     prior.family=c(prior.normal(),prior.point.laplace()))
       fit1 <- flash(data=Sigma.hat, prior.family=prior.point.laplace(), 
@@ -128,17 +136,17 @@ plot.for.p.v2 <- function(set.p, seed){
       fit2 <- flash(data=Sigma.hat.nodiag, prior.family=prior.point.laplace(), 
               greedy.Kmax = 3, backfit=TRUE, verbose.lvl=0)
       
-      fig[[1]] <- fig.one.K2(fit0, title='on X')
-      fig[[2]] <- fig.one.K2(fit1, title='on cov')
-      fig[[3]] <- fig.one.K2(fit2, title='on cov w/o diag')
+      fig[[2]] <- fig.one.K2(fit0, title='on X')
+      fig[[3]] <- fig.one.K2(fit1, title='on cov')
+      fig[[4]] <- fig.one.K2(fit2, title='on cov w/o diag')
       
-    grid.arrange(fig[[1]], fig[[2]], fig[[3]], ncol=3)
+    grid.arrange(fig[[1]], fig[[2]], fig[[3]], fig[[4]], ncol=4)
 }
 ```
 
 ### p=300
 
-```{r}
+```{r, fig.width=12, fig.height=3}
 plot.for.p.v2(set.p=300, seed=1)
 plot.for.p.v2(set.p=300, seed=2)
 plot.for.p.v2(set.p=300, seed=3)
@@ -148,7 +156,7 @@ plot.for.p.v2(set.p=300, seed=5)
 
 ### p=1k
 
-```{r}
+```{r, fig.width=12, fig.height=3}
 plot.for.p.v2(set.p=1000, seed=1)
 plot.for.p.v2(set.p=1000, seed=2)
 plot.for.p.v2(set.p=1000, seed=3)
@@ -160,7 +168,7 @@ plot.for.p.v2(set.p=1000, seed=5)
 ### p=3k
 
 
-```{r}
+```{r, fig.width=12, fig.height=3}
 plot.for.p.v2(set.p=3000, seed=1)
 plot.for.p.v2(set.p=3000, seed=2)
 plot.for.p.v2(set.p=3000, seed=3)
@@ -172,7 +180,7 @@ plot.for.p.v2(set.p=3000, seed=5)
 ### p=10k
 
 
-```{r}
+```{r, fig.width=12, fig.height=3}
 plot.for.p.v2(set.p=10000, seed=1)
 plot.for.p.v2(set.p=10000, seed=2)
 plot.for.p.v2(set.p=10000, seed=3)
@@ -184,7 +192,7 @@ plot.for.p.v2(set.p=10000, seed=5)
 ### p=30k
 
 
-```{r}
+```{r, fig.width=12, fig.height=3}
 plot.for.p.v2(set.p=30000, seed=1)
 plot.for.p.v2(set.p=30000, seed=2)
 plot.for.p.v2(set.p=30000, seed=3)
@@ -196,7 +204,7 @@ plot.for.p.v2(set.p=30000, seed=5)
 ### p=100k
 
 
-```{r}
+```{r, fig.width=12, fig.height=3}
 plot.for.p.v2(set.p=100000, seed=1)
 plot.for.p.v2(set.p=100000, seed=2)
 plot.for.p.v2(set.p=100000, seed=3)
@@ -208,7 +216,7 @@ plot.for.p.v2(set.p=100000, seed=5)
 ### p=300k
 
 
-```{r}
+```{r, fig.width=12, fig.height=3}
 plot.for.p.v2(set.p=300000, seed=1)
 plot.for.p.v2(set.p=300000, seed=2)
 plot.for.p.v2(set.p=300000, seed=3)
