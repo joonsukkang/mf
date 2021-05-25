@@ -475,16 +475,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee8774bb244a38143edbb8857f9dcd97915f2a8cbtargetblanke8774bba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/e8774bb244a38143edbb8857f9dcd97915f2a8cb" target="_blank">e8774bb</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee8772e19f662bcc61c639e1a88a71fff3109cfcctargetblanke8772e1a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/e8772e19f662bcc61c639e1a88a71fff3109cfcc" target="_blank">e8772e1</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee8774bb244a38143edbb8857f9dcd97915f2a8cbtargetblanke8774bba" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee8772e19f662bcc61c639e1a88a71fff3109cfcctargetblanke8772e1a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/e8774bb244a38143edbb8857f9dcd97915f2a8cb" target="_blank">e8774bb</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/e8772e19f662bcc61c639e1a88a71fff3109cfcc" target="_blank">e8772e1</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -513,6 +513,7 @@ Untracked files:
     Untracked:  analysis/y2_eb.Rmd
     Untracked:  analysis/y2_toy.Rmd
     Untracked:  analysis/y2_toy_500.Rmd
+    Untracked:  analysis/y2_toy_n.Rmd
     Untracked:  code/code_wflow_publish.R
     Untracked:  code/model_exp_v20201110.R
     Untracked:  data/eigvals.rds
@@ -568,6 +569,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/e8772e19f662bcc61c639e1a88a71fff3109cfcc/analysis/toy_p.Rmd" target="_blank">e8772e1</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+<td>
+added cov eigenvector
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/toy_p.html" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1006,6 +1041,14 @@ Joonsuk Kang
       Sigma.hat &lt;- cov(X2n)
       Sigma.hat.nodiag &lt;- Sigma.hat; diag(Sigma.hat.nodiag) &lt;- NA
       
+      eig &lt;- eigen(Sigma.hat)
+      ggplot()+
+      geom_point(aes(x=1:80, y=eig$vectors[,1], col=&#39;L1.hat&#39;))+
+      geom_point(aes(x=1:80, y=eig$vectors[,2], col=&#39;L2.hat&#39;))+
+      ggtitle(&#39;eigvector of cov&#39;)+
+      geom_abline(slope=0)+xlab(&quot;index&quot;)+ylab(&quot;L&quot;) -&gt; fig[[1]]
+
+      
       fit0 &lt;- flash(data=X2n, greedy.Kmax = 2, backfit=TRUE, verbose.lvl=0,
                     prior.family=c(prior.normal(),prior.point.laplace()))
       fit1 &lt;- flash(data=Sigma.hat, prior.family=prior.point.laplace(), 
@@ -1013,102 +1056,1397 @@ Joonsuk Kang
       fit2 &lt;- flash(data=Sigma.hat.nodiag, prior.family=prior.point.laplace(), 
               greedy.Kmax = 3, backfit=TRUE, verbose.lvl=0)
       
-      fig[[1]] &lt;- fig.one.K2(fit0, title=&#39;on X&#39;)
-      fig[[2]] &lt;- fig.one.K2(fit1, title=&#39;on cov&#39;)
-      fig[[3]] &lt;- fig.one.K2(fit2, title=&#39;on cov w/o diag&#39;)
+      fig[[2]] &lt;- fig.one.K2(fit0, title=&#39;on X&#39;)
+      fig[[3]] &lt;- fig.one.K2(fit1, title=&#39;on cov&#39;)
+      fig[[4]] &lt;- fig.one.K2(fit2, title=&#39;on cov w/o diag&#39;)
       
-    grid.arrange(fig[[1]], fig[[2]], fig[[3]], ncol=3)
+    grid.arrange(fig[[1]], fig[[2]], fig[[3]], fig[[4]], ncol=4)
 }</code></pre>
 <div id="p300" class="section level3">
 <h3>p=300</h3>
 <pre class="r"><code>plot.for.p.v2(set.p=300, seed=1)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
+Past versions of unnamed-chunk-4-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-4-1.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300, seed=2)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-2">
+Past versions of unnamed-chunk-4-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-4-2.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300, seed=3)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-3">
+Past versions of unnamed-chunk-4-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-4-3.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300, seed=4)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-4.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-4">
+Past versions of unnamed-chunk-4-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-4-4.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300, seed=5)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-4-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-5">
+Past versions of unnamed-chunk-4-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-4-5.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="p1k" class="section level3">
 <h3>p=1k</h3>
 <pre class="r"><code>plot.for.p.v2(set.p=1000, seed=1)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
+Past versions of unnamed-chunk-5-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-5-1.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=1000, seed=2)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-2">
+Past versions of unnamed-chunk-5-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-5-2.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=1000, seed=3)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-3">
+Past versions of unnamed-chunk-5-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-5-3.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=1000, seed=4)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-4.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-4">
+Past versions of unnamed-chunk-5-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-5-4.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=1000, seed=5)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-5-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-5">
+Past versions of unnamed-chunk-5-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-5-5.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="p3k" class="section level3">
 <h3>p=3k</h3>
 <pre class="r"><code>plot.for.p.v2(set.p=3000, seed=1)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-6-1.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=3000, seed=2)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-2">
+Past versions of unnamed-chunk-6-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-6-2.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=3000, seed=3)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-3">
+Past versions of unnamed-chunk-6-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-6-3.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=3000, seed=4)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-4.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-4">
+Past versions of unnamed-chunk-6-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-6-4.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=3000, seed=5)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-6-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-5">
+Past versions of unnamed-chunk-6-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-6-5.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="p10k" class="section level3">
 <h3>p=10k</h3>
 <pre class="r"><code>plot.for.p.v2(set.p=10000, seed=1)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
+Past versions of unnamed-chunk-7-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-7-1.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=10000, seed=2)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-2">
+Past versions of unnamed-chunk-7-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-7-2.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=10000, seed=3)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-3">
+Past versions of unnamed-chunk-7-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-7-3.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=10000, seed=4)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-4.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-4">
+Past versions of unnamed-chunk-7-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-7-4.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=10000, seed=5)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-7-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-5">
+Past versions of unnamed-chunk-7-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-7-5.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="p30k" class="section level3">
 <h3>p=30k</h3>
 <pre class="r"><code>plot.for.p.v2(set.p=30000, seed=1)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-8-1.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=30000, seed=2)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-2">
+Past versions of unnamed-chunk-8-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-8-2.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=30000, seed=3)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-3">
+Past versions of unnamed-chunk-8-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-8-3.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=30000, seed=4)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-4.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-4">
+Past versions of unnamed-chunk-8-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-8-4.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=30000, seed=5)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-8-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-5">
+Past versions of unnamed-chunk-8-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-8-5.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="p100k" class="section level3">
 <h3>p=100k</h3>
 <pre class="r"><code>plot.for.p.v2(set.p=100000, seed=1)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-9-1.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=100000, seed=2)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-2">
+Past versions of unnamed-chunk-9-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-9-2.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=100000, seed=3)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-3">
+Past versions of unnamed-chunk-9-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-9-3.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=100000, seed=4)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-4.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-4">
+Past versions of unnamed-chunk-9-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-9-4.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=100000, seed=5)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-9-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-5">
+Past versions of unnamed-chunk-9-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-9-5.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="p300k" class="section level3">
 <h3>p=300k</h3>
 <pre class="r"><code>plot.for.p.v2(set.p=300000, seed=1)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-10-1.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300000, seed=2)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-2">
+Past versions of unnamed-chunk-10-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-10-2.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300000, seed=3)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-3">
+Past versions of unnamed-chunk-10-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-10-3.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300000, seed=4)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-4.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-4">
+Past versions of unnamed-chunk-10-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-10-4.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot.for.p.v2(set.p=300000, seed=5)</code></pre>
-<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-5.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/toy_p.Rmd/unnamed-chunk-10-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-5">
+Past versions of unnamed-chunk-10-5.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-5" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d50d95bbd194062f0aa42a32767e99ec4519859d/docs/figure/toy_p.Rmd/unnamed-chunk-10-5.png" target="_blank">d50d95b</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-05-24
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
