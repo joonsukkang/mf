@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Joonsuk Kang" />
+
+<meta name="date" content="2021-07-20" />
+
+<title>Alt-Flash: normal prior</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/joonsukkang/mf">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Alt-Flash: normal prior</h1>
+<h4 class="author">Joonsuk Kang</h4>
+<h4 class="date">2021-07-20</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-07-21
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mf/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201010code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201010)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201010code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201010)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreea1952b0e14c8c10a5b6cf5f145c0e369752c5481targetblanka1952b0a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/a1952b0e14c8c10a5b6cf5f145c0e369752c5481" target="_blank">a1952b0</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreea1952b0e14c8c10a5b6cf5f145c0e369752c5481targetblanka1952b0a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/a1952b0e14c8c10a5b6cf5f145c0e369752c5481" target="_blank">a1952b0</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.Rhistory
+
+Untracked files:
+    Untracked:  analysis/Alt-Flash-EBNM.Rmd
+    Untracked:  analysis/Alt-Flash-old.Rmd
+    Untracked:  analysis/Alt-Flash_ash.Rmd
+    Untracked:  analysis/bingham.Rmd
+    Untracked:  analysis/bingham_constant.Rmd
+    Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g1_K.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g2_K.Rmd
+    Untracked:  analysis/demo8_splash.Rmd
+    Untracked:  analysis/flip_correlation.Rmd
+    Untracked:  analysis/flipping_pdf.Rmd
+    Untracked:  analysis/infinitefactor_toy.Rmd
+    Untracked:  analysis/model_exp_prior_v20201110m.Rmd
+    Untracked:  analysis/model_invgam_prior.Rmd
+    Untracked:  analysis/multiplicative.Rmd
+    Untracked:  analysis/sliding_correlation.Rmd
+    Untracked:  analysis/sliding_pdf.Rmd
+    Untracked:  analysis/temp.Rmd
+    Untracked:  analysis/toy_p_notfixK.Rmd
+    Untracked:  analysis/y2_NoTargetsByTF.R
+    Untracked:  analysis/y2_eb.Rmd
+    Untracked:  analysis/y2_toy.Rmd
+    Untracked:  analysis/y2_toy_500.Rmd
+    Untracked:  analysis/y2_toy_highd.Rmd
+    Untracked:  analysis/y2_toy_highd_covver.Rmd
+    Untracked:  analysis/y2_toy_lastday_backtosimple.Rmd
+    Untracked:  analysis/y2_toy_master.Rmd
+    Untracked:  analysis/y2_toy_n.Rmd
+    Untracked:  analysis/y2_toy_n_K3.Rmd
+    Untracked:  code/code_wflow_publish.R
+    Untracked:  code/model_exp_v20201110.R
+    Untracked:  data/eigvals.rds
+    Untracked:  data/hTFtarget_NoTargetsByTF.txt
+    Untracked:  data/metro_results.txt
+    Untracked:  figure/
+    Untracked:  output/Likelihood.gif
+    Untracked:  writing/
+
+Unstaged changes:
+    Deleted:    analysis/ChoosingW.Rmd
+    Deleted:    analysis/concentration.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g1.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g2.Rmd
+    Modified:   analysis/flashier_point_laplace.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/model_exp_prior.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/Alt-Flash.Rmd</code>) and HTML (<code>docs/Alt-Flash.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/a1952b0e14c8c10a5b6cf5f145c0e369752c5481/analysis/Alt-Flash.Rmd" target="_blank">a1952b0</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-07-21
+</td>
+<td>
+Alt-Flash with Normal Prior
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
+<pre><code>✓ ggplot2 3.3.5     ✓ purrr   0.3.4
+✓ tibble  3.1.2     ✓ dplyr   1.0.7
+✓ tidyr   1.1.3     ✓ stringr 1.4.0
+✓ readr   1.4.0     ✓ forcats 0.5.1</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(tictoc)
+library(flashier)
+library(ebnm)</code></pre>
+<div id="alt-flash" class="section level1">
+<h1>Alt-Flash</h1>
+<div id="define-some-internal-functions" class="section level3">
+<h3>define some internal functions</h3>
+<pre class="r"><code># functions 
+############################################
+
+update.tau &lt;- function(Y, A.l, A.f, B.l, B.f){
+  ((sum(diag(t(Y)%*%Y))-2*sum(diag(t(Y)%*%A.l%*%t(A.f)))+sum(B.l*B.f))/(n*p))^(-1)
+}
+
+update.phi &lt;- function(y, Ak, 
+                       pi.grid, tau.grid, tau,
+                       Bkk, B.minusk, b.minusk
+                       ){
+  # intermediate variables
+  M &lt;- length(pi.grid)
+  chunksq &lt;- (sum(y*Ak) - sum(B.minusk*b.minusk))^2
+  
+  # output
+  vec.out &lt;- rep(0, M)
+  for (m in 1:M){
+    vec.out[m] &lt;- log(pi.grid[m])-(1/2)*log(1+tau/tau.grid[m]*Bkk) + tau^2*chunksq/(2*(tau.grid[m]+tau*Bkk))
+  }
+  vec.out &lt;- vec.out-max(vec.out)
+  vec.out &lt;- exp(vec.out)
+  vec.out &lt;- vec.out/sum(vec.out)
+  return(vec.out)
+}
+
+compute.elbo &lt;- function(Y, tau, K,
+                         A.l, A.f, B.l, B.f, C.l, C.f,
+                         g.l, g.f){
+  
+  elbo.0 &lt;- -n*p/2*log(2*pi)+n*p/2*log(tau)-tau/2*(sum(diag(t(Y)%*%Y))-2*sum(diag(t(Y)%*%A.l%*%t(A.f)))+sum(B.l*B.f))
+  
+  elbo.L &lt;- 0
+  for (k in 1:K){
+    g &lt;- g.l[[k]]
+    if(class(g)==&quot;normalmix&quot; &amp; g$M==1){
+      elbo.L &lt;- elbo.L - (1/2)*sum(g$tau*C.l[,k] -1 -log(g$tau) -log(C.l[,k]-A.l[,k]^2))
+    }
+    if(class(g)==&quot;normalmix&quot; &amp; g$M&gt;1){
+      for (i in 1:n){
+        for (m in 1:g$M){
+          elbo.L &lt;- elbo.L + g$phi[i,m]*log(sum(g$phi[i,]*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+        }
+      }
+      for (m in 1:g$M){
+        elbo.L &lt;- elbo.L - sum(g$phi[,m])*log(sum(g$pi*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+      }
+    }
+  }
+
+  elbo.F &lt;- 0
+  for (k in 1:K){
+    g &lt;- g.f[[k]]
+    if(class(g)==&quot;normalmix&quot; &amp; g$M==1){
+      elbo.F &lt;- elbo.F - (1/2)*sum(g$tau*C.f[,k] -1 -log(g$tau) -log(C.f[,k]-A.f[,k]^2))
+    }
+    if(class(g)==&quot;normalmix&quot; &amp; g$M&gt;1){
+      for (i in 1:p){
+        for (m in 1:g$M){
+          elbo.F &lt;- elbo.F + g$phi[i,m]*log(sum(g$phi[i,]*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+        }
+      }
+      for (m in 1:g$M){
+        elbo.F &lt;- elbo.F - sum(g$phi[,m])*log(sum(g$pi*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+    }
+  }
+
+  }
+  
+  return(elbo.0+elbo.L+elbo.F)
+}</code></pre>
+</div>
+<div id="initilaize-w-flashier-backfit-w-alt-flash" class="section level3">
+<h3>initilaize w/ flashier + backfit w/ Alt-Flash</h3>
+<pre class="r"><code>flashier_altflash_normal &lt;- function(Y){
+
+# initialization
+############################################
+# initialize the fit object with flashier; do not backfit
+fit.init &lt;- flashier::flash(data=Y, backfit=FALSE, 
+                                prior.family=prior.normal(), verbose.lvl=0)
+K &lt;- fit.init$n.factors
+
+
+# initialization from fit.flashier; scale applied to L
+A.l &lt;- fit.init$loadings.pm[[1]] %*% diag(fit.init$loadings.scale)
+A.f &lt;- fit.init$loadings.pm[[2]]
+C.l &lt;- A.l^2 + (fit.init$loadings.psd[[1]] %*% diag(fit.init$loadings.scale))^2
+C.f &lt;- A.f^2 + fit.init$loadings.psd[[2]]^2
+
+B.l &lt;- t(A.l) %*% A.l
+B.f &lt;- t(A.f) %*% A.f
+diag(B.l) &lt;- colSums(C.l)
+diag(B.f) &lt;- colSums(C.f)
+tau &lt;- update.tau(Y, A.l, A.f, B.l, B.f)
+g.l &lt;- fit.init$fitted.g[[1]]
+g.f &lt;- fit.init$fitted.g[[2]]
+
+
+
+# replace sd 0 with a small value
+#######################
+for (k in 1:K){
+  if(g.l[[k]]$sd[1]==0){g.l[[k]]$sd[1] &lt;- g.l[[k]]$sd[2]*1e-6}
+  if(g.f[[k]]$sd[1]==0){g.f[[k]]$sd[1] &lt;- g.f[[k]]$sd[2]*1e-6}
+}
+  
+for (k in 1:K){
+  if(class(g.l[[k]])==&quot;normalmix&quot;){
+    g.l[[k]]$M &lt;- length(g.l[[k]]$sd)
+    g.l[[k]]$tau &lt;- (g.l[[k]]$sd)^(-2)
+    if(g.l[[k]]$M&gt;1){
+      g.l[[k]]$phi &lt;- matrix(0, nrow=n, ncol=g.l[[k]]$M)
+    }
+  }
+  if(class(g.f[[k]])==&quot;normalmix&quot;){
+    g.f[[k]]$M &lt;- length(g.f[[k]]$sd)
+    g.f[[k]]$tau &lt;- (g.f[[k]]$sd)^(-2)
+    if(g.f[[k]]$M&gt;1){
+      g.f[[k]]$phi &lt;- matrix(0, nrow=p, ncol=g.f[[k]]$M)
+    }
+}
+}
+
+maxiter &lt;- 100
+elbo.tol &lt;- sqrt(.Machine$double.eps) *prod(dim(Y)) # set according to flashier implementation
+# https://github.com/willwerscheid/flashier/blob/fa2879879ada64a1c1586c4ca518f69e589e89ab/R/convergence_criteria.R#L1
+
+
+elbo.old &lt;- 0
+
+for (n.iter in 1:maxiter){
+# L-step
+############################################
+# update q_l
+for (i in 1:n){
+  y &lt;- Y[i,]
+  b &lt;- A.l[i,]
+  b.old &lt;- rep(0,K)
+  while(sum((b-b.old)^2)&gt;1e-10){
+    b.old &lt;- b
+    for (k in 1:K){
+      if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M==1)){
+        b[k] &lt;- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])
+        # b[k] &lt;- ebnm(x=(sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/B.f[k,k], s=(tau*B.f[k,k])^(-1/2),
+        #            prior_family=&quot;normal&quot;,
+        #            g_init=g.l[[k]], fix_g=TRUE, output=&#39;posterior_mean&#39;)$posterior$mean
+        
+      }
+      if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M &gt;1)){
+          g.l[[k]]$phi[i,] &lt;- update.phi(y=y, Ak=A.f[,k], 
+                                         pi.grid=g.l[[k]]$pi, tau.grid=g.l[[k]]$tau, tau=tau,
+                                         Bkk=B.f[k,k], B.minusk=B.f[-k,k], b.minusk=b[-k])
+          b[k] &lt;- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))*sum(g.l[[k]]$phi[i,]/(g.l[[k]]$tau/tau+B.f[k,k]))
+      }
+    }
+  }
+  A.l[i,] &lt;- b
+  for (k in 1:K){
+    if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M==1)){
+      C.l[i,k] &lt;- b[k]^2+1/(g.l[[k]]$tau + tau*B.f[k,k])
+    }
+    if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M &gt;1)){
+      C.l[i,k] &lt;- sum(g.l[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])  )^2+1/(g.l[[k]]$tau + tau*B.f[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_l
+for (k in 1:K){
+  if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M==1)){
+    g.l[[k]]$tau &lt;- mean(C.l[,k])^(-1)
+  }
+  if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M &gt;1)){
+    g.l[[k]]$pi &lt;- colMeans(g.l[[k]]$phi)
+  }
+}
+B.l &lt;- t(A.l)%*%A.l
+diag(B.l) &lt;- colSums(C.l)
+
+
+# F-step
+############################################
+# update q_f
+for (i in 1:p){
+  y &lt;- Y[,i]
+  b &lt;- A.f[i,]
+  b.old &lt;- rep(0,K)
+  while(sum((b-b.old)^2)&gt;1e-10){
+    b.old &lt;- b
+    for (k in 1:K){
+      if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M==1)){
+        b[k] &lt;- (sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])
+      }
+      if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M &gt;1)){
+          g.f[[k]]$phi[i,] &lt;- update.phi(y=y, Ak=A.l[,k], 
+                                         pi.grid=g.f[[k]]$pi, tau.grid=g.f[[k]]$tau, tau=tau,
+                                         Bkk=B.l[k,k], B.minusk=B.l[-k,k], b.minusk=b[-k])
+          b[k] &lt;- (sum(y*A.f[,k])-sum(B.l[-k,k]*b[-k]))*sum(g.f[[k]]$phi[i,]/(g.f[[k]]$tau/tau+B.l[k,k]))
+      }
+    }
+  }
+  A.f[i,] &lt;- b
+  for (k in 1:K){
+    if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M==1)){
+      C.f[i,k] &lt;- b[k]^2+1/(g.f[[k]]$tau + tau*B.l[k,k])
+    }
+    if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M &gt;1)){
+      C.f[i,k] &lt;- sum(g.f[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])  )^2+1/(g.f[[k]]$tau + tau*B.l[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_f
+for (k in 1:K){
+  if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M==1)){
+    g.f[[k]]$tau &lt;- mean(C.f[,k])^(-1)
+  }
+  if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M &gt;1)){
+    g.f[[k]]$pi &lt;- colMeans(g.f[[k]]$phi)
+  }
+}
+B.f &lt;- t(A.f)%*%A.f
+diag(B.f) &lt;- colSums(C.f)
+
+
+# update tau
+############################################
+tau &lt;- update.tau(Y, A.l, A.f, B.l, B.f)
+
+# check elbo
+############################################
+elbo &lt;- compute.elbo(Y=Y, tau=tau, K=K,
+                     A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+#print(paste0(&quot;iteration:&quot;, n.iter, &quot;; elbo: &quot;,elbo))
+if (abs(elbo-elbo.old)&lt;elbo.tol) break
+elbo.old &lt;- elbo
+}
+
+out.list &lt;- list(Y=Y, tau=tau, elbo=elbo,
+                 A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+return(out.list)
+}</code></pre>
+</div>
+<div id="initilaize-w-svd-backfit-w-alt-flash" class="section level3">
+<h3>initilaize w/ SVD + backfit w/ Alt-Flash</h3>
+<pre class="r"><code>altflash_normal &lt;- function(Y,K){
+
+# initialization
+############################################
+
+# initialization from SVD
+Y.rsvd &lt;- rsvd::rsvd(Y, k=K)
+A.l &lt;- Y.rsvd$u %*% diag(Y.rsvd$d)
+A.f &lt;- Y.rsvd$v
+B.l &lt;- t(A.l) %*% A.l
+B.f &lt;- t(A.f) %*% A.f
+C.l &lt;- A.l^2
+C.f &lt;- A.f^2
+
+tau &lt;- update.tau(Y, A.l, A.f, B.l, B.f)
+
+# borrow structure from flash object (not using the estimates)
+g.l &lt;- fit.init$fitted.g[[1]]
+g.f &lt;- fit.init$fitted.g[[2]]
+
+for (k in 1:K){
+  g.l[[k]]$sd &lt;- sd(A.l[,k])
+  g.f[[k]]$sd &lt;- sd(A.f[,k])
+}
+
+# replace sd 0 with a small value
+#######################
+for (k in 1:K){
+  if(g.l[[k]]$sd[1]==0){g.l[[k]]$sd[1] &lt;- g.l[[k]]$sd[2]*1e-6}
+  if(g.f[[k]]$sd[1]==0){g.f[[k]]$sd[1] &lt;- g.f[[k]]$sd[2]*1e-6}
+}
+  
+for (k in 1:K){
+  if(class(g.l[[k]])==&quot;normalmix&quot;){
+    g.l[[k]]$M &lt;- length(g.l[[k]]$sd)
+    g.l[[k]]$tau &lt;- (g.l[[k]]$sd)^(-2)
+    if(g.l[[k]]$M&gt;1){
+      g.l[[k]]$phi &lt;- matrix(0, nrow=n, ncol=g.l[[k]]$M)
+    }
+  }
+  if(class(g.f[[k]])==&quot;normalmix&quot;){
+    g.f[[k]]$M &lt;- length(g.f[[k]]$sd)
+    g.f[[k]]$tau &lt;- (g.f[[k]]$sd)^(-2)
+    if(g.f[[k]]$M&gt;1){
+      g.f[[k]]$phi &lt;- matrix(0, nrow=p, ncol=g.f[[k]]$M)
+    }
+}
+}
+
+maxiter &lt;- 100
+elbo.tol &lt;- sqrt(.Machine$double.eps) *prod(dim(Y)) # set according to flashier implementation
+# https://github.com/willwerscheid/flashier/blob/fa2879879ada64a1c1586c4ca518f69e589e89ab/R/convergence_criteria.R#L1
+
+
+elbo.old &lt;- 0
+
+for (n.iter in 1:maxiter){
+# L-step
+############################################
+# update q_l
+for (i in 1:n){
+  y &lt;- Y[i,]
+  b &lt;- A.l[i,]
+  b.old &lt;- rep(0,K)
+  while(sum((b-b.old)^2)&gt;1e-10){
+    b.old &lt;- b
+    for (k in 1:K){
+      if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M==1)){
+        b[k] &lt;- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])
+      }
+      if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M &gt;1)){
+          g.l[[k]]$phi[i,] &lt;- update.phi(y=y, Ak=A.f[,k], 
+                                         pi.grid=g.l[[k]]$pi, tau.grid=g.l[[k]]$tau, tau=tau,
+                                         Bkk=B.f[k,k], B.minusk=B.f[-k,k], b.minusk=b[-k])
+          b[k] &lt;- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))*sum(g.l[[k]]$phi[i,]/(g.l[[k]]$tau/tau+B.f[k,k]))
+      }
+    }
+  }
+  A.l[i,] &lt;- b
+  for (k in 1:K){
+    if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M==1)){
+      C.l[i,k] &lt;- b[k]^2+1/(g.l[[k]]$tau + tau*B.f[k,k])
+    }
+    if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M &gt;1)){
+      C.l[i,k] &lt;- sum(g.l[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])  )^2+1/(g.l[[k]]$tau + tau*B.f[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_l
+for (k in 1:K){
+  if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M==1)){
+    g.l[[k]]$tau &lt;- mean(C.l[,k])^(-1)
+  }
+  if((class(g.l[[k]])==&quot;normalmix&quot;) &amp; (g.l[[k]]$M &gt;1)){
+    g.l[[k]]$pi &lt;- colMeans(g.l[[k]]$phi)
+  }
+}
+B.l &lt;- t(A.l)%*%A.l
+diag(B.l) &lt;- colSums(C.l)
+
+
+# F-step
+############################################
+# update q_f
+for (i in 1:p){
+  y &lt;- Y[,i]
+  b &lt;- A.f[i,]
+  b.old &lt;- rep(0,K)
+  while(sum((b-b.old)^2)&gt;1e-10){
+    b.old &lt;- b
+    for (k in 1:K){
+      if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M==1)){
+        b[k] &lt;- (sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])
+      }
+      if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M &gt;1)){
+          g.f[[k]]$phi[i,] &lt;- update.phi(y=y, Ak=A.l[,k], 
+                                         pi.grid=g.f[[k]]$pi, tau.grid=g.f[[k]]$tau, tau=tau,
+                                         Bkk=B.l[k,k], B.minusk=B.l[-k,k], b.minusk=b[-k])
+          b[k] &lt;- (sum(y*A.f[,k])-sum(B.l[-k,k]*b[-k]))*sum(g.f[[k]]$phi[i,]/(g.f[[k]]$tau/tau+B.l[k,k]))
+      }
+    }
+  }
+  A.f[i,] &lt;- b
+  for (k in 1:K){
+    if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M==1)){
+      C.f[i,k] &lt;- b[k]^2+1/(g.f[[k]]$tau + tau*B.l[k,k])
+    }
+    if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M &gt;1)){
+      C.f[i,k] &lt;- sum(g.f[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])  )^2+1/(g.f[[k]]$tau + tau*B.l[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_f
+for (k in 1:K){
+  if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M==1)){
+    g.f[[k]]$tau &lt;- mean(C.f[,k])^(-1)
+  }
+  if((class(g.f[[k]])==&quot;normalmix&quot;) &amp; (g.f[[k]]$M &gt;1)){
+    g.f[[k]]$pi &lt;- colMeans(g.f[[k]]$phi)
+  }
+}
+B.f &lt;- t(A.f)%*%A.f
+diag(B.f) &lt;- colSums(C.f)
+
+
+# update tau
+############################################
+tau &lt;- update.tau(Y, A.l, A.f, B.l, B.f)
+
+# check elbo
+############################################
+elbo &lt;- compute.elbo(Y=Y, tau=tau, K=K,
+                     A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+#print(paste0(&quot;iteration:&quot;, n.iter, &quot;; elbo: &quot;,elbo))
+if (abs(elbo-elbo.old)&lt;elbo.tol) break
+elbo.old &lt;- elbo
+}
+
+out.list &lt;- list(Y=Y, tau=tau, elbo=elbo,
+                 A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+return(out.list)
+}</code></pre>
+</div>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<div id="an-example" class="section level3">
+<h3>an example</h3>
+<pre class="r"><code># an example from https://stephenslab.github.io/flashr/articles/flash_intro.html 
+set.seed(1)
+n = 100
+p = 500
+k = 7
+LL = matrix(rnorm(n*k),nrow=n)
+FF = matrix(rnorm(p*k),nrow=p)
+Y = LL %*% t(FF) + rnorm(n*p)
+
+rm(n, p)
+n &lt;- nrow(Y)
+p &lt;- ncol(Y)
+
+
+# initialize w/ flashier (not backfit; to compare computation time)
+system.time(
+fit.init &lt;- flashier::flash(data=Y, backfit=FALSE, 
+                            prior.family=prior.normal(), verbose.lvl=0)
+)</code></pre>
+<pre><code>   user  system elapsed 
+  0.437   0.018   0.456 </code></pre>
+<pre class="r"><code># initialize + backfit w/ flashier 
+system.time(
+fit.flashier &lt;- flashier::flash(data=Y, backfit=TRUE, 
+                            prior.family=prior.normal(), verbose.lvl=0)
+)</code></pre>
+<pre><code>   user  system elapsed 
+  0.551   0.006   0.557 </code></pre>
+<pre class="r"><code># initialize w/ flashier + backfit w/ altflash
+system.time(
+fit1 &lt;- flashier_altflash_normal(Y=Y)
+)</code></pre>
+<pre><code>   user  system elapsed 
+  1.194   0.035   1.230 </code></pre>
+<pre class="r"><code># initialize w/ svd + backfit w/ altflash
+system.time(
+fit2 &lt;- altflash_normal(Y=Y, K=k) # assuming K is known
+)</code></pre>
+<pre><code>   user  system elapsed 
+  0.596   0.010   0.608 </code></pre>
+<pre class="r"><code># elbo difference
+fit1$elbo - fit.flashier$elbo</code></pre>
+<pre><code>[1] 4.992151e-06</code></pre>
+<pre class="r"><code>fit2$elbo - fit.flashier$elbo</code></pre>
+<pre><code>[1] 7.803828e-06</code></pre>
+<pre class="r"><code># difference from the truth
+c(norm(LL %*% t(FF) - fitted(fit.flashier), &quot;F&quot;),
+  norm(LL %*% t(FF) - fit1$A.l%*%t(fit1$A.f), &quot;F&quot;),
+  norm(LL %*% t(FF) - fit2$A.l%*%t(fit2$A.f), &quot;F&quot;))</code></pre>
+<pre><code>[1] 64.50123 64.50123 64.50122</code></pre>
+<pre class="r"><code># difference from the flashier fit
+c(norm(fitted(fit.flashier) - fit1$A.l%*%t(fit1$A.f), &quot;F&quot;),
+  norm(fitted(fit.flashier) - fit2$A.l%*%t(fit2$A.f), &quot;F&quot;))</code></pre>
+<pre><code>[1] 0.0004529808 0.0010157999</code></pre>
+<pre class="r"><code># altflash and flashier results are almost identical
+summary(c(fitted(fit.flashier) - fit1$A.l%*%t(fit1$A.f)))</code></pre>
+<pre><code>      Min.    1st Qu.     Median       Mean    3rd Qu.       Max. 
+-1.147e-05 -1.185e-06  1.419e-09 -1.449e-09  1.176e-06  1.305e-05 </code></pre>
+</div>
+<div id="try-more-seeds" class="section level3">
+<h3>try more seeds</h3>
+<pre class="r"><code>mat.time &lt;- matrix(0, nrow=0, ncol=4)
+mat.elbo &lt;- matrix(0, nrow=0, ncol=2)
+
+for (i.seed in 101:120){
+    # an example from https://stephenslab.github.io/flashr/articles/flash_intro.html 
+    set.seed(i.seed)
+    n = 100
+    p = 500
+    k = 7
+    LL = matrix(rnorm(n*k),nrow=n)
+    FF = matrix(rnorm(p*k),nrow=p)
+    Y = LL %*% t(FF) + rnorm(n*p)
+    
+    rm(n, p)
+    n &lt;- nrow(Y)
+    p &lt;- ncol(Y)
+    
+    
+    # initialize w/ flashier (not backfit; to compare computation time)
+    system.time(
+    fit.init &lt;- flashier::flash(data=Y, backfit=FALSE, 
+                                prior.family=prior.normal(), verbose.lvl=0)
+    ) -&gt; time1
+    
+    # initialize + backfit w/ flashier 
+    system.time(
+    fit.flashier &lt;- flashier::flash(data=Y, backfit=TRUE, 
+                                prior.family=prior.normal(), verbose.lvl=0)
+    )-&gt; time2
+    
+    # initialize w/ flashier + backfit w/ altflash
+    system.time(
+    fit1 &lt;- flashier_altflash_normal(Y=Y)
+    ) -&gt; time3
+    
+    # initialize w/ svd + backfit w/ altflash
+    system.time(
+    fit2 &lt;- altflash_normal(Y=Y, K=k) # assuming K is known
+    ) -&gt; time4
+    
+    mat.time &lt;- rbind(mat.time, c(time1[3], time2[3], time3[3], time4[3]))
+    
+    # elbo difference
+    mat.elbo &lt;- rbind(mat.elbo, c(fit1$elbo - fit.flashier$elbo, fit2$elbo - fit.flashier$elbo))
+}
+
+colnames(mat.time) &lt;- c(&quot;flashier init only&quot;, &quot;flashier&quot;, &quot;flashier+altflash&quot;, &quot;altflash&quot;)
+colMeans(mat.time)</code></pre>
+<pre><code>flashier init only           flashier  flashier+altflash           altflash 
+           0.47315            0.62855            1.04160            0.44590 </code></pre>
+<pre class="r"><code>summary(mat.time)</code></pre>
+<pre><code> flashier init only    flashier      flashier+altflash    altflash     
+ Min.   :0.3750     Min.   :0.5080   Min.   :0.9060    Min.   :0.4120  
+ 1st Qu.:0.4363     1st Qu.:0.5813   1st Qu.:0.9505    1st Qu.:0.4198  
+ Median :0.4540     Median :0.6275   Median :0.9800    Median :0.4270  
+ Mean   :0.4732     Mean   :0.6286   Mean   :1.0416    Mean   :0.4459  
+ 3rd Qu.:0.5155     3rd Qu.:0.6655   3rd Qu.:1.1100    3rd Qu.:0.4350  
+ Max.   :0.6790     Max.   :0.7820   Max.   :1.8320    Max.   :0.6640  </code></pre>
+<pre class="r"><code>colnames(mat.elbo) &lt;- c(&quot;flashier+altflash&quot;, &quot;altflash&quot;)
+colMeans(mat.elbo)</code></pre>
+<pre><code>flashier+altflash          altflash 
+     6.247804e-06      1.612104e-05 </code></pre>
+<pre class="r"><code>summary(mat.elbo)</code></pre>
+<pre><code> flashier+altflash      altflash        
+ Min.   :3.958e-06   Min.   :8.356e-06  
+ 1st Qu.:5.870e-06   1st Qu.:1.216e-05  
+ Median :6.214e-06   Median :1.466e-05  
+ Mean   :6.248e-06   Mean   :1.612e-05  
+ 3rd Qu.:6.953e-06   3rd Qu.:1.865e-05  
+ Max.   :8.291e-06   Max.   :3.132e-05  </code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.0 (2021-05-18)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] ebnm_0.1-36     flashier_0.2.7  tictoc_1.0.1    forcats_0.5.1  
+ [5] stringr_1.4.0   dplyr_1.0.7     purrr_0.3.4     readr_1.4.0    
+ [9] tidyr_1.1.3     tibble_3.1.2    ggplot2_3.3.5   tidyverse_1.3.1
+[13] workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] httr_1.4.2        jsonlite_1.7.2    splines_4.1.0     modelr_0.1.8     
+ [5] assertthat_0.2.1  horseshoe_0.2.0   mixsqp_0.3-43     deconvolveR_1.2-1
+ [9] cellranger_1.1.0  yaml_2.2.1        pillar_1.6.1      backports_1.2.1  
+[13] lattice_0.20-44   glue_1.4.2        digest_0.6.27     promises_1.2.0.1 
+[17] rvest_1.0.0       colorspace_2.0-2  htmltools_0.5.1.1 httpuv_1.6.1     
+[21] Matrix_1.3-3      pkgconfig_2.0.3   invgamma_1.1      broom_0.7.8      
+[25] haven_2.4.1       scales_1.1.1      whisker_0.4       later_1.2.0      
+[29] git2r_0.28.0      generics_0.1.0    ellipsis_0.3.2    withr_2.4.2      
+[33] ashr_2.2-47       cli_3.0.0         magrittr_2.0.1    crayon_1.4.1     
+[37] readxl_1.3.1      evaluate_0.14     fs_1.5.0          fansi_0.5.0      
+[41] xml2_1.3.2        truncnorm_1.0-8   tools_4.1.0       hms_1.1.0        
+[45] lifecycle_1.0.0   trust_0.1-8       munsell_0.5.0     reprex_2.0.0     
+[49] irlba_2.3.3       compiler_4.1.0    rsvd_1.0.5        rlang_0.4.11     
+[53] grid_4.1.0        rstudioapi_0.13   rmarkdown_2.9     gtable_0.3.0     
+[57] DBI_1.1.1         R6_2.5.0          lubridate_1.7.10  knitr_1.33       
+[61] utf8_1.2.1        rprojroot_2.0.2   stringi_1.6.2     parallel_4.1.0   
+[65] SQUAREM_2021.1    Rcpp_1.0.6        vctrs_0.3.8       dbplyr_2.1.1     
+[69] tidyselect_1.1.1  xfun_0.24        </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
