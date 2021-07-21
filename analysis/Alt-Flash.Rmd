@@ -1,0 +1,576 @@
+---
+title: "Alt-Flash: normal prior"
+author: "Joonsuk Kang"
+date: "2021-07-20"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(tictoc)
+library(flashier)
+library(ebnm)
+```
+
+
+
+
+# Alt-Flash
+
+### define some internal functions
+
+```{r}
+# functions 
+############################################
+
+update.tau <- function(Y, A.l, A.f, B.l, B.f){
+  ((sum(diag(t(Y)%*%Y))-2*sum(diag(t(Y)%*%A.l%*%t(A.f)))+sum(B.l*B.f))/(n*p))^(-1)
+}
+
+update.phi <- function(y, Ak, 
+                       pi.grid, tau.grid, tau,
+                       Bkk, B.minusk, b.minusk
+                       ){
+  # intermediate variables
+  M <- length(pi.grid)
+  chunksq <- (sum(y*Ak) - sum(B.minusk*b.minusk))^2
+  
+  # output
+  vec.out <- rep(0, M)
+  for (m in 1:M){
+    vec.out[m] <- log(pi.grid[m])-(1/2)*log(1+tau/tau.grid[m]*Bkk) + tau^2*chunksq/(2*(tau.grid[m]+tau*Bkk))
+  }
+  vec.out <- vec.out-max(vec.out)
+  vec.out <- exp(vec.out)
+  vec.out <- vec.out/sum(vec.out)
+  return(vec.out)
+}
+
+compute.elbo <- function(Y, tau, K,
+                         A.l, A.f, B.l, B.f, C.l, C.f,
+                         g.l, g.f){
+  
+  elbo.0 <- -n*p/2*log(2*pi)+n*p/2*log(tau)-tau/2*(sum(diag(t(Y)%*%Y))-2*sum(diag(t(Y)%*%A.l%*%t(A.f)))+sum(B.l*B.f))
+  
+  elbo.L <- 0
+  for (k in 1:K){
+    g <- g.l[[k]]
+    if(class(g)=="normalmix" & g$M==1){
+      elbo.L <- elbo.L - (1/2)*sum(g$tau*C.l[,k] -1 -log(g$tau) -log(C.l[,k]-A.l[,k]^2))
+    }
+    if(class(g)=="normalmix" & g$M>1){
+      for (i in 1:n){
+        for (m in 1:g$M){
+          elbo.L <- elbo.L + g$phi[i,m]*log(sum(g$phi[i,]*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+        }
+      }
+      for (m in 1:g$M){
+        elbo.L <- elbo.L - sum(g$phi[,m])*log(sum(g$pi*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+      }
+    }
+  }
+
+  elbo.F <- 0
+  for (k in 1:K){
+    g <- g.f[[k]]
+    if(class(g)=="normalmix" & g$M==1){
+      elbo.F <- elbo.F - (1/2)*sum(g$tau*C.f[,k] -1 -log(g$tau) -log(C.f[,k]-A.f[,k]^2))
+    }
+    if(class(g)=="normalmix" & g$M>1){
+      for (i in 1:p){
+        for (m in 1:g$M){
+          elbo.F <- elbo.F + g$phi[i,m]*log(sum(g$phi[i,]*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+        }
+      }
+      for (m in 1:g$M){
+        elbo.F <- elbo.F - sum(g$phi[,m])*log(sum(g$pi*exp(-1/2*(g$tau/g$tau[m]+log(g$tau[m]/g$tau)-1))))
+    }
+  }
+
+  }
+  
+  return(elbo.0+elbo.L+elbo.F)
+}
+```
+
+
+
+### initilaize w/ flashier + backfit w/ Alt-Flash
+
+```{r}
+flashier_altflash_normal <- function(Y){
+
+# initialization
+############################################
+# initialize the fit object with flashier; do not backfit
+fit.init <- flashier::flash(data=Y, backfit=FALSE, 
+                                prior.family=prior.normal(), verbose.lvl=0)
+K <- fit.init$n.factors
+
+
+# initialization from fit.flashier; scale applied to L
+A.l <- fit.init$loadings.pm[[1]] %*% diag(fit.init$loadings.scale)
+A.f <- fit.init$loadings.pm[[2]]
+C.l <- A.l^2 + (fit.init$loadings.psd[[1]] %*% diag(fit.init$loadings.scale))^2
+C.f <- A.f^2 + fit.init$loadings.psd[[2]]^2
+
+B.l <- t(A.l) %*% A.l
+B.f <- t(A.f) %*% A.f
+diag(B.l) <- colSums(C.l)
+diag(B.f) <- colSums(C.f)
+tau <- update.tau(Y, A.l, A.f, B.l, B.f)
+g.l <- fit.init$fitted.g[[1]]
+g.f <- fit.init$fitted.g[[2]]
+
+
+
+# replace sd 0 with a small value
+#######################
+for (k in 1:K){
+  if(g.l[[k]]$sd[1]==0){g.l[[k]]$sd[1] <- g.l[[k]]$sd[2]*1e-6}
+  if(g.f[[k]]$sd[1]==0){g.f[[k]]$sd[1] <- g.f[[k]]$sd[2]*1e-6}
+}
+  
+for (k in 1:K){
+  if(class(g.l[[k]])=="normalmix"){
+    g.l[[k]]$M <- length(g.l[[k]]$sd)
+    g.l[[k]]$tau <- (g.l[[k]]$sd)^(-2)
+    if(g.l[[k]]$M>1){
+      g.l[[k]]$phi <- matrix(0, nrow=n, ncol=g.l[[k]]$M)
+    }
+  }
+  if(class(g.f[[k]])=="normalmix"){
+    g.f[[k]]$M <- length(g.f[[k]]$sd)
+    g.f[[k]]$tau <- (g.f[[k]]$sd)^(-2)
+    if(g.f[[k]]$M>1){
+      g.f[[k]]$phi <- matrix(0, nrow=p, ncol=g.f[[k]]$M)
+    }
+}
+}
+
+maxiter <- 100
+elbo.tol <- sqrt(.Machine$double.eps) *prod(dim(Y)) # set according to flashier implementation
+# https://github.com/willwerscheid/flashier/blob/fa2879879ada64a1c1586c4ca518f69e589e89ab/R/convergence_criteria.R#L1
+
+
+elbo.old <- 0
+
+for (n.iter in 1:maxiter){
+# L-step
+############################################
+# update q_l
+for (i in 1:n){
+  y <- Y[i,]
+  b <- A.l[i,]
+  b.old <- rep(0,K)
+  while(sum((b-b.old)^2)>1e-10){
+    b.old <- b
+    for (k in 1:K){
+      if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M==1)){
+        b[k] <- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])
+        # b[k] <- ebnm(x=(sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/B.f[k,k], s=(tau*B.f[k,k])^(-1/2),
+        #            prior_family="normal",
+        #            g_init=g.l[[k]], fix_g=TRUE, output='posterior_mean')$posterior$mean
+        
+      }
+      if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M >1)){
+          g.l[[k]]$phi[i,] <- update.phi(y=y, Ak=A.f[,k], 
+                                         pi.grid=g.l[[k]]$pi, tau.grid=g.l[[k]]$tau, tau=tau,
+                                         Bkk=B.f[k,k], B.minusk=B.f[-k,k], b.minusk=b[-k])
+          b[k] <- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))*sum(g.l[[k]]$phi[i,]/(g.l[[k]]$tau/tau+B.f[k,k]))
+      }
+    }
+  }
+  A.l[i,] <- b
+  for (k in 1:K){
+    if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M==1)){
+      C.l[i,k] <- b[k]^2+1/(g.l[[k]]$tau + tau*B.f[k,k])
+    }
+    if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M >1)){
+      C.l[i,k] <- sum(g.l[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])  )^2+1/(g.l[[k]]$tau + tau*B.f[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_l
+for (k in 1:K){
+  if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M==1)){
+    g.l[[k]]$tau <- mean(C.l[,k])^(-1)
+  }
+  if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M >1)){
+    g.l[[k]]$pi <- colMeans(g.l[[k]]$phi)
+  }
+}
+B.l <- t(A.l)%*%A.l
+diag(B.l) <- colSums(C.l)
+
+
+# F-step
+############################################
+# update q_f
+for (i in 1:p){
+  y <- Y[,i]
+  b <- A.f[i,]
+  b.old <- rep(0,K)
+  while(sum((b-b.old)^2)>1e-10){
+    b.old <- b
+    for (k in 1:K){
+      if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M==1)){
+        b[k] <- (sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])
+      }
+      if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M >1)){
+          g.f[[k]]$phi[i,] <- update.phi(y=y, Ak=A.l[,k], 
+                                         pi.grid=g.f[[k]]$pi, tau.grid=g.f[[k]]$tau, tau=tau,
+                                         Bkk=B.l[k,k], B.minusk=B.l[-k,k], b.minusk=b[-k])
+          b[k] <- (sum(y*A.f[,k])-sum(B.l[-k,k]*b[-k]))*sum(g.f[[k]]$phi[i,]/(g.f[[k]]$tau/tau+B.l[k,k]))
+      }
+    }
+  }
+  A.f[i,] <- b
+  for (k in 1:K){
+    if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M==1)){
+      C.f[i,k] <- b[k]^2+1/(g.f[[k]]$tau + tau*B.l[k,k])
+    }
+    if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M >1)){
+      C.f[i,k] <- sum(g.f[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])  )^2+1/(g.f[[k]]$tau + tau*B.l[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_f
+for (k in 1:K){
+  if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M==1)){
+    g.f[[k]]$tau <- mean(C.f[,k])^(-1)
+  }
+  if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M >1)){
+    g.f[[k]]$pi <- colMeans(g.f[[k]]$phi)
+  }
+}
+B.f <- t(A.f)%*%A.f
+diag(B.f) <- colSums(C.f)
+
+
+# update tau
+############################################
+tau <- update.tau(Y, A.l, A.f, B.l, B.f)
+
+# check elbo
+############################################
+elbo <- compute.elbo(Y=Y, tau=tau, K=K,
+                     A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+#print(paste0("iteration:", n.iter, "; elbo: ",elbo))
+if (abs(elbo-elbo.old)<elbo.tol) break
+elbo.old <- elbo
+}
+
+out.list <- list(Y=Y, tau=tau, elbo=elbo,
+                 A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+return(out.list)
+}
+
+```
+
+### initilaize w/ SVD + backfit w/ Alt-Flash
+
+```{r}
+altflash_normal <- function(Y,K){
+
+# initialization
+############################################
+
+# initialization from SVD
+Y.rsvd <- rsvd::rsvd(Y, k=K)
+A.l <- Y.rsvd$u %*% diag(Y.rsvd$d)
+A.f <- Y.rsvd$v
+B.l <- t(A.l) %*% A.l
+B.f <- t(A.f) %*% A.f
+C.l <- A.l^2
+C.f <- A.f^2
+
+tau <- update.tau(Y, A.l, A.f, B.l, B.f)
+
+# borrow structure from flash object (not using the estimates)
+g.l <- fit.init$fitted.g[[1]]
+g.f <- fit.init$fitted.g[[2]]
+
+for (k in 1:K){
+  g.l[[k]]$sd <- sd(A.l[,k])
+  g.f[[k]]$sd <- sd(A.f[,k])
+}
+
+# replace sd 0 with a small value
+#######################
+for (k in 1:K){
+  if(g.l[[k]]$sd[1]==0){g.l[[k]]$sd[1] <- g.l[[k]]$sd[2]*1e-6}
+  if(g.f[[k]]$sd[1]==0){g.f[[k]]$sd[1] <- g.f[[k]]$sd[2]*1e-6}
+}
+  
+for (k in 1:K){
+  if(class(g.l[[k]])=="normalmix"){
+    g.l[[k]]$M <- length(g.l[[k]]$sd)
+    g.l[[k]]$tau <- (g.l[[k]]$sd)^(-2)
+    if(g.l[[k]]$M>1){
+      g.l[[k]]$phi <- matrix(0, nrow=n, ncol=g.l[[k]]$M)
+    }
+  }
+  if(class(g.f[[k]])=="normalmix"){
+    g.f[[k]]$M <- length(g.f[[k]]$sd)
+    g.f[[k]]$tau <- (g.f[[k]]$sd)^(-2)
+    if(g.f[[k]]$M>1){
+      g.f[[k]]$phi <- matrix(0, nrow=p, ncol=g.f[[k]]$M)
+    }
+}
+}
+
+maxiter <- 100
+elbo.tol <- sqrt(.Machine$double.eps) *prod(dim(Y)) # set according to flashier implementation
+# https://github.com/willwerscheid/flashier/blob/fa2879879ada64a1c1586c4ca518f69e589e89ab/R/convergence_criteria.R#L1
+
+
+elbo.old <- 0
+
+for (n.iter in 1:maxiter){
+# L-step
+############################################
+# update q_l
+for (i in 1:n){
+  y <- Y[i,]
+  b <- A.l[i,]
+  b.old <- rep(0,K)
+  while(sum((b-b.old)^2)>1e-10){
+    b.old <- b
+    for (k in 1:K){
+      if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M==1)){
+        b[k] <- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])
+      }
+      if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M >1)){
+          g.l[[k]]$phi[i,] <- update.phi(y=y, Ak=A.f[,k], 
+                                         pi.grid=g.l[[k]]$pi, tau.grid=g.l[[k]]$tau, tau=tau,
+                                         Bkk=B.f[k,k], B.minusk=B.f[-k,k], b.minusk=b[-k])
+          b[k] <- (sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))*sum(g.l[[k]]$phi[i,]/(g.l[[k]]$tau/tau+B.f[k,k]))
+      }
+    }
+  }
+  A.l[i,] <- b
+  for (k in 1:K){
+    if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M==1)){
+      C.l[i,k] <- b[k]^2+1/(g.l[[k]]$tau + tau*B.f[k,k])
+    }
+    if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M >1)){
+      C.l[i,k] <- sum(g.l[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.f[,k])-sum(B.f[-k,k]*b[-k]))/(g.l[[k]]$tau/tau+B.f[k,k])  )^2+1/(g.l[[k]]$tau + tau*B.f[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_l
+for (k in 1:K){
+  if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M==1)){
+    g.l[[k]]$tau <- mean(C.l[,k])^(-1)
+  }
+  if((class(g.l[[k]])=="normalmix") & (g.l[[k]]$M >1)){
+    g.l[[k]]$pi <- colMeans(g.l[[k]]$phi)
+  }
+}
+B.l <- t(A.l)%*%A.l
+diag(B.l) <- colSums(C.l)
+
+
+# F-step
+############################################
+# update q_f
+for (i in 1:p){
+  y <- Y[,i]
+  b <- A.f[i,]
+  b.old <- rep(0,K)
+  while(sum((b-b.old)^2)>1e-10){
+    b.old <- b
+    for (k in 1:K){
+      if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M==1)){
+        b[k] <- (sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])
+      }
+      if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M >1)){
+          g.f[[k]]$phi[i,] <- update.phi(y=y, Ak=A.l[,k], 
+                                         pi.grid=g.f[[k]]$pi, tau.grid=g.f[[k]]$tau, tau=tau,
+                                         Bkk=B.l[k,k], B.minusk=B.l[-k,k], b.minusk=b[-k])
+          b[k] <- (sum(y*A.f[,k])-sum(B.l[-k,k]*b[-k]))*sum(g.f[[k]]$phi[i,]/(g.f[[k]]$tau/tau+B.l[k,k]))
+      }
+    }
+  }
+  A.f[i,] <- b
+  for (k in 1:K){
+    if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M==1)){
+      C.f[i,k] <- b[k]^2+1/(g.f[[k]]$tau + tau*B.l[k,k])
+    }
+    if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M >1)){
+      C.f[i,k] <- sum(g.f[[k]]$phi[i,]
+                     *(
+                       ((sum(y*A.l[,k])-sum(B.l[-k,k]*b[-k]))/(g.f[[k]]$tau/tau+B.l[k,k])  )^2+1/(g.f[[k]]$tau + tau*B.l[k,k]))
+                     ) 
+    }
+  }
+}
+# update g_f
+for (k in 1:K){
+  if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M==1)){
+    g.f[[k]]$tau <- mean(C.f[,k])^(-1)
+  }
+  if((class(g.f[[k]])=="normalmix") & (g.f[[k]]$M >1)){
+    g.f[[k]]$pi <- colMeans(g.f[[k]]$phi)
+  }
+}
+B.f <- t(A.f)%*%A.f
+diag(B.f) <- colSums(C.f)
+
+
+# update tau
+############################################
+tau <- update.tau(Y, A.l, A.f, B.l, B.f)
+
+# check elbo
+############################################
+elbo <- compute.elbo(Y=Y, tau=tau, K=K,
+                     A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+#print(paste0("iteration:", n.iter, "; elbo: ",elbo))
+if (abs(elbo-elbo.old)<elbo.tol) break
+elbo.old <- elbo
+}
+
+out.list <- list(Y=Y, tau=tau, elbo=elbo,
+                 A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
+                     g.l=g.l, g.f=g.f)
+return(out.list)
+}
+```
+
+
+
+# Results
+
+### an example
+
+```{r}
+# an example from https://stephenslab.github.io/flashr/articles/flash_intro.html 
+set.seed(1)
+n = 100
+p = 500
+k = 7
+LL = matrix(rnorm(n*k),nrow=n)
+FF = matrix(rnorm(p*k),nrow=p)
+Y = LL %*% t(FF) + rnorm(n*p)
+
+rm(n, p)
+n <- nrow(Y)
+p <- ncol(Y)
+
+
+# initialize w/ flashier (not backfit; to compare computation time)
+system.time(
+fit.init <- flashier::flash(data=Y, backfit=FALSE, 
+                            prior.family=prior.normal(), verbose.lvl=0)
+)
+
+# initialize + backfit w/ flashier 
+system.time(
+fit.flashier <- flashier::flash(data=Y, backfit=TRUE, 
+                            prior.family=prior.normal(), verbose.lvl=0)
+)
+
+# initialize w/ flashier + backfit w/ altflash
+system.time(
+fit1 <- flashier_altflash_normal(Y=Y)
+)
+
+# initialize w/ svd + backfit w/ altflash
+system.time(
+fit2 <- altflash_normal(Y=Y, K=k) # assuming K is known
+)
+
+# elbo difference
+fit1$elbo - fit.flashier$elbo
+fit2$elbo - fit.flashier$elbo
+
+# difference from the truth
+c(norm(LL %*% t(FF) - fitted(fit.flashier), "F"),
+  norm(LL %*% t(FF) - fit1$A.l%*%t(fit1$A.f), "F"),
+  norm(LL %*% t(FF) - fit2$A.l%*%t(fit2$A.f), "F"))
+
+# difference from the flashier fit
+c(norm(fitted(fit.flashier) - fit1$A.l%*%t(fit1$A.f), "F"),
+  norm(fitted(fit.flashier) - fit2$A.l%*%t(fit2$A.f), "F"))
+
+# altflash and flashier results are almost identical
+summary(c(fitted(fit.flashier) - fit1$A.l%*%t(fit1$A.f)))
+```
+
+### try more seeds
+
+```{r}
+mat.time <- matrix(0, nrow=0, ncol=4)
+mat.elbo <- matrix(0, nrow=0, ncol=2)
+
+for (i.seed in 101:120){
+    # an example from https://stephenslab.github.io/flashr/articles/flash_intro.html 
+    set.seed(i.seed)
+    n = 100
+    p = 500
+    k = 7
+    LL = matrix(rnorm(n*k),nrow=n)
+    FF = matrix(rnorm(p*k),nrow=p)
+    Y = LL %*% t(FF) + rnorm(n*p)
+    
+    rm(n, p)
+    n <- nrow(Y)
+    p <- ncol(Y)
+    
+    
+    # initialize w/ flashier (not backfit; to compare computation time)
+    system.time(
+    fit.init <- flashier::flash(data=Y, backfit=FALSE, 
+                                prior.family=prior.normal(), verbose.lvl=0)
+    ) -> time1
+    
+    # initialize + backfit w/ flashier 
+    system.time(
+    fit.flashier <- flashier::flash(data=Y, backfit=TRUE, 
+                                prior.family=prior.normal(), verbose.lvl=0)
+    )-> time2
+    
+    # initialize w/ flashier + backfit w/ altflash
+    system.time(
+    fit1 <- flashier_altflash_normal(Y=Y)
+    ) -> time3
+    
+    # initialize w/ svd + backfit w/ altflash
+    system.time(
+    fit2 <- altflash_normal(Y=Y, K=k) # assuming K is known
+    ) -> time4
+    
+    mat.time <- rbind(mat.time, c(time1[3], time2[3], time3[3], time4[3]))
+    
+    # elbo difference
+    mat.elbo <- rbind(mat.elbo, c(fit1$elbo - fit.flashier$elbo, fit2$elbo - fit.flashier$elbo))
+}
+
+colnames(mat.time) <- c("flashier init only", "flashier", "flashier+altflash", "altflash")
+colMeans(mat.time)
+summary(mat.time)
+
+colnames(mat.elbo) <- c("flashier+altflash", "altflash")
+colMeans(mat.elbo)
+summary(mat.elbo)
+
+```
+
+
+
