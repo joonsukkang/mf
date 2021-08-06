@@ -16,9 +16,6 @@ library(microbenchmark)
 ```
 
 
-version 1. default BLAS
-version 2. vecLib BLAS
-
 
 
 # Alt-Flash
@@ -204,7 +201,7 @@ fit.altflash <- altflash_normal(fit.init)
 fit.altflash$elbo - fit.flashier$elbo
 ```
 
-### draw figure for elbo evolution 
+### draw figure: elbo evolution
 
 (the script with `eval=FALSE` and ran separately to save the figure)
 
