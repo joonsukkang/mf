@@ -476,16 +476,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree3224ca8c09505ec0afbc75585a0d6d109eaf7c94targetblank3224ca8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/3224ca8c09505ec0afbc75585a0d6d109eaf7c94" target="_blank">3224ca8</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree37b60336fdfea9e82f7430f1d20f1989ba3b6991targetblank37b6033a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/37b60336fdfea9e82f7430f1d20f1989ba3b6991" target="_blank">37b6033</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree3224ca8c09505ec0afbc75585a0d6d109eaf7c94targetblank3224ca8a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree37b60336fdfea9e82f7430f1d20f1989ba3b6991targetblank37b6033a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/3224ca8c09505ec0afbc75585a0d6d109eaf7c94" target="_blank">3224ca8</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/37b60336fdfea9e82f7430f1d20f1989ba3b6991" target="_blank">37b6033</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -588,6 +588,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/37b60336fdfea9e82f7430f1d20f1989ba3b6991/analysis/alt-flash-normal.Rmd" target="_blank">37b6033</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-08-06
+</td>
+<td>
+alt-flash with normal priors on L and F
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/d58038a4c6ea0747fb4e3ecdf4dd1ba37b18b8c0/docs/alt-flash-normal.html" target="_blank">d58038a</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-08-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/3224ca8c09505ec0afbc75585a0d6d109eaf7c94/analysis/alt-flash-normal.Rmd" target="_blank">3224ca8</a>
 </td>
 <td>
@@ -620,7 +654,6 @@ x dplyr::lag()    masks stats::lag()</code></pre>
 library(flashier)
 library(ebnm)
 library(microbenchmark)</code></pre>
-<p>version 1. default BLAS version 2. vecLib BLAS</p>
 <div id="alt-flash" class="section level1">
 <h1>Alt-Flash</h1>
 <div id="define-some-internal-functions" class="section level3">
@@ -777,7 +810,7 @@ fit.init &lt;- flash(data=Y, backfit=FALSE,
                             prior.family=prior.normal(), verbose.lvl=0)
 )</code></pre>
 <pre><code>   user  system elapsed 
- 31.718   1.453  15.080 </code></pre>
+ 34.982   1.592  15.693 </code></pre>
 </div>
 <div id="backfit-performance-flashier-v-alt-flash" class="section level3">
 <h3>backfit performance: flashier v alt-flash</h3>
@@ -786,19 +819,56 @@ fit.init &lt;- flash(data=Y, backfit=FALSE,
                            times=20,
                            unit=&#39;s&#39;)
 summary(fit.back)</code></pre>
-<pre><code>          expr       min        lq      mean    median       uq       max neval
-1 fit.flashier 2.4567960 2.6489411 2.8340309 2.7854085 2.986439 3.4095872    20
-2 fit.altflash 0.2082893 0.2361035 0.2854182 0.2563124 0.305387 0.5490156    20</code></pre>
+<pre><code>          expr       min        lq      mean   median        uq       max neval
+1 fit.flashier 2.6099906 2.6394225 2.7726676 2.744886 2.8750445 3.0305532    20
+2 fit.altflash 0.2285241 0.2378311 0.2888263 0.254601 0.2944778 0.6177906    20</code></pre>
 <pre class="r"><code>boxplot(fit.back)</code></pre>
 <p><img src="figure/alt-flash-normal.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d58038a4c6ea0747fb4e3ecdf4dd1ba37b18b8c0/docs/figure/alt-flash-normal.Rmd/unnamed-chunk-6-1.png" target="_blank">d58038a</a>
+</td>
+<td>
+Joonsuk Kang
+</td>
+<td>
+2021-08-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># check elbo
 fit.flashier &lt;- flash.backfit(fit.init, verbose.lvl=0)
 fit.altflash &lt;- altflash_normal(fit.init)
 fit.altflash$elbo - fit.flashier$elbo</code></pre>
 <pre><code>[1] -0.0003051162</code></pre>
 </div>
-<div id="draw-figure-for-elbo-evolution" class="section level3">
-<h3>draw figure for elbo evolution</h3>
+<div id="draw-figure-elbo-evolution" class="section level3">
+<h3>draw figure: elbo evolution</h3>
 <p>(the script with <code>eval=FALSE</code> and ran separately to save the figure)</p>
 <pre class="r"><code># to save the elbo sequence and the corresponding running time, overwrite the function &quot;flashier::flash.backfit&quot;
 # the modified code is available at &quot;code/flash.backfit_elbo_tracking&quot;
