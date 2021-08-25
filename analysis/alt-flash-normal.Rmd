@@ -1,7 +1,7 @@
 ---
-title: "alt-flash: normal priors (on L and F)"
+title: "alt-flash: normal"
 author: "Joonsuk Kang"
-date: "2021-08-06"
+date: "2021-08-25"
 output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
@@ -13,223 +13,81 @@ library(tictoc)
 library(flashier)
 library(ebnm)
 library(microbenchmark)
+library(parallel); detectCores(); set.cores <- detectCores()
+library(ashr)
+
+source("code/alt-flash_v20210825.R")
+
+# "flash.backfit.e" is the function "flashier::flash.backfit" with elbo/time tracking functionality
+environment(flash.backfit.e) <- asNamespace('flashier') 
+flash.backfit.e <- compiler::cmpfun(flash.backfit.e)
 ```
 
-
-
-
-# Alt-Flash
-
-### define some internal functions
+# an example
 
 ```{r}
-# functions 
-############################################
-SOL.TAU <- function(trYTY, Y, A.l, A.f, B.l, B.f){
-  
-  n <- nrow(Y)
-  p <- ncol(Y)
-  
-  if(n<p){  tau <- ((trYTY - 2 * sum(diag(tcrossprod(crossprod(Y, A.l),A.f))) + sum(B.l*B.f))/(n*p))^(-1)}
-  if(n>=p){ tau <- ((trYTY - 2 * sum(diag(tcrossprod(tcrossprod(t(A.f), Y), t(A.l)))) + sum(B.l*B.f))/(n*p))^(-1)}
-  return(tau)
-}
-
-compute.elbo <- function(A.l, A.f, C.l, C.f,
-                         tau, tau.l, tau.f){
-  
-  n <- nrow(A.l)
-  p <- nrow(A.f)
-  K <- ncol(A.l)
-  
-  elbo.0 <- -n*p/2*(log(2*pi)-log(tau)+1)
-  elbo.L <- -(-n*K/2 - n/2*sum(log(tau.l)) + 1/2*sum(tcrossprod(C.l,t(tau.l))) - 1/2*sum(log(C.l-A.l^2)))
-  elbo.F <- -(-p*K/2 - p/2*sum(log(tau.f)) + 1/2*sum(tcrossprod(C.f,t(tau.f))) - 1/2*sum(log(C.f-A.f^2)))
-
-  return(elbo.0+elbo.L+elbo.F)
-}
-```
-
-
-
-### initilaize w/ flashier + backfit w/ Alt-Flash
-
-```{r}
-altflash_normal <- function(fit.init, maxiter=100){
-
-  time.vec <- Sys.time()
-  elbo.vec <- c()
-  
-#tic("preprocessing")
-# initialization
-############################################
-# initialize the fit object with flashier; do not backfit
-Y <- fit.init$flash.fit$Y
-K <- fit.init$n.factors
-trYTY <- fit.init$flash.fit$Y2 # = sum(diag(crossprod(Y,Y))) 
-n <- nrow(Y)
-p <- ncol(Y)
-
-# initialization from fit.flashier; scale applied to F
-A.l <- fit.init$loadings.pm[[1]]
-A.f <- t(t(fit.init$loadings.pm[[2]]) * fit.init$loadings.scale)
-B.l <- crossprod(A.l, A.l)
-B.f <- crossprod(A.f, A.f)
-
-tau <- fit.init$flash.fit$tau
-tau.l <- c(); tau.f <- c();
-for (k in 1:K){
-  tau.l <- c(tau.l, (fit.init$fitted.g[[1]][[k]]$sd)^(-2) )
-  tau.f <- c(tau.f, (fit.init$fitted.g[[2]][[k]]$sd * fit.init$loadings.scale[k])^(-2))
-}
-
-elbo.tol <- sqrt(.Machine$double.eps) *prod(dim(Y)) 
-# set according to flashier implementation
-# https://github.com/willwerscheid/flashier/blob/fa2879879ada64a1c1586c4ca518f69e589e89ab/R/convergence_criteria.R#L1
-elbo.old <- 0
-#toc()
-
-
-for (n.iter in 1:maxiter){
- #tic(paste0("iter_",n.iter))  
-  
-  
-    # L-step
-    ############################################
-    # update q_l
-    A.l <-   tcrossprod(tcrossprod(Y, t(A.f)),  t(solve(B.f+diag(tau.l/tau))))
-    B.l <- crossprod(A.l, A.l)
-    diag(B.l) <- diag(B.l) + n/(tau.l+tau*diag(B.f))
-    C.l <- A.l^2 + matrix(rep(1/(tau.l+tau*diag(B.f)), each=n), byrow=FALSE, ncol=K)
-
-    # update g_l
-    tau.l <- (colMeans(C.l))^(-1)
-    
-    
-    # Rescaling step
-    ############################################
-    # rescaling q_l, g_l; and also g_f
-    scale.L <- sqrt(colSums(A.l^2))
-    inv.scale.L <- 1/scale.L
-    A.l <- t(t(A.l) / scale.L)
-    B.l <- B.l * (tcrossprod(inv.scale.L,inv.scale.L))
-    C.l <- t(t(C.l) / scale.L^2)
-    tau.l <- tau.l*(scale.L^2)
-
-    # A.f <- t(t(A.f) * scale.L)    # --> computations not necessary (to be overwritten soon)
-    # B.f <- B.f * (tcrossprod(scale.L,scale.L))
-    # C.f <- t(t(C.f) * scale.L^2)
-    tau.f <- tau.f / (scale.L^2)
-    
-    
-    # F-step
-    ############################################
-    # update q_f
-    A.f <- tcrossprod(crossprod(Y, A.l), t(solve(B.l + diag(tau.f/tau))))
-    B.f <- crossprod(A.f, A.f)
-    diag(B.f) <- diag(B.f) + p/(tau.f+tau*diag(B.l))
-    C.f <- A.f^2 + matrix(rep(1/(tau.f+tau*diag(B.l)), each=p), byrow=FALSE, ncol=K)
-    
-    # update g_f
-    tau.f <- (colMeans(C.f))^(-1)
-    
-
-    # update tau
-    ############################################
-    tau <- SOL.TAU(trYTY=trYTY, Y, A.l, A.f, B.l, B.f)
-    
-    
-    # check elbo
-    ############################################
-    elbo <- compute.elbo(A.l=A.l, A.f=A.f, C.l=C.l, C.f=C.f,
-                         tau=tau, tau.l=tau.l, tau.f=tau.f)
-    elbo.vec <- c(elbo.vec, elbo)
-    time.vec <- c(time.vec, Sys.time())
-    
-    if (abs(elbo-elbo.old)<elbo.tol) break
-    elbo.old <- elbo
-    
-#toc()
-}
-time.vec <- as.numeric(time.vec[-1] - time.vec[1])
-
-out.list <- list(Y=Y, tau=tau, elbo=elbo, elbo.vec=elbo.vec, time.vec=time.vec,
-                 A.l=A.l, A.f=A.f, B.l=B.l, B.f=B.f, C.l=C.l, C.f=C.f,
-                     tau.l=tau.l, tau.f=tau.f)
-return(out.list)
-}
-```
-
-
-
-# Results
-
-### simulation setting
-
-```{r}
-set.seed(312)
-n = 500
-p = 2500
-k = 30
+set.seed(1)
+n = 1000; p=2000; k=30
 LL = matrix(rnorm(n*k),nrow=n)
 FF = matrix(rnorm(p*k),nrow=p)
 Y = LL %*% t(FF) + rnorm(n*p)
+rm(n,p,k,LL,FF)
 ```
 
-### initialize w/ flashier
+### initialize using flashier
 
 ```{r}
+# initialization w/ flashier
 system.time(
 fit.init <- flash(data=Y, backfit=FALSE, 
                             prior.family=prior.normal(), verbose.lvl=0)
 )
+fit.init$elbo
 ```
 
-### backfit performance: flashier v alt-flash
+### flashier result
 
 ```{r}
-fit.back <- microbenchmark(fit.flashier = flash.backfit(fit.init, verbose.lvl=0), # backfit w/ flashier
-                           fit.altflash = altflash_normal(fit.init), # backfit w/ alt-flash
-                           times=20,
-                           unit='s')
-summary(fit.back)
-boxplot(fit.back)
+fit.f <- flash.backfit.e(fit.init, verbose.lvl=0) # flashier fit
 
-# check elbo
-fit.flashier <- flash.backfit(fit.init, verbose.lvl=0)
-fit.altflash <- altflash_normal(fit.init)
-fit.altflash$elbo - fit.flashier$elbo
+options(cl.cores=set.cores)
+options(cl.type='FORK')
+fit.f.p <- flash.backfit.e(fit.init, verbose.lvl=0, method='parallel') 
 ```
 
-### draw figure: elbo evolution
+### alt-flash results
 
-(the script with `eval=FALSE` and ran separately to save the figure)
+```{r}
+fit.c1j1    <- alt.flash(fit.init, n.cores=1, n.jobs=1, when.normal.closed.form=FALSE)
+fit.c1j4    <- alt.flash(fit.init, n.cores=1, n.jobs=4, when.normal.closed.form=FALSE)
+fit.c4j4    <- alt.flash(fit.init, n.cores=4, n.jobs=4, when.normal.closed.form=FALSE)
 
-```{r, eval=FALSE}
-# to save the elbo sequence and the corresponding running time, overwrite the function "flashier::flash.backfit"
-# the modified code is available at "code/flash.backfit_elbo_tracking"
-trace(flash.backfit, edit=TRUE)
-
-fit.flashier <- flash.backfit(fit.init, verbose.lvl=0)
-fit.altflash <- altflash_normal(fit.init)
-untrace(flash.backfit)
-
-fit.altflash$elbo - fit.flashier[[1]]$elbo
-
-
-max.elbo <- max(fit.altflash$elbo.vec, fit.flashier$elbo.vec)
-y.altflash <- max.elbo - fit.altflash$elbo.vec
-y.flashier <- max.elbo - fit.flashier$elbo.vec
-y.altflash[y.altflash<0.01] <- 0.01
-y.flashier[y.flashier<0.01] <- 0.01
-
-ggplot()+
-  geom_line(aes(x=fit.altflash$time.vec, y=y.altflash, col='alt-flash'))+
-  geom_point(aes(x=fit.altflash$time.vec, y=y.altflash, col='alt-flash'))+
-  geom_line(aes(x=fit.flashier$time.vec, y=y.flashier, col='flashier'))+
-  geom_point(aes(x=fit.flashier$time.vec, y=y.flashier, col='flashier'))+
-  xlim(0,NA) + xlab("runtime (seconds)") + 
-  scale_y_log10() + ylab("distance from best elbo")
-
-ggsave("output/alt-flash-normal-elbo.pdf", width=6, height=3)
+fit.cf <- alt.flash(fit.init, n.cores=1)
 ```
+
+
+### visualization of elbo evolution
+
+```{r}
+DF.FIT <- function(fit, type){ data.frame(time=fit$time.vec, elbo=fit$elbo.vec, type=type) }
+
+rbind(DF.FIT(fit.f, 'flashier'),
+      DF.FIT(fit.f.p, 'flashier: parallel'),
+      DF.FIT(fit.c1j1, 'alt-flash: 1 core, 1 job'),
+      DF.FIT(fit.c1j4, 'alt-flash: 1 core, 4 jobs'), 
+      DF.FIT(fit.c4j4, 'alt-flash: 4 core, 4 jobs'),
+      DF.FIT(fit.cf, 'alt-flash: closed_form')
+) -> df.fig
+
+max(df.fig$elbo)
+e.tol <- fit.cf$elbo.tol; print(e.tol)
+
+df.fig$dist <- max(df.fig$elbo) - df.fig$elbo
+df.fig %>% mutate(dist = ifelse(dist < e.tol/10, e.tol/10, dist)) -> df.fig
+
+df.fig %>% 
+  ggplot(aes(x=time, y=dist, col=type, group=type))+
+  geom_line() + geom_point() + 
+  scale_y_log10() + ggtitle("distance from best elbo")
+```
+
