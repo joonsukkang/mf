@@ -16,8 +16,8 @@ library(microbenchmark)
 library(parallel); detectCores(); set.cores <- detectCores()
 library(ashr)
 
-#setwd("~/Dropbox/mf")
 source("code/alt-flash_v20210825.R")
+
 # "flash.backfit.e" is the function "flashier::flash.backfit" with elbo/time tracking functionality
 environment(flash.backfit.e) <- asNamespace('flashier') 
 flash.backfit.e <- compiler::cmpfun(flash.backfit.e)
@@ -31,7 +31,6 @@ n = 1000; p=2000; k=30
 LL = matrix(rnorm(n*k),nrow=n)
 FF = matrix(rnorm(p*k),nrow=p)
 Y = LL %*% t(FF) + rnorm(n*p)
-
 rm(n,p,k,LL,FF)
 ```
 
@@ -50,7 +49,6 @@ fit.init$elbo
 
 ```{r}
 fit.f <- flash.backfit.e(fit.init, verbose.lvl=0) # flashier fit
-
 
 options(cl.cores=set.cores)
 options(cl.type='FORK')
@@ -98,16 +96,9 @@ df.fig %>%
 
 ```{r, eval=TRUE}
 mb <- microbenchmark(
-  flash.backfit   = flash.backfit(fit.init, verbose.lvl=0), # using original "flashier" (just for comparison with flash.backfit.e)
-  flash.backfit.e = flash.backfit.e(fit.init, verbose.lvl=0), # using "flashier.backfit.e"
-  flash.backfit.p = flash.backfit(fit.init, verbose.lvl=0, method='parallel'),
-  
-  fit.c1j1   = alt.flash(fit.init, n.cores=1, n.jobs=1, when.normal.closed.form=FALSE),
-  fit.c1j4   = alt.flash(fit.init, n.cores=1, n.jobs=4, when.normal.closed.form=FALSE),
-  fit.c4j4   = alt.flash(fit.init, n.cores=4, n.jobs=4, when.normal.closed.form=FALSE),
-  
+  flash.f.p = flash.backfit(fit.init, verbose.lvl=0, method='parallel'), # flashier with parallel 
   fit.cf     = alt.flash(fit.init, n.cores=1),
-  times=20)
+  times=30)
 
 summary(mb)
 autoplot(mb) # violin plot
