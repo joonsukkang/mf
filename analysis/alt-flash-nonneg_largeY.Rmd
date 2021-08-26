@@ -1,5 +1,5 @@
 ---
-title: "alt-flash: non-negative prior on L and normal prior on F"
+title: "alt-flash: nonnegative (large Y)"
 author: "Joonsuk Kang"
 date: "2021-08-25"
 output: workflowr::wflow_html
