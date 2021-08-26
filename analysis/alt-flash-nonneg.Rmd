@@ -1,0 +1,83 @@
+---
+title: "alt-flash: nonnegative"
+author: "Joonsuk Kang"
+date: "2021-08-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r}
+library(tidyverse)
+library(tictoc)
+library(flashier)
+library(ebnm)
+library(parallel); detectCores(); set.cores <- detectCores()
+library(ashr)
+
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20210825.R")
+
+# "flash.backfit.e" is the function "flashier::flash.backfit" with elbo/time tracking functionality
+environment(flash.backfit.e) <- asNamespace('flashier') 
+flash.backfit.e <- compiler::cmpfun(flash.backfit.e)
+```
+
+
+```{r}
+draw.fig <- function(seed){
+  
+  # create data matrix
+  set.seed(seed)
+  n = 100; p=500; k=7
+  LL = matrix(rexp(n*k),nrow=n)
+  FF = matrix(rnorm(p*k),nrow=p)
+  Y = LL %*% t(FF) + rnorm(n*p)
+  rm(n,p,k,LL,FF)
+
+  # initialize using flashier
+  tic('initialize flashier object')
+  fit.init <- flash(data=Y, backfit=FALSE, prior.family=c(prior.nonnegative(), prior.normal()), verbose.lvl=0)
+  toc()
+  rm(Y)
+
+
+  # flashier results
+  options(cl.cores=set.cores); options(cl.type='FORK')
+  fit.f.e <- flash.backfit.e(fit.init, verbose.lvl=0, method='extrapolate', maxiter=1000)
+  fit.f.s <- flash.backfit.e(fit.init, verbose.lvl=0, method='sequential', maxiter=1000)
+  #fit.f.p <- flash.backfit.e(fit.init, verbose.lvl=0, method='parallel') # g_init must be NULL or an object of class normalmix.
+
+  # alt-flash results
+  fit.alt    <- alt.flash(fit.init, n.cores=1, maxiter=1000)
+
+  # draw figure
+  DF.FIT <- function(fit, type){ data.frame(time=fit$time.vec, elbo=fit$elbo.vec, type=type) }
+  
+  rbind(DF.FIT(fit.f.e,     'flashier: extrapolate'),
+        DF.FIT(fit.f.s,     'flashier: sequential'),
+        DF.FIT(fit.alt,   'alt-flash: single-core')
+        ) -> df.fig
+  
+  e.tol <- fit.alt$elbo.tol
+  
+  df.fig$dist <- max(df.fig$elbo) - df.fig$elbo
+  df.fig %>% mutate(dist = ifelse(dist < e.tol/10, e.tol/10, dist)) -> df.fig
+  
+  df.fig %>% 
+    ggplot(aes(x=time, y=dist, col=type, group=type))+
+    geom_line() + 
+    scale_y_log10() + ggtitle(paste0("distance from best elbo: seed=", seed)) -> fig
+  
+  return(fig)
+}
+
+```
+
+```{r}
+n.seeds <- 9
+for (seed in 1:n.seeds){ print(draw.fig(seed)) }
+```
+
+
