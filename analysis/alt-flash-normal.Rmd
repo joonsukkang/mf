@@ -23,71 +23,62 @@ environment(flash.backfit.e) <- asNamespace('flashier')
 flash.backfit.e <- compiler::cmpfun(flash.backfit.e)
 ```
 
-# an example
+
 
 ```{r}
-set.seed(1)
-n = 1000; p=2000; k=30
-LL = matrix(rnorm(n*k),nrow=n)
-FF = matrix(rnorm(p*k),nrow=p)
-Y = LL %*% t(FF) + rnorm(n*p)
-rm(n,p,k,LL,FF)
-```
+draw.fig <- function(seed){
+  
+  # create data matrix
+  #set.seed(seed)
+  n = 100; p=500; k=7
+  LL = matrix(rnorm(n*k),nrow=n)
+  FF = matrix(rnorm(p*k),nrow=p)
+  Y = LL %*% t(FF) + rnorm(n*p)
+  rm(n,p,k,LL,FF)
 
-### initialize using flashier
+  # initialize using flashier
+  tic('initialize flashier object')
+  fit.init <- flash(data=Y, backfit=FALSE, prior.family=prior.normal(), verbose.lvl=0)
+  toc()
+  rm(Y)
+
+  # flashier results
+  options(cl.cores=set.cores); options(cl.type='FORK')
+  fit.f <- flash.backfit.e(fit.init, verbose.lvl=0) # flashier fit
+  fit.f.p <- flash.backfit.e(fit.init, verbose.lvl=0, method='parallel') # flashier fit with parallel method
+
+  # alt-flash results
+  alt.flash(fit.init)
+  fit.alt    <- alt.flash(fit.init, n.cores=1, when.normal.closed.form=FALSE)
+  fit.alt.p  <- alt.flash(fit.init, n.cores=set.cores, when.normal.closed.form=FALSE)
+  fit.cf     <- alt.flash(fit.init, n.cores=1) # 'closed-form' method
+  
+  # draw figure
+  DF.FIT <- function(fit, type){ data.frame(time=fit$time.vec, elbo=fit$elbo.vec, type=type) }
+  
+  rbind(DF.FIT(fit.f,     'flashier'),
+        DF.FIT(fit.f.p,   'flashier: parallel'),
+        DF.FIT(fit.alt,   'alt-flash: single-core'),
+        DF.FIT(fit.alt.p, 'alt-flash: parallel'),
+        DF.FIT(fit.cf,    'alt-flash: closed_form')
+  ) -> df.fig
+  
+  e.tol <- fit.cf$elbo.tol
+  
+  df.fig$dist <- max(df.fig$elbo) - df.fig$elbo
+  df.fig %>% mutate(dist = ifelse(dist < e.tol/10, e.tol/10, dist)) -> df.fig
+  
+  df.fig %>% 
+    ggplot(aes(x=time, y=dist, col=type, group=type))+
+    geom_line() + geom_point() + 
+    scale_y_log10() + ggtitle(paste0("distance from best elbo: seed=", seed)) -> fig
+  
+  return(fig)
+}
+
+```
 
 ```{r}
-# initialization w/ flashier
-system.time(
-fit.init <- flash(data=Y, backfit=FALSE, 
-                            prior.family=prior.normal(), verbose.lvl=0)
-)
-fit.init$elbo
+n.seeds <- 9
+for (seed in 1:n.seeds){ print(draw.fig(seed)) }
 ```
-
-### flashier result
-
-```{r}
-fit.f <- flash.backfit.e(fit.init, verbose.lvl=0) # flashier fit
-
-options(cl.cores=set.cores)
-options(cl.type='FORK')
-fit.f.p <- flash.backfit.e(fit.init, verbose.lvl=0, method='parallel') 
-```
-
-### alt-flash results
-
-```{r}
-fit.c1j1    <- alt.flash(fit.init, n.cores=1, n.jobs=1, when.normal.closed.form=FALSE)
-fit.c1j4    <- alt.flash(fit.init, n.cores=1, n.jobs=4, when.normal.closed.form=FALSE)
-fit.c4j4    <- alt.flash(fit.init, n.cores=4, n.jobs=4, when.normal.closed.form=FALSE)
-
-fit.cf <- alt.flash(fit.init, n.cores=1)
-```
-
-
-### visualization of elbo evolution
-
-```{r}
-DF.FIT <- function(fit, type){ data.frame(time=fit$time.vec, elbo=fit$elbo.vec, type=type) }
-
-rbind(DF.FIT(fit.f, 'flashier'),
-      DF.FIT(fit.f.p, 'flashier: parallel'),
-      DF.FIT(fit.c1j1, 'alt-flash: 1 core, 1 job'),
-      DF.FIT(fit.c1j4, 'alt-flash: 1 core, 4 jobs'), 
-      DF.FIT(fit.c4j4, 'alt-flash: 4 core, 4 jobs'),
-      DF.FIT(fit.cf, 'alt-flash: closed_form')
-) -> df.fig
-
-max(df.fig$elbo)
-e.tol <- fit.cf$elbo.tol; print(e.tol)
-
-df.fig$dist <- max(df.fig$elbo) - df.fig$elbo
-df.fig %>% mutate(dist = ifelse(dist < e.tol/10, e.tol/10, dist)) -> df.fig
-
-df.fig %>% 
-  ggplot(aes(x=time, y=dist, col=type, group=type))+
-  geom_line() + geom_point() + 
-  scale_y_log10() + ggtitle("distance from best elbo")
-```
-
