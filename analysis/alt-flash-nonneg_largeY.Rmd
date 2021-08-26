@@ -1,0 +1,108 @@
+---
+title: "alt-flash: non-negative prior on L and normal prior on F"
+author: "Joonsuk Kang"
+date: "2021-08-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r}
+library(tidyverse)
+library(tictoc)
+library(flashier)
+library(ebnm)
+library(parallel); detectCores(); set.cores <- detectCores()
+library(ashr)
+
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20210825.R")
+
+# "flash.backfit.e" is the function "flashier::flash.backfit" with elbo/time tracking functionality
+environment(flash.backfit.e) <- asNamespace('flashier') 
+flash.backfit.e <- compiler::cmpfun(flash.backfit.e)
+```
+
+
+# an example
+
+```{r}
+set.seed(1)
+n=1000; p=2000; k=30
+LL = matrix(rexp(n*k),nrow=n)
+FF = matrix(rnorm(p*k),nrow=p)
+Y = LL %*% t(FF) + rnorm(n*p)
+mat.truth <- LL %*% t(FF) 
+
+rm(n,p,k)
+```
+
+
+## initialize using flashier
+
+The default seems to be using the method `extrapolate`, which achieves a higher elbo. In this analysis, we will focus on the `alt-flash` results with the `flashier` algorithm with the `sequential` method. 
+
+```{r, eval=FALSE}
+# initialization w/ flashier
+system.time(
+fit.init <- flash(data=Y, backfit=FALSE, 
+                            prior.family=c(prior.nonnegative(), prior.normal()), verbose.lvl=0)
+)
+
+# n=1000; p=2000; k=30; set.seed(1);
+# took 111 seconds
+saveRDS(fit.init, "output/nonneg_v20210824_large_fit.init.rds")
+```
+
+### results
+
+```{r, eval=FALSE}
+set.maxiter <- 5000
+
+system.time( fit.alt.p <- alt.flash(fit.init, n.cores=set.cores, maxiter=set.maxiter) )
+saveRDS(fit.alt.p, "output/nonneg_v20210824_large_fit.alt.p.rds")
+
+system.time( fit.alt <- alt.flash(fit.init, n.cores=1, maxiter=set.maxiter) )
+saveRDS(fit.alt, "output/nonneg_v20210824_large_fit.alt.rds")
+
+system.time( fit.f.ext <- flash.backfit.e(fit.init, verbose.lvl=0, method='extrapolate', maxiter = set.maxiter) )
+saveRDS(fit.f.ext, "output/nonneg_v20210824_large_fit.f.ext.rds")
+```
+
+
+### alt-flash results
+
+```{r}
+fit.alt.p <- readRDS("output/nonneg_v20210824_large_fit.alt.p.rds")
+fit.alt <- readRDS("output/nonneg_v20210824_large_fit.alt.rds")
+fit.f.ext <- readRDS("output/nonneg_v20210824_large_fit.f.ext.rds")
+
+DF.FIT <- function(fit, type){
+  data.frame(time=fit$time.vec, elbo=fit$elbo.vec, type=type)
+}
+
+rbind(DF.FIT(fit.alt.p, 'alt-flash: parallel'),
+      DF.FIT(fit.alt, 'alt-flash: single core'),
+      DF.FIT(fit.f.ext, 'flashier: extrapolate')
+      ) -> df.fig
+
+max(df.fig$elbo)
+e.tol <- fit.alt$elbo.tol; print(e.tol)
+
+df.fig$dist <- max(df.fig$elbo) - df.fig$elbo
+df.fig %>% mutate(dist = ifelse(dist < e.tol, e.tol, dist)) -> df.fig
+
+df.fig %>%
+  ggplot(aes(x=time/3600, y=dist, col=type, group=type))+xlab("hours")+
+  geom_line() + #geom_point() + 
+  scale_y_log10() + ggtitle("distance from best elbo")
+
+print(c(last(fit.alt.p$time.vec), last(fit.alt$time.vec), last(fit.f.ext$time.vec)))
+print(c(last(fit.alt.p$time.vec), last(fit.alt$time.vec), last(fit.f.ext$time.vec))/last(fit.f.ext$time.vec))
+
+norm(mat.truth - fitted(fit.f.ext$flash), 'f' )
+norm(mat.truth - tcrossprod(fit.alt$A.l, fit.alt$A.f), 'f' )
+norm(mat.truth - tcrossprod(fit.alt.p$A.l, fit.alt.p$A.f), 'f' )
+```
+
