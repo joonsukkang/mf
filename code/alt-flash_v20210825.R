@@ -10,8 +10,6 @@ alt.flash <- function(fit.init,
                       when.normal.closed.form=TRUE){
 
   if(is.null(n.jobs)==TRUE){n.jobs <- n.cores}
-
-  elbo.tol <- sqrt(.Machine$double.eps) *prod(dim(Y))
   time.vec <- Sys.time()
   elbo.vec <- c()
 
@@ -20,6 +18,9 @@ alt.flash <- function(fit.init,
   for(i in 1:length(obj.temp)) assign(names(obj.temp)[i], obj.temp[[i]])
   g.l.pf <- G.PF(g.l)
   g.f.pf <- G.PF(g.f)
+
+  elbo.tol <- sqrt(.Machine$double.eps) *prod(dim(Y))
+
 
   # updates
   for (i.iter in 1:maxiter){
