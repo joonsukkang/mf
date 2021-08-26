@@ -7,15 +7,17 @@ editor_options:
   chunk_output_type: console
 ---
 
+
 ```{r}
 library(tidyverse)
 library(tictoc)
 library(flashier)
 library(ebnm)
-library(microbenchmark)
 library(parallel); detectCores(); set.cores <- detectCores()
 library(ashr)
+library(microbenchmark)
 
+setwd("~/Box/2-research/mf")
 source("code/alt-flash_v20210825.R")
 
 # "flash.backfit.e" is the function "flashier::flash.backfit" with elbo/time tracking functionality
@@ -29,7 +31,7 @@ flash.backfit.e <- compiler::cmpfun(flash.backfit.e)
 draw.fig <- function(seed){
   
   # create data matrix
-  #set.seed(seed)
+  set.seed(seed)
   n = 100; p=500; k=7
   LL = matrix(rnorm(n*k),nrow=n)
   FF = matrix(rnorm(p*k),nrow=p)
@@ -48,10 +50,9 @@ draw.fig <- function(seed){
   fit.f.p <- flash.backfit.e(fit.init, verbose.lvl=0, method='parallel') # flashier fit with parallel method
 
   # alt-flash results
-  alt.flash(fit.init)
   fit.alt    <- alt.flash(fit.init, n.cores=1, when.normal.closed.form=FALSE)
   fit.alt.p  <- alt.flash(fit.init, n.cores=set.cores, when.normal.closed.form=FALSE)
-  fit.cf     <- alt.flash(fit.init, n.cores=1) # 'closed-form' method
+  fit.alt.cf     <- alt.flash(fit.init, n.cores=1) # 'closed-form' method
   
   # draw figure
   DF.FIT <- function(fit, type){ data.frame(time=fit$time.vec, elbo=fit$elbo.vec, type=type) }
@@ -60,10 +61,10 @@ draw.fig <- function(seed){
         DF.FIT(fit.f.p,   'flashier: parallel'),
         DF.FIT(fit.alt,   'alt-flash: single-core'),
         DF.FIT(fit.alt.p, 'alt-flash: parallel'),
-        DF.FIT(fit.cf,    'alt-flash: closed_form')
+        DF.FIT(fit.alt.cf,    'alt-flash: closed_form')
   ) -> df.fig
   
-  e.tol <- fit.cf$elbo.tol
+  e.tol <- fit.alt.cf$elbo.tol
   
   df.fig$dist <- max(df.fig$elbo) - df.fig$elbo
   df.fig %>% mutate(dist = ifelse(dist < e.tol/10, e.tol/10, dist)) -> df.fig
@@ -81,4 +82,33 @@ draw.fig <- function(seed){
 ```{r}
 n.seeds <- 9
 for (seed in 1:n.seeds){ print(draw.fig(seed)) }
+```
+
+```{r}
+# create data matrix
+set.seed(10)
+n = 100; p=500; k=7
+LL = matrix(rnorm(n*k),nrow=n)
+FF = matrix(rnorm(p*k),nrow=p)
+Y = LL %*% t(FF) + rnorm(n*p)
+rm(n,p,k,LL,FF)
+
+# initialize using flashier
+tic('initialize flashier object')
+fit.init <- flash(data=Y, backfit=FALSE, prior.family=prior.normal(), verbose.lvl=0)
+toc()
+rm(Y)
+
+options(cl.cores=set.cores); options(cl.type='FORK')
+microbenchmark(flashier=flash.backfit.e(fit.init, verbose.lvl=0),
+               flashier.parallel=flash.backfit.e(fit.init, verbose.lvl=0, method='parallel'),
+               
+               alt.flash=alt.flash(fit.init, n.cores=1, when.normal.closed.form=FALSE),
+               alt.flash.parallel=alt.flash(fit.init, n.cores=set.cores, when.normal.closed.form=FALSE),
+               alt.flash.closed_form=alt.flash(fit.init, n.cores=1),
+               times=50
+               ) -> mb
+
+summary(mb)
+autoplot(mb)
 ```
