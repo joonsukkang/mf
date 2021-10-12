@@ -7,7 +7,8 @@ alt.flash <- function(flashier.fit=NULL, # initialize with flashier obj
                       g.l=NULL,
                       g.f=NULL,
                       seed=NULL, # seed for random initialization
-                      maxiter=1000
+                      maxiter=1000,
+                      g.common=FALSE
                       ){
 
   time.vec <- Sys.time()
@@ -23,6 +24,16 @@ alt.flash <- function(flashier.fit=NULL, # initialize with flashier obj
   g.f.pf <- G.PF(g.f)
 
   elbo.tol <- sqrt(.Machine$double.eps) *prod(dim(Y))
+
+  # update g
+  if(g.common==TRUE){
+    g.lf <- SOL.G.COMMON(g.l.pf, Y, A.l, A.f, B.l, B.f, tau)
+    g.l <- g.lf; g.f <- g.lf
+  }
+  if(g.common==FALSE){
+    g.l <- SOL.G(g.l.pf,    Y, A.l, A.f, B.f, tau)
+    g.f <- SOL.G(g.f.pf, t(Y), A.f, A.l, B.l, tau)
+  }
 
   # updates
   for (i.iter in 1:maxiter){
@@ -89,25 +100,31 @@ alt.flash <- function(flashier.fit=NULL, # initialize with flashier obj
     tau <- SOL.TAU(trYTY=trYTY, Y, A.l, A.f, B.l, B.f)
 
     # update g
-    g.l <- SOL.G(g.l.pf,    Y, A.l, A.f, B.f, tau)
-    g.f <- SOL.G(g.f.pf, t(Y), A.f, A.l, B.l, tau)
+    if(g.common==TRUE){
+      g.lf <- SOL.G.COMMON(g.l.pf, Y, A.l, A.f, B.l, B.f, tau)
+      g.l <- g.lf; g.f <- g.lf
+    }
+    if(g.common==FALSE){
+      g.l <- SOL.G(g.l.pf,    Y, A.l, A.f, B.f, tau)
+      g.f <- SOL.G(g.f.pf, t(Y), A.f, A.l, B.l, tau)
+    }
+
   }
 
   if(i.iter==maxiter){ print("Maximum number of iterations reached.") }
-
+  print(paste0('backfit completed; elbo=', elbo))
 
   # scale and order factors
   scales <- sqrt(diag(B.l) * diag(B.f))
   ordering <- order(scales, decreasing=TRUE)
   scales <- scales[ordering]
-  A.l <- A.l[,ordering]; C.l <- C.l[,ordering]
-  A.f <- A.f[,ordering]; C.f <- C.f[,ordering]
+  A.l <- A.l[,ordering,drop=FALSE]; C.l <- C.l[,ordering,drop=FALSE]
+  A.f <- A.f[,ordering,drop=FALSE]; C.f <- C.f[,ordering,drop=FALSE]
 
   B.l <- crossprod(A.l); diag(B.l) <- colSums(C.l)
   B.f <- crossprod(A.f); diag(B.f) <- colSums(C.f)
 
   g.l <- g.l[ordering]; g.f <- g.f[ordering]
-
 
 
   time.vec <- as.numeric(time.vec[-1] - time.vec[1])
@@ -349,6 +366,29 @@ SOL.G <- function(g.l.pf, Y, A.l, A.f, B.f, tau){
 
   return(g.l)
 }
+
+
+SOL.G.COMMON <- function(g.l.pf, Y, A.l, A.f, B.l, B.f, tau){
+
+  K <- ncol(A.l)
+  g.lf <- list()
+
+  for (k in 1:K){
+    x.l <- c(Y%*%A.f[,k] - A.l[,-k, drop=FALSE] %*% B.f[k,-k])/B.f[k,k]
+    s.l <- rep(1/sqrt(tau*B.f[k,k]), length(x.l))
+    x.f <- c(t(Y)%*%A.l[,k] - A.f[,-k, drop=FALSE] %*% B.l[k,-k])/B.l[k,k]
+    s.f <- rep(1/sqrt(tau*B.l[k,k]), length(x.f))
+
+    obj.temp <- ebnm(x=c(x.l, x.f), s=c(s.l, s.f), prior_family=g.l.pf, fix_g=FALSE)
+    g.lf[[k]] <- obj.temp$fitted_g
+  }
+
+  return(g.lf)
+}
+
+
+
+
 
 
 # update tau
