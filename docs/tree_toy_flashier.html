@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Joonsuk Kang" />
+
+<meta name="date" content="2021-10-11" />
+
+<title>Tree Toy Data: flash results</title>
+
+<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/joonsukkang/mf">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Tree Toy Data: flash results</h1>
+<h4 class="author">Joonsuk Kang</h4>
+<h4 class="date">2021-10-11</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-10-12
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mf/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201010code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201010)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201010code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201010)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeb8dee4affa3ce6bca7a92d7e0d2285a7a9f761aftargetblankb8dee4aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/b8dee4affa3ce6bca7a92d7e0d2285a7a9f761af" target="_blank">b8dee4a</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeb8dee4affa3ce6bca7a92d7e0d2285a7a9f761aftargetblankb8dee4aa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/b8dee4affa3ce6bca7a92d7e0d2285a7a9f761af" target="_blank">b8dee4a</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  altFlash.pdf
+    Untracked:  analysis/alt-flash-nonneg.Rmd
+    Untracked:  analysis/alt-flash-nonneg_largeY.Rmd
+    Untracked:  analysis/alt-flash-normal_largeY.Rmd
+    Untracked:  analysis/bingham.Rmd
+    Untracked:  analysis/bingham_constant.Rmd
+    Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g1_K.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g2_K.Rmd
+    Untracked:  analysis/demo8_splash.Rmd
+    Untracked:  analysis/flashImpute_ML100k.Rmd
+    Untracked:  analysis/flashImpute_ML1M.Rmd
+    Untracked:  analysis/flip_correlation.Rmd
+    Untracked:  analysis/flipping_pdf.Rmd
+    Untracked:  analysis/infinitefactor_toy.Rmd
+    Untracked:  analysis/model_exp_prior_v20201110m.Rmd
+    Untracked:  analysis/model_invgam_prior.Rmd
+    Untracked:  analysis/multiplicative.Rmd
+    Untracked:  analysis/site_libs (joonsukkang@uchicago.edu)/
+    Untracked:  analysis/sliding_correlation.Rmd
+    Untracked:  analysis/sliding_pdf.Rmd
+    Untracked:  analysis/temp.Rmd
+    Untracked:  analysis/toy_p_notfixK.Rmd
+    Untracked:  analysis/tree_toy_altflash.Rmd
+    Untracked:  analysis/y2_NoTargetsByTF.R
+    Untracked:  analysis/y2_eb.Rmd
+    Untracked:  analysis/y2_toy.Rmd
+    Untracked:  analysis/y2_toy_500.Rmd
+    Untracked:  analysis/y2_toy_highd.Rmd
+    Untracked:  analysis/y2_toy_highd_covver.Rmd
+    Untracked:  analysis/y2_toy_lastday_backtosimple.Rmd
+    Untracked:  analysis/y2_toy_master.Rmd
+    Untracked:  analysis/y2_toy_n.Rmd
+    Untracked:  analysis/y2_toy_n_K3.Rmd
+    Untracked:  code/alt-flash.R
+    Untracked:  code/alt-flash_v20210819.R
+    Untracked:  code/model_exp_v20201110.R
+    Untracked:  code/workflowr_codes.R
+    Untracked:  data/eigvals.rds
+    Untracked:  data/hTFtarget_NoTargetsByTF.txt
+    Untracked:  data/metro_results.txt
+    Untracked:  figure/
+    Untracked:  flashImpute.pdf
+    Untracked:  output/Likelihood.gif
+    Untracked:  output/nonneg_v20210824_large_fit.alt.p.rds
+    Untracked:  output/nonneg_v20210824_large_fit.alt.rds
+    Untracked:  output/nonneg_v20210824_large_fit.f.ext.rds
+    Untracked:  output/nonneg_v20210824_large_fit.f.seq.rds
+    Untracked:  output/nonneg_v20210824_large_fit.init.rds
+    Untracked:  output/nonneg_v20210824_small_fit.alt.p.rds
+    Untracked:  output/nonneg_v20210824_small_fit.alt.rds
+    Untracked:  output/nonneg_v20210824_small_fit.f.ext.rds
+    Untracked:  output/nonneg_v20210824_small_fit.f.seq.rds
+    Untracked:  output/nonneg_v20210824_small_fit.init.rds
+    Untracked:  temp-blog/
+    Untracked:  writing/
+
+Unstaged changes:
+    Deleted:    .Rprofile
+    Deleted:    .gitattributes
+    Modified:   .gitignore
+    Deleted:    analysis/Alt-Flash.Rmd
+    Deleted:    analysis/ChoosingW.Rmd
+    Modified:   analysis/alt-flash-normal.Rmd
+    Deleted:    analysis/alt-flash-normal_v20210825.Rmd
+    Deleted:    analysis/concentration.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g1.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g2.Rmd
+    Modified:   analysis/flashier_point_laplace.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/model_exp_prior.Rmd
+    Modified:   code/flashImpute.R
+    Deleted:    output/alt-flash-normal-elbo.pdf
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/tree_toy_flashier.Rmd</code>) and HTML (<code>docs/tree_toy_flashier.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/b8dee4affa3ce6bca7a92d7e0d2285a7a9f761af/analysis/tree_toy_flashier.Rmd" target="_blank">b8dee4a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+<td>
+Tree Toy Data: flash results summary
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
+<pre><code>✓ ggplot2 3.3.5     ✓ purrr   0.3.4
+✓ tibble  3.1.4     ✓ dplyr   1.0.7
+✓ tidyr   1.1.3     ✓ stringr 1.4.0
+✓ readr   2.0.1     ✓ forcats 0.5.1</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(flashier)</code></pre>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<div id="extracting-1-100-001-1-pattern" class="section level2">
+<h2>extracting <code>(1,-1,0,0), (0,0,1,-1)</code> pattern</h2>
+<ul>
+<li><p>data <code>X2</code> is a noiseless version; <code>X2n_a</code> is a ‘hard’ (i.e. singular vectors are not sparse) noisy version and <code>X2n_b</code> an ‘easy’ (i.e. singular vectors are close to zero) noisy version.</p></li>
+<li><p>flashier on data <code>X</code> (which means original matrices <code>X2</code>, <code>X2n_a</code>, or <code>X2n_b</code>) leads to a sparser version of singular vectors, but the results are essentially identical to singular vectors</p></li>
+<li><p>flashier on covariance <code>cov(t(X))</code> successfully extracts the <code>(1,-1,0,0), (0,0,1,-1)</code> pattern–using either point-normal or point-laplace prior.</p></li>
+</ul>
+</div>
+<div id="extracting-1000-0100-0010-0001-pattern" class="section level2">
+<h2>extracting <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> pattern</h2>
+<ul>
+<li><p>method: flashier on <code>cov(t(X))</code> with point exponential prior</p></li>
+<li><p>for noiseless <code>X2</code>, flashier finds three, missing <code>(0,1,0,0)</code></p></li>
+<li><p>for hard case <code>X2n_a</code>, 49 factors (maximum number allowed) are fitted. The first factor roughly captures <code>(1,0,0,0)</code> and the second factor captures two points in the first 20 coordinates; the others are not much interpretable.</p></li>
+<li><p>for easy case <code>X2n_b</code>, 5 factors are fitted. The first captures <code>(0,0,0,1)</code> while each of the other four factors captures some exclusive subsets of <code>(1,0,0,0)</code> pattern.</p></li>
+<li><p>backfit does not seem to improve fit significantly</p></li>
+</ul>
+</div>
+</div>
+<div id="toy-data" class="section level1">
+<h1>Toy data</h1>
+<pre class="r"><code># code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn&#39;t work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+
+# take transpose
+X2 &lt;- t(X2)
+X2n_a &lt;- t(X2n_a)
+X2n_b &lt;- t(X2n_b)
+
+rm(X, X.svd, f, i, n, p)</code></pre>
+<pre class="r"><code># a function for plotting
+plot.three &lt;- function(L.X2, L.X2n_a, L.X2n_b){
+  data.frame(L=c(c(L.X2), c(L.X2n_a), c(L.X2n_b)),
+             x=1:80, 
+             factor =rep(as.factor(c(1,2)), each=80),
+             data = rep(c(&#39;X2&#39;, &#39;X2n_a&#39;, &#39;X2n_b&#39;), each=80*2)) %&gt;%
+    ggplot()+geom_line(aes(x=x, y=L, col=factor))+facet_wrap(~data)
+}</code></pre>
+</div>
+<div id="singular-vectors" class="section level1">
+<h1>singular vectors</h1>
+<pre class="r"><code>plot.three(svd(X2)$u[,1:2], svd(X2n_a)$u[,1:2], svd(X2n_b)$u[,1:2])</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="extracting-1-100-001-1" class="section level1">
+<h1>extracting <code>(1,-1,0,0), (0,0,1,-1)</code></h1>
+<div id="flashier-on-x" class="section level2">
+<h2>flashier on <code>X</code></h2>
+<pre class="r"><code># point-normal prior; without backfit
+flash.fit &lt;- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># point-normal prior; with backfit
+flash.fit &lt;- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># point-laplace prior; without backfit
+flash.fit &lt;- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># point-laplace prior; with backfit
+flash.fit &lt;- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+#plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b)) 
+# returns error:
+#     Error in (function (f, p, ..., hessian = FALSE, typsize = rep(1, length(p)),  : 
+#     non-finite value supplied by &#39;nlm&#39;</code></pre>
+</div>
+<div id="flashier-on-covtx" class="section level2">
+<h2>flashier on <code>cov(t(X))</code></h2>
+<pre class="r"><code># point-normal prior; without backfit
+flash.fit &lt;- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># point-normal prior; with backfit
+flash.fit &lt;- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># point-laplace prior; without backfit
+flash.fit &lt;- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># point-laplace prior; with backfit
+flash.fit &lt;- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b)) </code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-4.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="extracting-1000-0100-0010-0001" class="section level1">
+<h1>extracting <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code></h1>
+<pre class="r"><code># add &#39;point_exponential&#39; to the choice of flashier priors
+prior.point.exponential &lt;- function(...) {
+  args &lt;- as.prior.args(prior.family = &quot;point_exponential&quot;,
+                        optmethod = &quot;nlm&quot;,
+                        ...)
+  return(do.call(as.prior, args))
+}
+environment(prior.point.exponential) &lt;- asNamespace(&#39;flashier&#39;) 
+
+plot.factors &lt;- function(fit, showK){
+  data.frame(L=c(fit$loadings.pm[[1]][,1:showK]), 
+           x=rep(1:80),
+           factor=as.factor(rep(1:showK, 
+                      each=80))) %&gt;%
+  ggplot()+geom_line(aes(x=x, y=L, col=factor))
+}</code></pre>
+<div id="flashier-on-covtx-with-point-exponential-prior" class="section level2">
+<h2>flashier on <code>cov(t(X))</code> with point exponential prior</h2>
+<div id="data-x2" class="section level3">
+<h3>data <code>X2</code></h3>
+<pre class="r"><code># wihtout backfit
+fit1 &lt;- flash(cov(t(X2)), verbose.lvl=0, 
+              backfit=FALSE, prior.family = prior.point.exponential())
+fit1$pve</code></pre>
+<pre><code>[1] 0.16428992 0.12044666 0.09182435</code></pre>
+<pre class="r"><code>plot.factors(fit1, 3)</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># with backfit
+fit1b &lt;- flash(cov(t(X2)), verbose.lvl=0, 
+              backfit=TRUE, prior.family = prior.point.exponential())
+fit1b$pve</code></pre>
+<pre><code>[1] 0.16594899 0.12119237 0.09185635</code></pre>
+<pre class="r"><code>plot.factors(fit1b, 3)</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="data-x2n_a" class="section level3">
+<h3>data <code>X2n_a</code></h3>
+<pre class="r"><code># wihtout backfit
+fit1 &lt;- flash(cov(t(X2n_a)), verbose.lvl=0, 
+              backfit=FALSE, prior.family = prior.point.exponential())
+fit1$pve</code></pre>
+<pre><code> [1] 2.411204e-02 1.235551e-02 7.320797e-04 2.148520e-04 1.500973e-04
+ [6] 9.647985e-05 5.951509e-05 1.684710e-05 1.169043e-05 3.825817e-05
+[11] 1.255985e-05 1.162332e-05 2.606536e-06 3.134035e-06 3.704208e-06
+[16] 4.184674e-06 4.242600e-06 4.262953e-06 3.632207e-06 4.395574e-06
+[21] 4.808066e-06 2.708979e-06 1.572314e-06 2.381685e-06 1.324949e-06
+[26] 3.259714e-06 1.248354e-06 1.168633e-06 1.089750e-06 1.013518e-06
+[31] 9.413839e-07 8.734126e-07 8.091615e-07 7.484482e-07 6.913651e-07
+[36] 6.381260e-07 5.888115e-07 5.434565e-07 5.019356e-07 4.640744e-07
+[41] 4.296571e-07 3.984482e-07 3.701510e-07 3.445241e-07 3.213099e-07
+[46] 3.002956e-07 2.812633e-07 2.639513e-07 2.482565e-07</code></pre>
+<pre class="r"><code>plot.factors(fit1, 5)</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># with backfit
+# fit1b &lt;- flash(cov(t(X2n_a)), verbose.lvl=0, 
+#               backfit=TRUE, prior.family = prior.point.exponential())
+# returns error: Standard errors must be positive (and nonzero).</code></pre>
+</div>
+<div id="data-x2n_b" class="section level3">
+<h3>data <code>X2n_b</code></h3>
+<pre class="r"><code># wihtout backfit
+fit1 &lt;- flash(cov(t(X2n_b)), verbose.lvl=0, 
+              backfit=FALSE, prior.family = prior.point.exponential())
+fit1$pve</code></pre>
+<pre><code>[1] 0.04084389 0.02239558 0.01476962 0.01190229 0.01057242</code></pre>
+<pre class="r"><code>plot.factors(fit1, 5)</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># with backfit
+fit1b &lt;- flash(cov(t(X2n_b)), verbose.lvl=0, 
+              backfit=TRUE, prior.family = prior.point.exponential())
+fit1b$pve</code></pre>
+<pre><code>[1] 0.04215590 0.02267801 0.01486391 0.01192712 0.01058723</code></pre>
+<pre class="r"><code>plot.factors(fit1b, 5)</code></pre>
+<p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.1 (2021-08-10)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS Big Sur 11.6
+
+Matrix products: default
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] flashier_0.2.9  forcats_0.5.1   stringr_1.4.0   dplyr_1.0.7    
+ [5] purrr_0.3.4     readr_2.0.1     tidyr_1.1.3     tibble_3.1.4   
+ [9] ggplot2_3.3.5   tidyverse_1.3.1
+
+loaded via a namespace (and not attached):
+ [1] httr_1.4.2        jsonlite_1.7.2    splines_4.1.1     modelr_0.1.8     
+ [5] assertthat_0.2.1  horseshoe_0.2.0   highr_0.9         mixsqp_0.3-43    
+ [9] deconvolveR_1.2-1 cellranger_1.1.0  yaml_2.2.1        ebnm_0.1-50      
+[13] pillar_1.6.2      backports_1.2.1   lattice_0.20-44   glue_1.4.2       
+[17] digest_0.6.27     promises_1.2.0.1  rvest_1.0.1       colorspace_2.0-2 
+[21] htmltools_0.5.2   httpuv_1.6.2      Matrix_1.3-4      pkgconfig_2.0.3  
+[25] invgamma_1.1      broom_0.7.9       haven_2.4.3       scales_1.1.1     
+[29] whisker_0.4       later_1.3.0       tzdb_0.1.2        git2r_0.28.0     
+[33] farver_2.1.0      generics_0.1.0    ellipsis_0.3.2    withr_2.4.2      
+[37] ashr_2.2-47       cli_3.0.1         magrittr_2.0.1    crayon_1.4.1     
+[41] readxl_1.3.1      evaluate_0.14     fs_1.5.0          fansi_0.5.0      
+[45] xml2_1.3.2        truncnorm_1.0-8   tools_4.1.1       hms_1.1.0        
+[49] REBayes_2.2       lifecycle_1.0.0   trust_0.1-8       munsell_0.5.0    
+[53] reprex_2.0.1      irlba_2.3.3       compiler_4.1.1    rlang_0.4.11     
+[57] grid_4.1.1        rstudioapi_0.13   labeling_0.4.2    rmarkdown_2.10   
+[61] gtable_0.3.0      DBI_1.1.1         R6_2.5.1          lubridate_1.7.10 
+[65] knitr_1.33        fastmap_1.1.0     utf8_1.2.2        workflowr_1.6.2  
+[69] rprojroot_2.0.2   stringi_1.7.4     parallel_4.1.1    SQUAREM_2021.1   
+[73] Rcpp_1.0.7        vctrs_0.3.8       dbplyr_2.1.1      tidyselect_1.1.1 
+[77] xfun_0.25        </code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
