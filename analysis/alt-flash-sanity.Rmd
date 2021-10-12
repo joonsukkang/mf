@@ -1,0 +1,57 @@
+---
+title: "alt-flash: new version sanity check"
+author: "Joonsuk Kang"
+date: "2021-10-11"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+I dropped all the bells and whistles in the standing version of `alt-flash` (`v20210825`) 
+and is building a minimally functional (and maybe too slow) version.
+
+Below is a sanity check for the new version (`v20211010`).
+
+```{r}
+library(flashier)
+library(ebnm)
+library(tictoc)
+library(parallel)
+library(ashr)
+```
+
+# normal case
+
+```{r}
+seed <- 1
+
+# create data matrix
+set.seed(seed)
+n = 100; p=500; k=7
+LL = matrix(rnorm(n*k),nrow=n)
+FF = matrix(rnorm(p*k),nrow=p)
+Y = LL %*% t(FF) + rnorm(n*p)
+rm(n,p,k,LL,FF)
+
+# initialize using flashier
+fit.init <- flash(data=Y, backfit=FALSE, prior.family=prior.normal(), verbose.lvl=0)
+rm(Y)
+
+# flashier results 
+fit.f <- flash.backfit(fit.init, verbose.lvl=0) # flashier fit
+
+# old version
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20210825.R")
+fit.alt    <- alt.flash(fit.init, n.cores=1, when.normal.closed.form=FALSE)
+
+# new version
+rm(list= ls()[!(ls() %in% c('fit.alt','fit.alt.cf', 'fit.f', 'fit.init'))])
+source("code/alt-flash_v20211010.R")
+fit.alt.new    <- alt.flash(flashier.fit=fit.init)
+
+print(fit.f$elbo)
+print(fit.alt$elbo.vec)
+print(fit.alt.new$elbo.vec)
+```
+
