@@ -476,16 +476,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeb8dee4affa3ce6bca7a92d7e0d2285a7a9f761aftargetblankb8dee4aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/b8dee4affa3ce6bca7a92d7e0d2285a7a9f761af" target="_blank">b8dee4a</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree3a05e655e5062466fe3745e22034f712bad14f0btargetblank3a05e65a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/3a05e655e5062466fe3745e22034f712bad14f0b" target="_blank">3a05e65</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreeb8dee4affa3ce6bca7a92d7e0d2285a7a9f761aftargetblankb8dee4aa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree3a05e655e5062466fe3745e22034f712bad14f0btargetblank3a05e65a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/b8dee4affa3ce6bca7a92d7e0d2285a7a9f761af" target="_blank">b8dee4a</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/3a05e655e5062466fe3745e22034f712bad14f0b" target="_blank">3a05e65</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -565,7 +565,6 @@ Unstaged changes:
     Modified:   analysis/demo6_ebfa_hb_g1.Rmd
     Modified:   analysis/demo6_ebfa_hb_g2.Rmd
     Modified:   analysis/flashier_point_laplace.Rmd
-    Modified:   analysis/index.Rmd
     Modified:   analysis/model_exp_prior.Rmd
     Modified:   code/flashImpute.R
     Deleted:    output/alt-flash-normal-elbo.pdf
@@ -607,6 +606,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/tree_toy_flashier.html" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -714,6 +730,43 @@ plot.three &lt;- function(L.X2, L.X2n_a, L.X2n_b){
 <h1>singular vectors</h1>
 <pre class="r"><code>plot.three(svd(X2)$u[,1:2], svd(X2n_a)$u[,1:2], svd(X2n_b)$u[,1:2])</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
+Past versions of unnamed-chunk-4-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-4-1.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="extracting-1-100-001-1" class="section level1">
 <h1>extracting <code>(1,-1,0,0), (0,0,1,-1)</code></h1>
@@ -726,6 +779,43 @@ flash.fit &lt;- function(data.mat){
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
+Past versions of unnamed-chunk-5-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-5-1.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># point-normal prior; with backfit
 flash.fit &lt;- function(data.mat){
   flash(data.mat, verbose.lvl=0, 
@@ -733,6 +823,43 @@ flash.fit &lt;- function(data.mat){
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-2">
+Past versions of unnamed-chunk-5-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-5-2.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># point-laplace prior; without backfit
 flash.fit &lt;- function(data.mat){
   flash(data.mat, verbose.lvl=0, 
@@ -740,6 +867,43 @@ flash.fit &lt;- function(data.mat){
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-3">
+Past versions of unnamed-chunk-5-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-5-3.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># point-laplace prior; with backfit
 flash.fit &lt;- function(data.mat){
   flash(data.mat, verbose.lvl=0, 
@@ -759,6 +923,43 @@ flash.fit &lt;- function(data.mat){
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-6-1.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># point-normal prior; with backfit
 flash.fit &lt;- function(data.mat){
   flash(cov(t(data.mat)), verbose.lvl=0, 
@@ -766,6 +967,43 @@ flash.fit &lt;- function(data.mat){
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-2">
+Past versions of unnamed-chunk-6-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-6-2.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># point-laplace prior; without backfit
 flash.fit &lt;- function(data.mat){
   flash(cov(t(data.mat)), verbose.lvl=0, 
@@ -773,6 +1011,43 @@ flash.fit &lt;- function(data.mat){
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-3">
+Past versions of unnamed-chunk-6-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-6-3.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># point-laplace prior; with backfit
 flash.fit &lt;- function(data.mat){
   flash(cov(t(data.mat)), verbose.lvl=0, 
@@ -780,6 +1055,43 @@ flash.fit &lt;- function(data.mat){
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b)) </code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-6-4.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-4">
+Past versions of unnamed-chunk-6-4.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-4" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-6-4.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="extracting-1000-0100-0010-0001" class="section level1">
@@ -811,6 +1123,43 @@ fit1$pve</code></pre>
 <pre><code>[1] 0.16428992 0.12044666 0.09182435</code></pre>
 <pre class="r"><code>plot.factors(fit1, 3)</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-8-1.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># with backfit
 fit1b &lt;- flash(cov(t(X2)), verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
@@ -818,6 +1167,43 @@ fit1b$pve</code></pre>
 <pre><code>[1] 0.16594899 0.12119237 0.09185635</code></pre>
 <pre class="r"><code>plot.factors(fit1b, 3)</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-2">
+Past versions of unnamed-chunk-8-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-8-2.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="data-x2n_a" class="section level3">
 <h3>data <code>X2n_a</code></h3>
@@ -837,6 +1223,43 @@ fit1$pve</code></pre>
 [46] 3.002956e-07 2.812633e-07 2.639513e-07 2.482565e-07</code></pre>
 <pre class="r"><code>plot.factors(fit1, 5)</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-9-1.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># with backfit
 # fit1b &lt;- flash(cov(t(X2n_a)), verbose.lvl=0, 
 #               backfit=TRUE, prior.family = prior.point.exponential())
@@ -851,6 +1274,43 @@ fit1$pve</code></pre>
 <pre><code>[1] 0.04084389 0.02239558 0.01476962 0.01190229 0.01057242</code></pre>
 <pre class="r"><code>plot.factors(fit1, 5)</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-10-1.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># with backfit
 fit1b &lt;- flash(cov(t(X2n_b)), verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
@@ -858,6 +1318,43 @@ fit1b$pve</code></pre>
 <pre><code>[1] 0.04215590 0.02267801 0.01486391 0.01192712 0.01058723</code></pre>
 <pre class="r"><code>plot.factors(fit1b, 5)</code></pre>
 <p><img src="figure/tree_toy_flashier.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-2">
+Past versions of unnamed-chunk-10-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/312b015d869ab244c54bb76099b0a67632e1f2d1/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-10-2.png" target="_blank">312b015</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
