@@ -9,6 +9,25 @@ editor_options:
 ---
 
 
+## alternating flash
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://raw.githubusercontent.com/joonsukkang/mf/master/docs/figure/tree_toy_flashier.Rmd/unnamed-chunk-10-1.png" width="400">
+:::
+::: {}
++ [flashier on tree toy data](tree_toy_flashier.html): as a motivation for alternating flash
+  + we could extract `(1,-1,0,0), (0,0,1,-1)` pattern with flashier on `cov(t(X))`
+  + however, extracting `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` seems harder. flashier on `cov(t(X))` with point-exponential prior finds only a subset of the signals.
+  
+
++ [minimal](alt-flash-sanity.html): a sanity check for the new minimally functional version of alt-flash
+
+
+:::
+::::
+
+
+
 ## integrating f out
 
 
@@ -48,6 +67,19 @@ editor_options:
 
 :::
 ::::
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/flashier_point_laplace.Rmd/unnamed-chunk-4-1.png" width="400">
+:::
+::: {}
+
++ `flashier` result on toy data with point laplace prior : [flashier_point_laplace](flashier_point_laplace.html)
+  + When point Laplace prior is put on $L$ and `warmstart` is used, flashier works well.
+
+:::
+::::
+
 
 ## archive
 :::: {style="display: flex;"}
