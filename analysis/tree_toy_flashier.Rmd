@@ -1,0 +1,247 @@
+---
+title: "Tree Toy Data: flash results"
+author: "Joonsuk Kang"
+date: "2021-10-11"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(flashier)
+```
+
+
+# Summary
+
+## extracting `(1,-1,0,0), (0,0,1,-1)` pattern
+
+- data `X2` is a noiseless version; `X2n_a` is a 'hard' (i.e. singular vectors are not sparse) noisy version and `X2n_b` an 'easy' (i.e. singular vectors are close to zero) noisy version.
+
+- flashier on data `X` (which means original matrices `X2`, `X2n_a`, or `X2n_b`) leads to a sparser version of singular vectors, but the results are essentially identical to singular vectors
+
+- flashier on covariance `cov(t(X))` successfully extracts the `(1,-1,0,0), (0,0,1,-1)` pattern--using either point-normal or point-laplace prior.
+
+
+## extracting `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` pattern
+
+- method: flashier on `cov(t(X))` with point exponential prior 
+
+- for noiseless `X2`, flashier finds three, missing `(0,1,0,0)`
+
+- for hard case `X2n_a`,  49 factors (maximum number allowed) are fitted. The first factor roughly captures `(1,0,0,0)` and the second factor captures two points in the first 20 coordinates; the others are not much interpretable.
+
+- for easy case `X2n_b`, 5 factors are fitted. The first captures `(0,0,0,1)` while each of the other four factors captures some exclusive subsets of `(1,0,0,0)` pattern.
+
+- backfit does not seem to improve fit significantly
+
+
+
+
+# Toy data
+
+```{r}
+# code originally from https://stephens999.github.io/misc/tree_pca_03.html.
+#--------------------------------------------------
+# create X
+set.seed(123)
+p = 1000
+n = 20
+f = list()
+for(i in 1:6){ 
+  f[[i]] = rnorm(p)
+}
+X =matrix(0,ncol=4*n, nrow=p)
+X[,1:(2*n)] = f[[1]]
+X[,(2*n+1):(4*n)] = f[[2]]
+
+X[,1:n] = X[,1:n]+f[[3]]
+X[,(n+1):(2*n)] = X[,(n+1):(2*n)]+f[[4]]
+X[,(2*n+1):(3*n)] = X[,(2*n+1):(3*n)] + f[[5]]
+X[,(3*n+1):(4*n)] = X[,(3*n+1):(4*n)] + f[[6]]
+X.svd = svd(X)
+
+# create X2
+X2 = X- X.svd$u[,1:2] %*% diag(X.svd$d[1:2]) %*% t(X.svd$v[,1:2])
+
+# adding noise
+set.seed(9) # the seed where flash didn't work
+X2n_a = X2 + rnorm(4*n*p,sd=3)
+
+set.seed(5) # the seed where flash did work
+X2n_b = X2 + rnorm(4*n*p,sd=3)
+#--------------------------------------------------
+
+# take transpose
+X2 <- t(X2)
+X2n_a <- t(X2n_a)
+X2n_b <- t(X2n_b)
+
+rm(X, X.svd, f, i, n, p)
+```
+
+
+```{r}
+# a function for plotting
+plot.three <- function(L.X2, L.X2n_a, L.X2n_b){
+  data.frame(L=c(c(L.X2), c(L.X2n_a), c(L.X2n_b)),
+             x=1:80, 
+             factor =rep(as.factor(c(1,2)), each=80),
+             data = rep(c('X2', 'X2n_a', 'X2n_b'), each=80*2)) %>%
+    ggplot()+geom_line(aes(x=x, y=L, col=factor))+facet_wrap(~data)
+}
+```
+
+
+# singular vectors
+
+```{r}
+plot.three(svd(X2)$u[,1:2], svd(X2n_a)$u[,1:2], svd(X2n_b)$u[,1:2])
+```
+
+
+# extracting `(1,-1,0,0), (0,0,1,-1)` 
+
+
+## flashier on `X`
+
+```{r}
+# point-normal prior; without backfit
+flash.fit <- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))
+
+# point-normal prior; with backfit
+flash.fit <- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))
+
+
+# point-laplace prior; without backfit
+flash.fit <- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))
+
+# point-laplace prior; with backfit
+flash.fit <- function(data.mat){
+  flash(data.mat, verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+#plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b)) 
+# returns error:
+#     Error in (function (f, p, ..., hessian = FALSE, typsize = rep(1, length(p)),  : 
+#     non-finite value supplied by 'nlm'
+
+```
+
+## flashier on `cov(t(X))`
+
+```{r}
+# point-normal prior; without backfit
+flash.fit <- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))
+
+# point-normal prior; with backfit
+flash.fit <- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))
+
+
+# point-laplace prior; without backfit
+flash.fit <- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=FALSE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))
+
+# point-laplace prior; with backfit
+flash.fit <- function(data.mat){
+  flash(cov(t(data.mat)), verbose.lvl=0, 
+        backfit=TRUE, prior.family = prior.point.laplace())$loadings.pm[[1]][,1:2]
+}
+plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b)) 
+```
+
+
+
+# extracting `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` 
+
+```{r}
+# add 'point_exponential' to the choice of flashier priors
+prior.point.exponential <- function(...) {
+  args <- as.prior.args(prior.family = "point_exponential",
+                        optmethod = "nlm",
+                        ...)
+  return(do.call(as.prior, args))
+}
+environment(prior.point.exponential) <- asNamespace('flashier') 
+
+plot.factors <- function(fit, showK){
+  data.frame(L=c(fit$loadings.pm[[1]][,1:showK]), 
+           x=rep(1:80),
+           factor=as.factor(rep(1:showK, 
+                      each=80))) %>%
+  ggplot()+geom_line(aes(x=x, y=L, col=factor))
+}
+```
+
+## flashier on `cov(t(X))` with point exponential prior
+
+### data `X2`
+
+```{r}
+# wihtout backfit
+fit1 <- flash(cov(t(X2)), verbose.lvl=0, 
+              backfit=FALSE, prior.family = prior.point.exponential())
+fit1$pve
+plot.factors(fit1, 3)
+
+# with backfit
+fit1b <- flash(cov(t(X2)), verbose.lvl=0, 
+              backfit=TRUE, prior.family = prior.point.exponential())
+fit1b$pve
+plot.factors(fit1b, 3)
+```
+
+### data `X2n_a`
+
+```{r}
+# wihtout backfit
+fit1 <- flash(cov(t(X2n_a)), verbose.lvl=0, 
+              backfit=FALSE, prior.family = prior.point.exponential())
+fit1$pve
+plot.factors(fit1, 5)
+
+# with backfit
+# fit1b <- flash(cov(t(X2n_a)), verbose.lvl=0, 
+#               backfit=TRUE, prior.family = prior.point.exponential())
+# returns error: Standard errors must be positive (and nonzero).
+```
+
+### data `X2n_b`
+
+```{r}
+# wihtout backfit
+fit1 <- flash(cov(t(X2n_b)), verbose.lvl=0, 
+              backfit=FALSE, prior.family = prior.point.exponential())
+fit1$pve
+plot.factors(fit1, 5)
+
+# with backfit
+fit1b <- flash(cov(t(X2n_b)), verbose.lvl=0, 
+              backfit=TRUE, prior.family = prior.point.exponential())
+fit1b$pve
+plot.factors(fit1b, 5)
+```
