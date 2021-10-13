@@ -336,16 +336,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee2823b8e7c99392cf3d4572b757b5f615657ff77targetblanke2823b8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/e2823b8e7c99392cf3d4572b757b5f615657ff77" target="_blank">e2823b8</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f7fc356aa8f1fabf56148461c533ef2ae27bdfdtargetblank4f7fc35a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/4f7fc356aa8f1fabf56148461c533ef2ae27bdfd" target="_blank">4f7fc35</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee2823b8e7c99392cf3d4572b757b5f615657ff77targetblanke2823b8a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f7fc356aa8f1fabf56148461c533ef2ae27bdfdtargetblank4f7fc35a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/e2823b8e7c99392cf3d4572b757b5f615657ff77" target="_blank">e2823b8</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/4f7fc356aa8f1fabf56148461c533ef2ae27bdfd" target="_blank">4f7fc35</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -472,6 +472,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4f7fc356aa8f1fabf56148461c533ef2ae27bdfd/analysis/index.Rmd" target="_blank">4f7fc35</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+<td>
+replace gammamix notation to math notation
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/71c619e3592de23e8de95b347700ed45f95f341d/docs/index.html" target="_blank">71c619e</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -916,7 +950,7 @@ Start workflowr project.
 <ul>
 <li>method
 <ul>
-<li>priors are set as point-exponential: <code>g.l=g.f=gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))</code></li>
+<li>priors are set as point-exponential: <span class="math inline">\(0.1\delta_0(\cdot)+0.9\exp(\cdot; \lambda=1)\)</span></li>
 <li>two-step procedure is implemented.
 <ul>
 <li>the first step is to stabilize the fit given <code>g.l,g.f</code></li>

@@ -500,16 +500,16 @@ relative
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4bb4c2e64bf2fedfede0673918a3ba14ecc54789targetblank4bb4c2ea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/4bb4c2e64bf2fedfede0673918a3ba14ecc54789" target="_blank">4bb4c2e</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f7fc356aa8f1fabf56148461c533ef2ae27bdfdtargetblank4f7fc35a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/4f7fc356aa8f1fabf56148461c533ef2ae27bdfd" target="_blank">4f7fc35</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4bb4c2e64bf2fedfede0673918a3ba14ecc54789targetblank4bb4c2ea" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f7fc356aa8f1fabf56148461c533ef2ae27bdfdtargetblank4f7fc35a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/4bb4c2e64bf2fedfede0673918a3ba14ecc54789" target="_blank">4bb4c2e</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/4f7fc356aa8f1fabf56148461c533ef2ae27bdfd" target="_blank">4f7fc35</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -595,7 +595,6 @@ Unstaged changes:
     Modified:   analysis/demo6_ebfa_hb_g1.Rmd
     Modified:   analysis/demo6_ebfa_hb_g2.Rmd
     Modified:   analysis/flashier_point_laplace.Rmd
-    Modified:   analysis/index.Rmd
     Modified:   analysis/model_exp_prior.Rmd
     Modified:   code/flashImpute.R
     Deleted:    output/alt-flash-normal-elbo.pdf
@@ -637,6 +636,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4f7fc356aa8f1fabf56148461c533ef2ae27bdfd/analysis/tree_toy_altflash_1.Rmd" target="_blank">4f7fc35</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+<td>
+replace gammamix notation to math notation
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/tree_toy_altflash_1.html" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -719,7 +752,7 @@ environment(prior.point.exponential) &lt;- asNamespace(&#39;flashier&#39;) </cod
 <h2>Method</h2>
 <ul>
 <li>data: denoised (rank-2) data matrix</li>
-<li>priors: point-exponential <code>g_l</code>, <code>g_f</code> (<code>=gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))</code>)</li>
+<li>priors: point-exponential <span class="math inline">\(0.1\delta_0(\cdot)+0.9\exp(\cdot; \lambda=1)\)</span></li>
 <li><em>initialization</em>: random rank-<span class="math inline">\(K\)</span> initialization
 <ul>
 <li>first, random rank-<span class="math inline">\(K\)</span> intialization with given priors <span class="math inline">\(g_l,g_f\)</span></li>
@@ -913,8 +946,82 @@ saveRDS(out.list, &quot;output/tree_toy_altflash_dX2_v2021_1012_1309.rds&quot;)<
 <pre class="r"><code>results_dX2 &lt;- readRDS(&quot;output/tree_toy_altflash_dX2_v2021_1012_1309.rds&quot;)
 fig.elbo(results_dX2)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-8-1.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>fig.L(results_dX2)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-2">
+Past versions of unnamed-chunk-8-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-8-2.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>max(list.to.elbo(results_dX2)$elbo)</code></pre>
 <pre><code>[1] -516.5073</code></pre>
 <pre class="r"><code>flash(cov(t(dX2)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo</code></pre>
@@ -942,8 +1049,82 @@ saveRDS(out.list, &quot;output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds&quot
 <pre class="r"><code>results_dX2n_a &lt;- readRDS(&quot;output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds&quot;)
 fig.elbo(results_dX2n_a)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
+Past versions of unnamed-chunk-11-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-11-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-11-1.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>fig.L(results_dX2n_a)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-2">
+Past versions of unnamed-chunk-11-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-11-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-11-2.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>max(list.to.elbo(results_dX2n_a)$elbo)</code></pre>
 <pre><code>[1] -3098.097</code></pre>
 <pre class="r"><code>flash(cov(t(dX2n_a)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo</code></pre>
@@ -971,8 +1152,82 @@ saveRDS(out.list, &quot;output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds&quot
 <pre class="r"><code>results_dX2n_b &lt;- readRDS(&quot;output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds&quot;)
 fig.elbo(results_dX2n_b)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-1">
+Past versions of unnamed-chunk-14-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-14-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-14-1.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>fig.L(results_dX2n_b)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-14-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-2">
+Past versions of unnamed-chunk-14-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-14-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-14-2.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>max(list.to.elbo(results_dX2n_b)$elbo)</code></pre>
 <pre><code>[1] -3167.564</code></pre>
 <pre class="r"><code>flash(cov(t(dX2n_b)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo</code></pre>
@@ -983,10 +1238,121 @@ fig.elbo(results_dX2n_b)</code></pre>
 <p>compare the scaled version of the two; all are identical</p>
 <pre class="r"><code>fig.LF(results_dX2)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-16-1">
+Past versions of unnamed-chunk-16-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-16-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-16-1.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>fig.LF(results_dX2n_a)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-16-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-16-2">
+Past versions of unnamed-chunk-16-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-16-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-16-2.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>fig.LF(results_dX2n_b)</code></pre>
 <p><img src="figure/tree_toy_altflash_1.Rmd/unnamed-chunk-16-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-16-3">
+Past versions of unnamed-chunk-16-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-16-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4c528f25d46a45626afcb6dd514848455d1d16e1/docs/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-16-3.png" target="_blank">4c528f2</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
