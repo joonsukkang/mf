@@ -1,7 +1,7 @@
 ---
 title: "Tree Toy Data: alt-flash results (1)"
 author: "Joonsuk Kang"
-date: "2021-10-11"
+date: "2021-10-13"
 output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
@@ -19,6 +19,62 @@ prior.point.exponential <- function(...) {
 }
 environment(prior.point.exponential) <- asNamespace('flashier') 
 ```
+
+
+
+# Summary
+
+## Method
+
+* data: denoised (rank-2) data matrix
+* priors: point-exponential `g_l`, `g_f` (`=gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))`)
+* *initialization*: random rank-$K$ initialization
+  + first, random rank-$K$ intialization with given priors $g_l,g_f$
+  + then, update $q_l, q_f, \tau$ (holding $g_l,g_f$ fixed) until elbo stabilizes 
+* backfit using alt-flash: update $q_l$ given $q_f$, and $q_f$ given $q_l$
+
+
+The initialization seems to play an important role in the model fitting in that 
+we need to provide an initial condition for parameters that falls into a feasible reason 
+for the alt-flash algorithm to work properly.
+
+I tried a two-step fitting procedure that 
+
+- the first step involves finding a stable state given priors $g_l$ and $g_f$. 
+To be specific, we generate initial $L$ from $g_l$ and $F$ from $g_f$, and then
+update $q_l, q_f, \tau$ with the priors $g_l,g_f$ fixed, until the ELBO stabilizes.
+
+- the second step is the full backfitting procedure (now start updating $g_l$ and $g_f$ as well). 
+
+
+This sensitivity to initial conditions does not necessarily mean a sensitivity 
+to the prior choices $g_l$ and $g_f$, which needs further investigation.
+
+In the following investigation, we use the following simple point exponential prior 
+as the initial values of `g.l` and `g.f`.
+
+```{r}
+# a point-exponential prior
+g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
+```
+
+
+## Results
+
+In all of the cases (`X2`, `X2n_a`, `X2n_b`), all four patterns are captures by the method.
+
+* when $K>4$, only four factors are used and the residual factors are dropped; the desired `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` pattern is captured
+
+* when $K<4$, a sub optimal fit is achieved; capturing only $K$ of the four patterns
+
+* we tried five seeds for $K=1,2,\dots,8$; the randomness in seeds has little impact on the results (the only difference would be which $K$ of the four patterns get selected when $K>4$)
+
+* a much higher elbo is achieved compared to flashier (when given $K\geq 4$)
+
+* posterior means of $L$ and $F$ are identical (up to scale) in all cases
+
+
+
 
 # Toy data
 
@@ -63,41 +119,20 @@ rm(X, X.svd, f, i, n, p)
 ```
 
 
-# Method
-
-In this investigation, we use `alt-flash` with `point-exponential` prior. 
-
-The initialization seems to play an important role in the model fitting in that 
-we need to provide an initial condition for parameters that falls in a feasible reason 
-for the alt-flash algorithm to work properly.
-
-I tried a two-step fitting procedure that 
-
-- the first step involves finding a stable state given priors $g_l$ and $g_f$. 
-To be specific, we generate initial $L$ from $g_l$ and $F$ from $g_f$, and then
-update $q_l, q_f, \tau$ with the priors $g_l,g_f$ fixed, until the ELBO stabilizes.
-
-- the second step is the full backfitting procedure (now start updating $g_l$ and $g_f$ as well). 
-
-
-This sensitivity to initial conditions does not necessarily mean a sensitivity 
-to the prior choices $g_l$ and $g_f$, which needs further investigation.
-
-
-In the following investigation, we use the following simple point exponential prior 
-as the initial values of `g.l` and `g.f`.
-
 ```{r}
-# a point-exponential prior
-g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
+# create a rank-2 denoised version of matrix
+r2d <- function(dat.mat){
+  smat <- svd(dat.mat)
+  dmat <- smat$u[,1:2] %*% diag(smat$d[1:2], nrow=2) %*% t(smat$v[,1:2])
+  return(dmat)
+}
+dX2 <-r2d(X2)
+dX2n_a <-r2d(X2n_a)
+dX2n_b <-r2d(X2n_b)
 ```
 
 
-```{r}
-setwd("~/Box/2-research/mf")
-source("code/alt-flash_v20211010.R")
-```
-
+# Some Functions
 
 ```{r}
 list.to.elbo <- function(out.list){
@@ -120,27 +155,36 @@ list.to.elbo <- function(out.list){
 }
 
 
-list.to.factors <- function(out.list){
+list.to.factors <- function(out.list){ 
+  
   
   df <- data.frame(L = double(),
+                   F = double(),
                    x = integer(),
                    factor = integer(),
                    K = integer(),
                    seed = integer()
                    )
+  
 
   for (K in 1:length(out.list)){
     for (seed in 1:length(out.list[[K]])){
       
-      mat.temp <- out.list[[K]][[seed]]$A.l # use posterior mean of L
-      mat.temp <- mat.temp %*% diag(1/sqrt(colSums(mat.temp^2)),  # scale columns to L2 norm 1
-                                    nrow=ncol(mat.temp),
-                                    ncol=ncol(mat.temp))
+      mat.L <- out.list[[K]][[seed]]$A.l # use posterior mean of L
+      mat.F <- out.list[[K]][[seed]]$A.f
+      
+      mat.L <- mat.L %*% diag(1/sqrt(colSums(mat.L^2)),  # scale columns to L2 norm 1
+                                    nrow=ncol(mat.L),
+                                    ncol=ncol(mat.L))
+      mat.F <- mat.F %*% diag(1/sqrt(colSums(mat.F^2)),  # scale columns to L2 norm 1
+                                    nrow=ncol(mat.F),
+                                    ncol=ncol(mat.F))
       
       df <- rbind(df, 
-                  data.frame(L = c(mat.temp),
-                             x = 1:nrow(mat.temp),
-                             factor = rep(1:ncol(mat.temp), each=nrow(mat.temp)),
+                  data.frame(L = c(mat.L),
+                             F = c(mat.F),
+                             x = 1:nrow(mat.L),
+                             factor = rep(1:ncol(mat.L), each=nrow(mat.L)),
                              K = K,
                              seed = seed))
     }
@@ -148,37 +192,55 @@ list.to.factors <- function(out.list){
   return(df)
 }
 
-top10 <- function(df.elbo, df.L){
-	
-	df.elbo %>% 
-    group_by(K, seed) %>%
-    summarise(elbo=last(elbo)) %>%
-    ungroup() %>%
-    arrange(-elbo) %>% head(10) %>%
-    mutate(rank=1:10) %>% select(rank, elbo, K, seed) -> df.elbo.top10
 
-  print(df.elbo.top10)
+fig.elbo <-function(out.list){
+  list.to.elbo(out.list) %>%
+  mutate(seed=as.factor(seed),
+         dist=max(elbo)-elbo+1e-6) %>%
+  ggplot()+
+  geom_line(aes(x=iteration, y=dist, group=seed, col=seed)) +
+  scale_y_log10()+
+  facet_grid(~K, labeller=labeller(.cols=label_both))+
+  ylab('distance from best elbo')
+}
+
+fig.L <- function(out.list){
+  list.to.factors(out.list) %>% 
+  mutate(factor=as.factor(factor)) %>%
+  ggplot()+geom_line(aes(x=x, y=L, group=factor, col=factor))+
+  facet_grid(K~seed, 
+             labeller = labeller(.rows = label_both, .cols = label_both))
+}
+
+fig.LF <- function(out.list){
   
-  df.elbo.top10 %>% 
-    select(-elbo) %>% 
-    inner_join(df.L, by=c('K', 'seed'))  %>% 
+  list.to.factors(out.list) %>% 
     mutate(factor=as.factor(factor)) %>%
-    ggplot()+geom_line(aes(x=x, y=L, group=factor, col=factor))+
-    facet_wrap(~rank, nrow=2, labeller='label_both') -> fig
-  
-  print(fig)
+    ggplot()+geom_line(aes(x=F, y=L, group=factor, col=factor))+
+    facet_grid(K~seed, 
+               labeller = labeller(.rows = label_both, .cols = label_both)) 
 }
+
+
 
 ```
 
+# Results
 
-# Results: `cov(t(X2))`
+
+```{r}
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20211010.R")
+```
+
+
+## Results: `cov(t(X2))`
 
 
 ```{r, eval=FALSE}
 # for record: g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
 out.list <- list()
-data.mat <- cov(t(X2))
+data.mat <- cov(t(dX2))
 
 for (K in 1:8){
   print(paste0("now fitting K=",K)) 
@@ -192,52 +254,28 @@ for (K in 1:8){
   out.list[[K]] <- temp.list
 }
 
-saveRDS(out.list, "output/tree_toy_altflash_X2_v2021_1012_1309.rds")
+saveRDS(out.list, "output/tree_toy_altflash_dX2_v2021_1012_1309.rds")
 ```
 
 ```{r}
-results_X2 <- readRDS("output/tree_toy_altflash_X2_v2021_1012_1309.rds")
-
-list.to.elbo(results_X2) %>%
-  mutate(seed=as.factor(seed),
-         dist=max(elbo)-elbo+1e-6) %>%
-  ggplot()+
-  geom_line(aes(x=iteration, y=dist, group=seed, col=seed)) +
-  scale_y_log10()+
-  facet_grid(~K, labeller=labeller(.cols=label_both))+
-  ylab('distance from best elbo')
-
-list.to.factors(results_X2) %>% 
-  mutate(factor=as.factor(factor)) %>%
-  ggplot()+geom_line(aes(x=x, y=L, group=factor, col=factor))+
-  facet_grid(K~seed, 
-             labeller = labeller(.rows = label_both, .cols = label_both))
+results_dX2 <- readRDS("output/tree_toy_altflash_dX2_v2021_1012_1309.rds")
+fig.elbo(results_dX2)
+fig.L(results_dX2)
 ```
-
-
-Observations
-
-- when $K>4$ is given, only four factors are used and the residual factors are dropped; the desired `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` pattern is captured
-
-- when $K<4$ is given, a sub optimal fit is achieved; capturing only $K$-many of the four patterns
-
-- this noiseless task is easier than the noisy tasks below
-
-- a much higher elbo is achieved compared to flashier (when given $K\geq 4$)
 
 ```{r}
-max(list.to.elbo(results_X2)$elbo)
-flash(cov(t(X2)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
+max(list.to.elbo(results_dX2)$elbo)
+flash(cov(t(dX2)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
 ```
 
 
 
-# Results: `X2n_a`
+## Results: `X2n_a`
 
 ```{r, eval=FALSE}
 # for record: g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
 out.list <- list()
-data.mat <- cov(t(X2n_a))
+data.mat <- cov(t(dX2n_a))
 
 for (K in 1:8){
   print(paste0("now fitting K=",K)) 
@@ -251,42 +289,26 @@ for (K in 1:8){
   out.list[[K]] <- temp.list
 }
 
-saveRDS(out.list, "output/tree_toy_altflash_X2n_a_v2021_1012_1309.rds")
+saveRDS(out.list, "output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds")
 ```
 
 ```{r}
-
-results_X2n_a <- readRDS("output/tree_toy_altflash_X2n_a_v2021_1012_1309.rds")
-
-df.elbo <- list.to.elbo(results_X2n_a)
-df.elbo %>%
-  mutate(seed=as.factor(seed),
-         dist=max(elbo)-elbo+1e-6) %>%
-  ggplot()+
-  geom_line(aes(x=iteration, y=dist, group=seed, col=seed)) +
-  scale_y_log10()+
-  facet_grid(~K, labeller=labeller(.cols=label_both))+
-  ylab('distance from best elbo')
-  
-df.L <- list.to.factors(results_X2n_a)
-df.L %>% 
-  mutate(factor=as.factor(factor)) %>%
-  ggplot()+geom_line(aes(x=x, y=L, group=factor, col=factor))+
-  facet_grid(K~seed, 
-             labeller = labeller(.rows = label_both, .cols = label_both))
-
-top10(df.elbo, df.L)
-flash(cov(t(X2n_a)), prior.family=prior.point.exponential(), backfit=FALSE, verbose.lvl=0)$elbo # backfit fails
+results_dX2n_a <- readRDS("output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds")
+fig.elbo(results_dX2n_a)
+fig.L(results_dX2n_a)
 ```
 
+```{r}
+max(list.to.elbo(results_dX2n_a)$elbo)
+flash(cov(t(dX2n_a)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
+```
 
-# Results: `X2n_b`
-
+## Results: `X2n_b`
 
 ```{r, eval=FALSE}
 # for record: g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
 out.list <- list()
-data.mat <- cov(t(X2n_b))
+data.mat <- cov(t(dX2n_b))
 
 for (K in 1:8){
   print(paste0("now fitting K=",K)) 
@@ -300,34 +322,31 @@ for (K in 1:8){
   out.list[[K]] <- temp.list
 }
 
-saveRDS(out.list, "output/tree_toy_altflash_X2n_b_v2021_1012_1309.rds")
+saveRDS(out.list, "output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds")
 ```
 
 
 ```{r}
-results_X2n_b <- readRDS("output/tree_toy_altflash_X2n_b_v2021_1012_1309.rds")
-
-df.elbo <- list.to.elbo(results_X2n_b)
-df.elbo %>%
-  mutate(seed=as.factor(seed),
-         dist=max(elbo)-elbo+1e-6) %>%
-  ggplot()+
-  geom_line(aes(x=iteration, y=dist, group=seed, col=seed)) +
-  scale_y_log10()+
-  facet_grid(~K, labeller=labeller(.cols=label_both))+
-  ylab('distance from best elbo')
-  
-df.L <- list.to.factors(results_X2n_b)
-df.L %>% 
-  mutate(factor=as.factor(factor)) %>%
-  ggplot()+geom_line(aes(x=x, y=L, group=factor, col=factor))+
-  facet_grid(K~seed, 
-             labeller = labeller(.rows = label_both, .cols = label_both))
-
-top10(df.elbo, df.L)
-flash(cov(t(X2n_b)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
+results_dX2n_b <- readRDS("output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds")
+fig.elbo(results_dX2n_b)
+fig.L(results_dX2n_b)
 ```
 
+```{r}
+max(list.to.elbo(results_dX2n_b)$elbo)
+flash(cov(t(dX2n_b)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
+```
+
+
+## Check Symmetry
+
+compare the scaled version of the two; all are identical
+
+```{r}
+fig.LF(results_dX2)
+fig.LF(results_dX2n_a)
+fig.LF(results_dX2n_b)
+```
 
 
 
