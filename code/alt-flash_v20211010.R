@@ -8,7 +8,8 @@ alt.flash <- function(flashier.fit=NULL, # initialize with flashier obj
                       g.f=NULL,
                       seed=NULL, # seed for random initialization
                       maxiter=1000,
-                      g.common=FALSE
+                      g.common=FALSE,
+                      print.elbo=FALSE
                       ){
 
   time.vec <- Sys.time()
@@ -17,7 +18,7 @@ alt.flash <- function(flashier.fit=NULL, # initialize with flashier obj
   # initialize from flashier fit
   if(!is.null(flashier.fit)){ obj.temp <- INIT.flashier(flashier.fit) }
   # random initialization
-  if(is.null(flashier.fit)){ obj.temp <- INIT.rand(Y, g.l, g.f, seed) }
+  if(is.null(flashier.fit)){ obj.temp <- INIT.rand(Y, g.l, g.f, seed, print.elbo) }
 
   for(i in 1:length(obj.temp)) assign(names(obj.temp)[i], obj.temp[[i]])
   g.l.pf <- G.PF(g.l)
@@ -86,7 +87,7 @@ alt.flash <- function(flashier.fit=NULL, # initialize with flashier obj
 
     # compute elbo
     elbo <- ELBO(Y, trYTY, tau, A.l, A.f, B.l, B.f, KL.l, KL.f)
-    #print(elbo)
+    if(print.elbo==TRUE){print(elbo)}
 
     # record time and elbo
     time.vec <- c(time.vec, Sys.time())
@@ -156,7 +157,8 @@ sample.pe <- function(g, nsamp){
 
 
 # random initialization
-INIT.rand <- function(Y, g.l, g.f, elbo.tol=1, max.update=30, min.update=10, seed=NULL){
+INIT.rand <- function(Y, g.l, g.f, elbo.tol=1, max.update=30, min.update=10, seed=NULL,
+                      print.elbo){
 
   if(!is.null(seed)){set.seed(seed)}
 
@@ -189,7 +191,7 @@ INIT.rand <- function(Y, g.l, g.f, elbo.tol=1, max.update=30, min.update=10, see
 
     tau <- SOL.TAU(trYTY=trYTY, Y, A.l, A.f, B.l, B.f)
     elbo <- ELBO(Y, trYTY, tau, A.l, A.f, B.l, B.f, KL.l, KL.f)
-    #print(elbo)
+    if(print.elbo==TRUE){print(elbo)}
 
     if(i > min.update){if(abs(elbo.old-elbo) < elbo.tol) break}
     elbo.old <- elbo
