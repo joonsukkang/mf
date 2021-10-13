@@ -336,16 +336,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree36dda83d012c4e3eb35ae127f7a3fa4eb8a6ac79targetblank36dda83a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/36dda83d012c4e3eb35ae127f7a3fa4eb8a6ac79" target="_blank">36dda83</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee2823b8e7c99392cf3d4572b757b5f615657ff77targetblanke2823b8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/e2823b8e7c99392cf3d4572b757b5f615657ff77" target="_blank">e2823b8</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree36dda83d012c4e3eb35ae127f7a3fa4eb8a6ac79targetblank36dda83a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee2823b8e7c99392cf3d4572b757b5f615657ff77targetblanke2823b8a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/36dda83d012c4e3eb35ae127f7a3fa4eb8a6ac79" target="_blank">36dda83</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/e2823b8e7c99392cf3d4572b757b5f615657ff77" target="_blank">e2823b8</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -413,6 +413,9 @@ Untracked files:
     Untracked:  output/tree_toy_altflash_X2_v2021_1012_1309.rds
     Untracked:  output/tree_toy_altflash_X2n_a_v2021_1012_1309.rds
     Untracked:  output/tree_toy_altflash_X2n_b_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds
     Untracked:  temp-blog/
     Untracked:  writing/
 
@@ -429,7 +432,6 @@ Unstaged changes:
     Modified:   analysis/demo6_ebfa_hb_g2.Rmd
     Modified:   analysis/flashier_point_laplace.Rmd
     Modified:   analysis/model_exp_prior.Rmd
-    Modified:   analysis/tree_toy_altflash_1.Rmd
     Modified:   code/flashImpute.R
     Deleted:    output/alt-flash-normal-elbo.pdf
 
@@ -470,6 +472,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/e2823b8e7c99392cf3d4572b757b5f615657ff77/analysis/index.Rmd" target="_blank">e2823b8</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+<td>
+add altflash w/ denoising to index
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/fbc239b5c316cab53e6a0759d93a13bf98add352/docs/index.html" target="_blank">fbc239b</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -872,21 +908,27 @@ Start workflowr project.
 <h2>alternating flash</h2>
 <div style="display: flex;">
 <div style="min-width: 300px; max-width: 300px">
-<p><img src="https://joonsukkang.github.io/mf/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-7-2.png" width="400"></p>
+<p><img src="https://joonsukkang.github.io/mf/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-14-2.png" width="400"></p>
 </div>
 <div>
 <ul>
 <li><a href="tree_toy_altflash_1.html">altflash on tree toy data</a>
 <ul>
-<li>priors are set as <code>g.l=g.f=gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))</code></li>
+<li>method
+<ul>
+<li>priors are set as point-exponential: <code>g.l=g.f=gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))</code></li>
 <li>two-step procedure is implemented.
 <ul>
-<li>the first step is to stabilize fit given <code>g.l,g.f</code></li>
+<li>the first step is to stabilize the fit given <code>g.l,g.f</code></li>
 <li>the second step is to fully update (including <code>g.l,g.f</code>)</li>
 </ul></li>
-<li>extracting <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> is easy for noiseless data; harder for noisy data.
+<li>use denoised (rank-2) data</li>
+</ul></li>
+<li>results
 <ul>
-<li>given <span class="math inline">\(K\geq4\)</span>, altflash always captures the desired pattern, which attains a higher elbo</li>
+<li>all four patterns <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> are captured when <span class="math inline">\(K\geq4\)</span></li>
+<li>when <span class="math inline">\(K&lt;4\)</span>, only <span class="math inline">\(K\)</span> of the four patterns are captured</li>
+<li>posterior mean of <span class="math inline">\(L\)</span> and <span class="math inline">\(F\)</span> are symmetric (up to scale)</li>
 </ul></li>
 </ul></li>
 </ul>
