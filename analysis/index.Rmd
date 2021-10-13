@@ -18,7 +18,7 @@ editor_options:
 ::: {}
 + [altflash on tree toy data](tree_toy_altflash_1.html)
   + method
-    + priors are set as point-exponential: `g.l=g.f=gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))`
+    + priors are set as point-exponential: $0.1\delta_0(\cdot)+0.9\exp(\cdot; \lambda=1)$
     + two-step procedure is implemented. 
       + the first step is to stabilize the fit given `g.l,g.f`
       + the second step is to fully update (including `g.l,g.f`)

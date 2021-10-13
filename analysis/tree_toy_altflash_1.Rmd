@@ -27,7 +27,7 @@ environment(prior.point.exponential) <- asNamespace('flashier')
 ## Method
 
 * data: denoised (rank-2) data matrix
-* priors: point-exponential `g_l`, `g_f` (`=gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))`)
+* priors: point-exponential $0.1\delta_0(\cdot)+0.9\exp(\cdot; \lambda=1)$
 * *initialization*: random rank-$K$ initialization
   + first, random rank-$K$ intialization with given priors $g_l,g_f$
   + then, update $q_l, q_f, \tau$ (holding $g_l,g_f$ fixed) until elbo stabilizes 
