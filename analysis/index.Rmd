@@ -29,6 +29,25 @@ editor_options:
 
 
 
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-8-2.png" width="400">
+:::
+::: {}
++ [but first, denoising](tree_toy_flashier_denoising.html)
+  + the goal is to extract `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` and we use flashier on `cov(t(X))` with point-exponential prior
+  + with the (apparent) rank-2 plus noise structure of toy data, we can greatly improve the fit by using the rank-2 version of the data matrix as the input
+  + three of the four patterns are captures in `X2`, `X2n_a`; two in `X2n_b`
+  + there are still one or two patterns that are not found
+
+:::
+::::
+
+
+
+
+
+
 
 
 :::: {style="display: flex;"}
