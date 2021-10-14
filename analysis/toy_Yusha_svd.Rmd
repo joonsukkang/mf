@@ -91,7 +91,7 @@ plot.L10(X2)
 ```
 
 ```{r}
-# with sd=0.1
+# with sd=1
 plot.L10(X3)
 ```
 
