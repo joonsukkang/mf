@@ -1,0 +1,97 @@
+---
+title: "toy data from Yusha: SVD"
+author: "Joonsuk Kang"
+date: "2021-10-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# toy data
+
+```{r}
+# source: https://yushaliu.github.io/single_cell_cancer/simulations2.html
+
+library(Matrix)
+library(flashier)
+library(magrittr)
+library(RColorBrewer)
+library(pheatmap)
+
+### set seed
+set.seed(100)
+
+### load in simulated loadings and factors
+model <- readRDS(url("https://raw.githubusercontent.com/YushaLiu/single_cell_cancer/master/data/model.rds"))
+L <- model$L
+F <- model$F
+
+### plot the drift factorization of truth, where F is orthogonal across columns 
+pheatmap(L, show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True L")
+pheatmap(L[,-1], show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True L")
+
+pheatmap(F, show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True F")
+pheatmap(F[,-1], show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True F")
+
+
+library(tidyverse)
+
+# true data
+X0 <- L %*% t(F)
+
+# with sd=0.5
+X1 <- L %*% t(F) + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+
+# with sd=0.7
+X2 <- L %*% t(F) + matrix(rnorm(800*2000, 0, 0.7), nrow=800, ncol=2000)
+
+# with sd=1
+X3 <- L %*% t(F) + matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+```
+
+# Function 
+
+print 15 largest singular values and their corresponding left singular vectors
+
+```{r}
+plot.L10 <- function(X){
+  
+  s <- svd(X)
+  print(s$d[1:15])
+  
+  data.frame(L.svd=c(s$u[,1:10]),
+             x=rep(1:800,times=10),
+             factor=rep(1:10, each=800)) %>%
+    mutate(factor=as.factor(factor)) %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L.svd, group=factor, col=factor))+
+    facet_wrap(~factor)
+}
+```
+
+
+# SVD results
+
+
+```{r}
+# true data
+plot.L10(X0)
+```
+
+
+```{r}
+# with sd=0.5
+plot.L10(X1)
+```
+
+
+```{r}
+# with sd=0.7
+plot.L10(X2)
+```
+
+```{r}
+# with sd=0.1
+plot.L10(X3)
+```
+
