@@ -126,6 +126,17 @@ editor_options:
 ::::
 
 
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+:::
+::: {}
+
++ [svd of toy data by Yusha](toy_Yusha_svd.html)
+
+:::
+::::
+
 ## archive
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
