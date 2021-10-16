@@ -11,7 +11,7 @@
 
 <meta name="author" content="Joonsuk Kang" />
 
-<meta name="date" content="2021-10-13" />
+<meta name="date" content="2021-10-16" />
 
 <title>Tree Toy Data: flash results w/ denoising</title>
 
@@ -360,7 +360,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Tree Toy Data: flash results w/ denoising</h1>
 <h4 class="author">Joonsuk Kang</h4>
-<h4 class="date">2021-10-13</h4>
+<h4 class="date">2021-10-16</h4>
 
 </div>
 
@@ -385,7 +385,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-10-13
+<strong>Last updated:</strong> 2021-10-16
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -476,16 +476,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreed59450f33477277f29e975f2eb0c9984ab7abacatargetblankd59450fa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/d59450f33477277f29e975f2eb0c9984ab7abaca" target="_blank">d59450f</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f807be5739c5985dd2c4801beb5e9032025d258targetblank4f807bea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/4f807be5739c5985dd2c4801beb5e9032025d258" target="_blank">4f807be</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreed59450f33477277f29e975f2eb0c9984ab7abacatargetblankd59450fa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f807be5739c5985dd2c4801beb5e9032025d258targetblank4f807bea" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/d59450f33477277f29e975f2eb0c9984ab7abaca" target="_blank">d59450f</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/4f807be5739c5985dd2c4801beb5e9032025d258" target="_blank">4f807be</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -500,6 +500,7 @@ Untracked files:
     Untracked:  analysis/alt-flash-nonneg.Rmd
     Untracked:  analysis/alt-flash-nonneg_largeY.Rmd
     Untracked:  analysis/alt-flash-normal_largeY.Rmd
+    Untracked:  analysis/altflash_simulation_Yusha.Rmd
     Untracked:  analysis/bingham.Rmd
     Untracked:  analysis/bingham_constant.Rmd
     Untracked:  analysis/demo3_toy.Rmd
@@ -540,6 +541,8 @@ Untracked files:
     Untracked:  flashImpute.pdf
     Untracked:  output/.Rapp.history
     Untracked:  output/Likelihood.gif
+    Untracked:  output/altflash_simulation_Yusha_20211013_res1.rds
+    Untracked:  output/altflash_simulation_Yusha_20211013_res3.rds
     Untracked:  output/nonneg_v20210824_large_fit.alt.p.rds
     Untracked:  output/nonneg_v20210824_large_fit.alt.rds
     Untracked:  output/nonneg_v20210824_large_fit.f.ext.rds
@@ -553,6 +556,9 @@ Untracked files:
     Untracked:  output/tree_toy_altflash_X2_v2021_1012_1309.rds
     Untracked:  output/tree_toy_altflash_X2n_a_v2021_1012_1309.rds
     Untracked:  output/tree_toy_altflash_X2n_b_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds
     Untracked:  temp-blog/
     Untracked:  writing/
 
@@ -569,7 +575,7 @@ Unstaged changes:
     Modified:   analysis/demo6_ebfa_hb_g2.Rmd
     Modified:   analysis/flashier_point_laplace.Rmd
     Modified:   analysis/model_exp_prior.Rmd
-    Modified:   analysis/tree_toy_altflash_1.Rmd
+    Modified:   code/alt-flash_v20211013.R
     Modified:   code/flashImpute.R
     Deleted:    output/alt-flash-normal-elbo.pdf
 
@@ -615,6 +621,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4f807be5739c5985dd2c4801beb5e9032025d258/analysis/tree_toy_flashier_denoising.Rmd" target="_blank">4f807be</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-16
+</td>
+<td>
+replace cov(X) with XXt/p
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/tree_toy_flashier_denoising.html" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/d59450f33477277f29e975f2eb0c9984ab7abaca/analysis/tree_toy_flashier_denoising.Rmd" target="_blank">d59450f</a>
 </td>
 <td>
@@ -647,7 +687,7 @@ x dplyr::lag()    masks stats::lag()</code></pre>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
 <ul>
-<li><p>the goal is to extract the <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> pattern and the method used is flshier on <code>cov(tX))</code> with point exponential prior</p></li>
+<li><p>the goal is to extract the <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> pattern and the method used is flashier on <code>XX^T/p</code> with point exponential prior</p></li>
 <li><p>here we implement the rank-2 denoising idea, which greatly improves the fit</p></li>
 <li><p>the toy data have rank-2 plus noise structure, which can be easily detected using a scree plot</p></li>
 <li><p>we can recover three patterns from <code>X2</code> and <code>X2n_a</code>, and two from <code>X2n_b</code>; notice that now <code>X2n_b</code> is a harder problem</p></li>
@@ -697,19 +737,137 @@ rm(X, X.svd, f, i, n, p)</code></pre>
 <p>The toy data have a rank-2 plus noise structure (we know since we made them). And as we can see, the singular values have two large values. We create a rank-2 version of the toy data to check whether denoising before model fitting greatly improves the model fit.</p>
 <pre class="r"><code>plot(svd(X2)$d)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
+Past versions of unnamed-chunk-3-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-3-1.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot(svd(X2n_a)$d)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-3-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-2">
+Past versions of unnamed-chunk-3-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-3-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-3-2.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>plot(svd(X2n_b)$d)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-3-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-3">
+Past versions of unnamed-chunk-3-3.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-3-3" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-3-3.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># create a rank-2 denoised version of matrix
 r2d &lt;- function(dat.mat){
   smat &lt;- svd(dat.mat)
   dmat &lt;- smat$u[,1:2] %*% diag(smat$d[1:2], nrow=2) %*% t(smat$v[,1:2])
   return(dmat)
 }
-dX2 &lt;-r2d(X2)
-dX2n_a &lt;-r2d(X2n_a)
-dX2n_b &lt;-r2d(X2n_b)</code></pre>
+
+# create a normalized XX^T matrix
+XXtn &lt;- function(X){
+  X %*% t(X) /ncol(X)
+}
+
+# create denoised, normalized XXT matrix
+mat2    &lt;- XXtn(r2d(X2))
+mat2n_a &lt;- XXtn(r2d(X2n_a))
+mat2n_b &lt;- XXtn(r2d(X2n_b))</code></pre>
 </div>
 <div id="some-functions" class="section level1">
 <h1>Some Functions</h1>
@@ -745,41 +903,263 @@ plot.factors &lt;- function(fit, showK=NULL){
 <div id="data-x2" class="section level2">
 <h2>data <code>X2</code></h2>
 <pre class="r"><code># wihtout backfit
-fit1 &lt;- flash(cov(t(dX2)), verbose.lvl=0, 
+fit1 &lt;- flash(mat2, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 plot.factors(fit1)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-6-1.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># with backfit
-fit1b &lt;- flash(cov(t(dX2)), verbose.lvl=0, 
+fit1b &lt;- flash(mat2, verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
 plot.factors(fit1b)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-2">
+Past versions of unnamed-chunk-6-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-6-2.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="data-x2n_a" class="section level2">
 <h2>data <code>X2n_a</code></h2>
 <pre class="r"><code># wihtout backfit
-fit1 &lt;- flash(cov(t(dX2n_a)), verbose.lvl=0, 
+fit1 &lt;- flash(mat2n_a, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 plot.factors(fit1)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
+Past versions of unnamed-chunk-7-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-7-1.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># with backfit
-fit1b &lt;- flash(cov(t(dX2n_a)), verbose.lvl=0,
+fit1b &lt;- flash(mat2n_a, verbose.lvl=0,
               backfit=TRUE, prior.family = prior.point.exponential())
 plot.factors(fit1)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-2">
+Past versions of unnamed-chunk-7-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-7-2.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="data-x2n_b" class="section level2">
 <h2>data <code>X2n_b</code></h2>
 <pre class="r"><code># wihtout backfit
-fit1 &lt;- flash(cov(t(dX2n_b)), verbose.lvl=0, 
+fit1 &lt;- flash(mat2n_b, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 plot.factors(fit1)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-8-1.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># with backfit
-fit1b &lt;- flash(cov(t(dX2n_b)), verbose.lvl=0, 
+fit1b &lt;- flash(mat2n_b, verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
 plot.factors(fit1)</code></pre>
 <p><img src="figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-2">
+Past versions of unnamed-chunk-8-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/983e1f5fc6258c668c0f4f926badb939d2e7fcc8/docs/figure/tree_toy_flashier_denoising.Rmd/unnamed-chunk-8-2.png" target="_blank">983e1f5</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
