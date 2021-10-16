@@ -305,7 +305,7 @@ $(document).ready(function () {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-10-14
+<strong>Last updated:</strong> 2021-10-16
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -336,16 +336,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4aa237102e334ca2b148eee6997bed5352ecd46etargetblank4aa2371a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/4aa237102e334ca2b148eee6997bed5352ecd46e" target="_blank">4aa2371</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree2c821c8eb8bf477e2322794eb0cf44c53a612ddbtargetblank2c821c8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/2c821c8eb8bf477e2322794eb0cf44c53a612ddb" target="_blank">2c821c8</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4aa237102e334ca2b148eee6997bed5352ecd46etargetblank4aa2371a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree2c821c8eb8bf477e2322794eb0cf44c53a612ddbtargetblank2c821c8a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/4aa237102e334ca2b148eee6997bed5352ecd46e" target="_blank">4aa2371</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/2c821c8eb8bf477e2322794eb0cf44c53a612ddb" target="_blank">2c821c8</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -379,6 +379,7 @@ Untracked files:
     Untracked:  analysis/sliding_correlation.Rmd
     Untracked:  analysis/sliding_pdf.Rmd
     Untracked:  analysis/temp.Rmd
+    Untracked:  analysis/toy_Yusha_oracle.Rmd
     Untracked:  analysis/toy_p_notfixK.Rmd
     Untracked:  analysis/y2_NoTargetsByTF.R
     Untracked:  analysis/y2_eb.Rmd
@@ -419,6 +420,9 @@ Untracked files:
     Untracked:  output/tree_toy_altflash_dX2_v2021_1012_1309.rds
     Untracked:  output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds
     Untracked:  output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2n_b_v2021_1012_1309.rds
     Untracked:  temp-blog/
     Untracked:  writing/
 
@@ -476,6 +480,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/2c821c8eb8bf477e2322794eb0cf44c53a612ddb/analysis/index.Rmd" target="_blank">2c821c8</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-16
+</td>
+<td>
+replace cov(X) with XXt/p
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/2b390749494bb36ea76eb2922dcd0535ce3ac64b/docs/index.html" target="_blank">2b39074</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-14
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -640,7 +678,7 @@ html
 joonsukkang
 </td>
 <td>
-2021-10-12
+2021-10-11
 </td>
 <td>
 Build site.
@@ -657,7 +695,7 @@ Rmd
 joonsukkang
 </td>
 <td>
-2021-10-12
+2021-10-11
 </td>
 <td>
 tree toy data + index updates
@@ -878,7 +916,7 @@ html
 Joonsuk Kang
 </td>
 <td>
-2020-11-03
+2020-11-02
 </td>
 <td>
 Build site.
@@ -895,7 +933,7 @@ Rmd
 Joonsuk Kang
 </td>
 <td>
-2020-11-03
+2020-11-02
 </td>
 <td>
 The Rank-1 Problem
@@ -994,7 +1032,7 @@ Start workflowr project.
 <li>the first step is to stabilize the fit given <code>g.l,g.f</code></li>
 <li>the second step is to fully update (including <code>g.l,g.f</code>)</li>
 </ul></li>
-<li>use denoised (rank-2) data</li>
+<li>use denoised (rank-2) <code>XX^T/p</code></li>
 </ul></li>
 <li>results
 <ul>
@@ -1014,7 +1052,7 @@ Start workflowr project.
 <ul>
 <li><a href="tree_toy_flashier_denoising.html">but first, denoising</a>
 <ul>
-<li>the goal is to extract <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> and we use flashier on <code>cov(t(X))</code> with point-exponential prior</li>
+<li>the goal is to extract <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> and we use flashier on <code>XX^T/p</code> with point-exponential prior</li>
 <li>with the (apparent) rank-2 plus noise structure of toy data, we can greatly improve the fit by using the rank-2 version of the data matrix as the input</li>
 <li>three of the four patterns are captures in <code>X2</code>, <code>X2n_a</code>; two in <code>X2n_b</code></li>
 <li>there are still one or two patterns that are not found</li>
@@ -1030,8 +1068,8 @@ Start workflowr project.
 <ul>
 <li><a href="tree_toy_flashier.html">flashier on tree toy data</a>: as a motivation for alternating flash
 <ul>
-<li>we could extract <code>(1,-1,0,0), (0,0,1,-1)</code> pattern with flashier on <code>cov(t(X))</code></li>
-<li>however, extracting <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> seems harder. flashier on <code>cov(t(X))</code> with point-exponential prior finds only a subset of the signals.</li>
+<li>we could extract <code>(1,-1,0,0), (0,0,1,-1)</code> pattern with flashier on <code>XX^T/p</code></li>
+<li>however, extracting <code>(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)</code> seems harder. flashier on <code>XX^T/p</code> with point-exponential prior finds only a subset of the signals.</li>
 </ul></li>
 <li><a href="alt-flash-sanity.html">minimal</a>: a sanity check for the new minimally functional version of alt-flash</li>
 </ul>
