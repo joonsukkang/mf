@@ -1,7 +1,7 @@
 ---
 title: "Tree Toy Data: alt-flash results (1)"
 author: "Joonsuk Kang"
-date: "2021-10-13"
+date: "2021-10-16"
 output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
@@ -126,9 +126,16 @@ r2d <- function(dat.mat){
   dmat <- smat$u[,1:2] %*% diag(smat$d[1:2], nrow=2) %*% t(smat$v[,1:2])
   return(dmat)
 }
-dX2 <-r2d(X2)
-dX2n_a <-r2d(X2n_a)
-dX2n_b <-r2d(X2n_b)
+
+# create a normalized XX^T matrix
+XXtn <- function(X){
+  X %*% t(X) /ncol(X)
+}
+
+# create denoised, normalized XXT matrix
+mat2    <- XXtn(r2d(X2))
+mat2n_a <- XXtn(r2d(X2n_a))
+mat2n_b <- XXtn(r2d(X2n_b))
 ```
 
 
@@ -220,9 +227,6 @@ fig.LF <- function(out.list){
     facet_grid(K~seed, 
                labeller = labeller(.rows = label_both, .cols = label_both)) 
 }
-
-
-
 ```
 
 # Results
@@ -230,17 +234,16 @@ fig.LF <- function(out.list){
 
 ```{r}
 setwd("~/Box/2-research/mf")
-source("code/alt-flash_v20211010.R")
+source("code/alt-flash_v20211013.R")
 ```
 
 
-## Results: `cov(t(X2))`
+## Results: `X2`
 
 
 ```{r, eval=FALSE}
-# for record: g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
 out.list <- list()
-data.mat <- cov(t(dX2))
+data.mat <- mat2
 
 for (K in 1:8){
   print(paste0("now fitting K=",K)) 
@@ -254,18 +257,18 @@ for (K in 1:8){
   out.list[[K]] <- temp.list
 }
 
-saveRDS(out.list, "output/tree_toy_altflash_dX2_v2021_1012_1309.rds")
+saveRDS(out.list, "output/tree_toy_altflash_mat2_v2021_1012_1309.rds")
 ```
 
 ```{r}
-results_dX2 <- readRDS("output/tree_toy_altflash_dX2_v2021_1012_1309.rds")
-fig.elbo(results_dX2)
-fig.L(results_dX2)
+results_mat2 <- readRDS("output/tree_toy_altflash_mat2_v2021_1012_1309.rds")
+fig.elbo(results_mat2)
+fig.L(results_mat2)
 ```
 
 ```{r}
-max(list.to.elbo(results_dX2)$elbo)
-flash(cov(t(dX2)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
+max(list.to.elbo(results_mat2)$elbo)
+flash(mat2, prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
 ```
 
 
@@ -275,7 +278,7 @@ flash(cov(t(dX2)), prior.family=prior.point.exponential(), backfit=TRUE, verbose
 ```{r, eval=FALSE}
 # for record: g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
 out.list <- list()
-data.mat <- cov(t(dX2n_a))
+data.mat <- mat2n_a
 
 for (K in 1:8){
   print(paste0("now fitting K=",K)) 
@@ -289,18 +292,18 @@ for (K in 1:8){
   out.list[[K]] <- temp.list
 }
 
-saveRDS(out.list, "output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds")
+saveRDS(out.list, "output/tree_toy_altflash_mat2n_a_v2021_1012_1309.rds")
 ```
 
 ```{r}
-results_dX2n_a <- readRDS("output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds")
-fig.elbo(results_dX2n_a)
-fig.L(results_dX2n_a)
+results_mat2n_a <- readRDS("output/tree_toy_altflash_mat2n_a_v2021_1012_1309.rds")
+fig.elbo(results_mat2n_a)
+fig.L(results_mat2n_a)
 ```
 
 ```{r}
-max(list.to.elbo(results_dX2n_a)$elbo)
-flash(cov(t(dX2n_a)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
+max(list.to.elbo(results_mat2n_a)$elbo)
+flash(mat2n_a, prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
 ```
 
 ## Results: `X2n_b`
@@ -308,7 +311,7 @@ flash(cov(t(dX2n_a)), prior.family=prior.point.exponential(), backfit=TRUE, verb
 ```{r, eval=FALSE}
 # for record: g.pe <- gammamix(pi=c(0.1, 0.9), shape=c(1,1), scale=c(0,1))
 out.list <- list()
-data.mat <- cov(t(dX2n_b))
+data.mat <- mat2n_b
 
 for (K in 1:8){
   print(paste0("now fitting K=",K)) 
@@ -322,19 +325,19 @@ for (K in 1:8){
   out.list[[K]] <- temp.list
 }
 
-saveRDS(out.list, "output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds")
+saveRDS(out.list, "output/tree_toy_altflash_mat2n_b_v2021_1012_1309.rds")
 ```
 
 
 ```{r}
-results_dX2n_b <- readRDS("output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds")
-fig.elbo(results_dX2n_b)
-fig.L(results_dX2n_b)
+results_mat2n_b <- readRDS("output/tree_toy_altflash_mat2n_b_v2021_1012_1309.rds")
+fig.elbo(results_mat2n_b)
+fig.L(results_mat2n_b)
 ```
 
 ```{r}
-max(list.to.elbo(results_dX2n_b)$elbo)
-flash(cov(t(dX2n_b)), prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
+max(list.to.elbo(results_mat2n_b)$elbo)
+flash(mat2n_b, prior.family=prior.point.exponential(), backfit=TRUE, verbose.lvl=0)$elbo
 ```
 
 
@@ -343,13 +346,10 @@ flash(cov(t(dX2n_b)), prior.family=prior.point.exponential(), backfit=TRUE, verb
 compare the scaled version of the two; all are identical
 
 ```{r}
-fig.LF(results_dX2)
-fig.LF(results_dX2n_a)
-fig.LF(results_dX2n_b)
+fig.LF(results_mat2)
+fig.LF(results_mat2n_a)
+fig.LF(results_mat2n_b)
 ```
-
-
-
 
 
 

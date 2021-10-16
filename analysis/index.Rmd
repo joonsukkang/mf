@@ -22,7 +22,7 @@ editor_options:
     + two-step procedure is implemented. 
       + the first step is to stabilize the fit given `g.l,g.f`
       + the second step is to fully update (including `g.l,g.f`)
-    + use denoised (rank-2) data
+    + use denoised (rank-2) `XX^T/p`
   + results
     + all four patterns `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` are captured when $K\geq4$
     + when $K<4$, only $K$ of the four patterns are captured
@@ -40,7 +40,7 @@ editor_options:
 :::
 ::: {}
 + [but first, denoising](tree_toy_flashier_denoising.html)
-  + the goal is to extract `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` and we use flashier on `cov(t(X))` with point-exponential prior
+  + the goal is to extract `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` and we use flashier on `XX^T/p` with point-exponential prior
   + with the (apparent) rank-2 plus noise structure of toy data, we can greatly improve the fit by using the rank-2 version of the data matrix as the input
   + three of the four patterns are captures in `X2`, `X2n_a`; two in `X2n_b`
   + there are still one or two patterns that are not found
@@ -61,8 +61,8 @@ editor_options:
 :::
 ::: {}
 + [flashier on tree toy data](tree_toy_flashier.html): as a motivation for alternating flash
-  + we could extract `(1,-1,0,0), (0,0,1,-1)` pattern with flashier on `cov(t(X))`
-  + however, extracting `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` seems harder. flashier on `cov(t(X))` with point-exponential prior finds only a subset of the signals.
+  + we could extract `(1,-1,0,0), (0,0,1,-1)` pattern with flashier on `XX^T/p`
+  + however, extracting `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` seems harder. flashier on `XX^T/p` with point-exponential prior finds only a subset of the signals.
   
 
 + [minimal](alt-flash-sanity.html): a sanity check for the new minimally functional version of alt-flash
