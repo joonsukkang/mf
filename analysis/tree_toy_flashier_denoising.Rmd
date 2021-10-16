@@ -1,7 +1,7 @@
 ---
 title: "Tree Toy Data: flash results w/ denoising"
 author: "Joonsuk Kang"
-date: "2021-10-13"
+date: "2021-10-16"
 output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
@@ -16,7 +16,7 @@ library(flashier)
 # Summary
 
 - the goal is to extract the `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` pattern 
-and the method used is flshier on `cov(tX))` with point exponential prior
+and the method used is flashier on `XX^T/p` with point exponential prior
 
 - here we implement the rank-2 denoising idea, which greatly improves the fit
 
@@ -93,10 +93,18 @@ r2d <- function(dat.mat){
   dmat <- smat$u[,1:2] %*% diag(smat$d[1:2], nrow=2) %*% t(smat$v[,1:2])
   return(dmat)
 }
-dX2 <-r2d(X2)
-dX2n_a <-r2d(X2n_a)
-dX2n_b <-r2d(X2n_b)
+
+# create a normalized XX^T matrix
+XXtn <- function(X){
+  X %*% t(X) /ncol(X)
+}
+
+# create denoised, normalized XXT matrix
+mat2    <- XXtn(r2d(X2))
+mat2n_a <- XXtn(r2d(X2n_a))
+mat2n_b <- XXtn(r2d(X2n_b))
 ```
+
 
 # Some Functions
 
@@ -139,12 +147,12 @@ plot.factors <- function(fit, showK=NULL){
 
 ```{r}
 # wihtout backfit
-fit1 <- flash(cov(t(dX2)), verbose.lvl=0, 
+fit1 <- flash(mat2, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 plot.factors(fit1)
 
 # with backfit
-fit1b <- flash(cov(t(dX2)), verbose.lvl=0, 
+fit1b <- flash(mat2, verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
 plot.factors(fit1b)
 ```
@@ -153,12 +161,12 @@ plot.factors(fit1b)
 
 ```{r}
 # wihtout backfit
-fit1 <- flash(cov(t(dX2n_a)), verbose.lvl=0, 
+fit1 <- flash(mat2n_a, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 plot.factors(fit1)
 
 # with backfit
-fit1b <- flash(cov(t(dX2n_a)), verbose.lvl=0,
+fit1b <- flash(mat2n_a, verbose.lvl=0,
               backfit=TRUE, prior.family = prior.point.exponential())
 plot.factors(fit1)
 ```
@@ -167,12 +175,12 @@ plot.factors(fit1)
 
 ```{r}
 # wihtout backfit
-fit1 <- flash(cov(t(dX2n_b)), verbose.lvl=0, 
+fit1 <- flash(mat2n_b, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 plot.factors(fit1)
 
 # with backfit
-fit1b <- flash(cov(t(dX2n_b)), verbose.lvl=0, 
+fit1b <- flash(mat2n_b, verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
 plot.factors(fit1)
 ```

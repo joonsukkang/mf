@@ -1,7 +1,7 @@
 ---
 title: "Tree Toy Data: flash results"
 author: "Joonsuk Kang"
-date: "2021-10-11"
+date: "2021-10-16"
 output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
@@ -21,12 +21,12 @@ library(flashier)
 
 - flashier on data `X` (which means original matrices `X2`, `X2n_a`, or `X2n_b`) leads to a sparser version of singular vectors, but the results are essentially identical to singular vectors
 
-- flashier on covariance `cov(t(X))` successfully extracts the `(1,-1,0,0), (0,0,1,-1)` pattern--using either point-normal or point-laplace prior.
+- flashier on covariance `XX^T/p` successfully extracts the `(1,-1,0,0), (0,0,1,-1)` pattern--using either point-normal or point-laplace prior.
 
 
 ## extracting `(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)` pattern
 
-- method: flashier on `cov(t(X))` with point exponential prior 
+- method: flashier on `XX^T/p` with point exponential prior 
 
 - for noiseless `X2`, flashier finds three, missing `(0,1,0,0)`
 
@@ -141,12 +141,13 @@ flash.fit <- function(data.mat){
 
 ```
 
-## flashier on `cov(t(X))`
+## flashier on `XX^T/p`
 
 ```{r}
 # point-normal prior; without backfit
 flash.fit <- function(data.mat){
-  flash(cov(t(data.mat)), verbose.lvl=0, 
+  mat <- data.mat %*% t(data.mat) / ncol(data.mat)
+  flash(mat, verbose.lvl=0, 
         backfit=FALSE, prior.family = prior.point.normal())$loadings.pm[[1]][,1:2]
 }
 plot.three(flash.fit(X2), flash.fit(X2n_a), flash.fit(X2n_b))
@@ -197,19 +198,22 @@ plot.factors <- function(fit, showK){
 }
 ```
 
-## flashier on `cov(t(X))` with point exponential prior
+## flashier on `XX^T/p` with point exponential prior
 
 ### data `X2`
 
 ```{r}
+data.mat <- X2
+mat <- data.mat %*% t(data.mat) / ncol(data.mat)
+
 # wihtout backfit
-fit1 <- flash(cov(t(X2)), verbose.lvl=0, 
+fit1 <- flash(mat, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 fit1$pve
 plot.factors(fit1, 3)
 
 # with backfit
-fit1b <- flash(cov(t(X2)), verbose.lvl=0, 
+fit1b <- flash(mat, verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
 fit1b$pve
 plot.factors(fit1b, 3)
@@ -218,29 +222,35 @@ plot.factors(fit1b, 3)
 ### data `X2n_a`
 
 ```{r}
+data.mat <- X2n_a
+mat <- data.mat %*% t(data.mat) / ncol(data.mat)
+
 # wihtout backfit
-fit1 <- flash(cov(t(X2n_a)), verbose.lvl=0, 
+fit1 <- flash(mat, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 fit1$pve
 plot.factors(fit1, 5)
 
 # with backfit
-# fit1b <- flash(cov(t(X2n_a)), verbose.lvl=0, 
-#               backfit=TRUE, prior.family = prior.point.exponential())
-# returns error: Standard errors must be positive (and nonzero).
+fit1b <- flash(mat, verbose.lvl=0,
+              backfit=TRUE, prior.family = prior.point.exponential())
 ```
 
 ### data `X2n_b`
 
 ```{r}
+data.mat <- X2n_b
+mat <- data.mat %*% t(data.mat) / ncol(data.mat)
+
+
 # wihtout backfit
-fit1 <- flash(cov(t(X2n_b)), verbose.lvl=0, 
+fit1 <- flash(mat, verbose.lvl=0, 
               backfit=FALSE, prior.family = prior.point.exponential())
 fit1$pve
 plot.factors(fit1, 5)
 
 # with backfit
-fit1b <- flash(cov(t(X2n_b)), verbose.lvl=0, 
+fit1b <- flash(mat, verbose.lvl=0, 
               backfit=TRUE, prior.family = prior.point.exponential())
 fit1b$pve
 plot.factors(fit1b, 5)
