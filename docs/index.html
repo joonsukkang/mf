@@ -336,16 +336,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree37586e002bea1eb2e038eac1c617eb3733cd13c6targetblank37586e0a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/37586e002bea1eb2e038eac1c617eb3733cd13c6" target="_blank">37586e0</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreece9540c6da1a1f854f59b3e932a691172a0f74dftargetblankce9540ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/ce9540c6da1a1f854f59b3e932a691172a0f74df" target="_blank">ce9540c</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree37586e002bea1eb2e038eac1c617eb3733cd13c6targetblank37586e0a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreece9540c6da1a1f854f59b3e932a691172a0f74dftargetblankce9540ca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/37586e002bea1eb2e038eac1c617eb3733cd13c6" target="_blank">37586e0</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/ce9540c6da1a1f854f59b3e932a691172a0f74df" target="_blank">ce9540c</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -379,6 +379,7 @@ Untracked files:
     Untracked:  analysis/sliding_correlation.Rmd
     Untracked:  analysis/sliding_pdf.Rmd
     Untracked:  analysis/temp.Rmd
+    Untracked:  analysis/toy_Yusha_nonneg_2.Rmd
     Untracked:  analysis/toy_Yusha_oracle_flashier.Rmd
     Untracked:  analysis/toy_Yusha_oracle_more seeds.Rmd
     Untracked:  analysis/toy_p_notfixK.Rmd
@@ -441,6 +442,7 @@ Unstaged changes:
     Modified:   analysis/flashier_point_laplace.Rmd
     Modified:   analysis/model_exp_prior.Rmd
     Modified:   code/alt-flash_v20211013.R
+    Modified:   code/alt-flash_v20211017.R
     Modified:   code/flashImpute.R
     Deleted:    output/alt-flash-normal-elbo.pdf
 
@@ -481,6 +483,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/ce9540c6da1a1f854f59b3e932a691172a0f74df/analysis/index.Rmd" target="_blank">ce9540c</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+<td>
+add alt-flash on Yusha’s toy data
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/793c9cf1287635bffcf02f60e8f00acd279540c5/docs/index.html" target="_blank">793c9cf</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1053,6 +1089,32 @@ Start workflowr project.
 <h2>alternating flash</h2>
 <div style="display: flex;">
 <div style="min-width: 300px; max-width: 300px">
+<p><img src="https://raw.githubusercontent.com/joonsukkang/mf/master/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-2.png" width="400"></p>
+</div>
+<div>
+<ul>
+<li><a href="toy_Yusha_nonneg_1.html">altflash on Yusha’s toy data</a>
+<ul>
+<li>method
+<ul>
+<li>initialize nonnegative <span class="math inline">\(L\)</span> matrix using eigenvectors of <span class="math inline">\(XX^T\)</span></li>
+</ul></li>
+<li>results
+<ul>
+<li>the result is interpretable in that it returns the 11 factors</li>
+<li>the elbo is lower than the result with oracle init (in which the pattern is less visible, though)</li>
+</ul></li>
+</ul></li>
+<li>More on the toy data
+<ul>
+<li><a href="toy_Yusha_svd.html">svd of toy data by Yusha</a></li>
+<li><a href="toy_Yusha_oracle.html">oracle init of toy data by Yusha</a></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div style="display: flex;">
+<div style="min-width: 300px; max-width: 300px">
 <p><img src="https://joonsukkang.github.io/mf/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-14-2.png" width="400"></p>
 </div>
 <div>
@@ -1162,17 +1224,6 @@ Start workflowr project.
 <ul>
 <li>When point Laplace prior is put on <span class="math inline">\(L\)</span> and <code>warmstart</code> is used, flashier works well.</li>
 </ul></li>
-</ul>
-</div>
-</div>
-<div style="display: flex;">
-<div style="min-width: 300px; max-width: 300px">
-
-</div>
-<div>
-<ul>
-<li><a href="toy_Yusha_svd.html">svd of toy data by Yusha</a></li>
-<li><a href="toy_Yusha_oracle.html">oracle init of toy data by Yusha</a></li>
 </ul>
 </div>
 </div>
