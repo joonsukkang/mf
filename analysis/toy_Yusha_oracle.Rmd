@@ -1,0 +1,277 @@
+---
+title: "toy data from Yusha: oracle initialization "
+author: "Joonsuk Kang"
+date: "2021-10-16"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+# summary
+
+* the first root factor $F_1$ seems to be too strong to allow other factors to be meaningfully captured
+
+* if we cut back the scale of $F_1$ by half, alt-flash returns an estimated $L$ (=$F$) that captures all 11 factors (with some noise)
+
+
+# some functions for investigation
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+
+# plot posterior mean of L and F 
+plotLF <- function(A.l, A.f, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             F=c(A.f),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figL
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=F, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figF
+  
+  grid.arrange(figL, figF, nrow=2, 
+               top=title)
+}
+
+
+# scale L: quadratic programming approach to find optimal scaling
+scaleL.qp <- function(Y, L, scale.min, print.scale=TRUE){
+
+  n <- nrow(L); K <- ncol(L)
+  Ls <- matrix(0, nrow=n, ncol=K)
+  
+  # normalized L: column norm 1
+  Ln <- L %*% diag(x=1/sqrt(colSums(L^2)))
+  
+  D <- crossprod(Ln)^2
+  d <- rep(0, K);   for (k in 1:K){d[k] <- as.numeric(t(Ln[,k])%*%Y%*%Ln[,k])}
+  qp <- quadprog::solve.QP(Dmat=D, dvec=d, Amat=diag(1,nrow=K), bvec=rep(scale.min,K)) 
+  
+  scale <- qp$solution
+  if(print.scale){print(scale)}
+
+  for (k in 1:K){Ls[,k] <- sqrt(scale[k])*Ln[,k]}
+  
+  out.list <- list(scale=scale, Ls=Ls)
+  
+  return(out.list)
+}
+```
+
+
+
+
+# toy data: original version
+
+```{r}
+# source: https://yushaliu.github.io/single_cell_cancer/simulations3_update.html
+
+library(Matrix)
+library(flashier)
+library(magrittr)
+library(RColorBrewer)
+library(pheatmap)
+
+
+source(url("https://raw.githubusercontent.com/YushaLiu/single_cell_cancer/master/code/util.R"))
+
+### load in simulated loadings and factors
+model <- readRDS(url("https://raw.githubusercontent.com/YushaLiu/single_cell_cancer/master/data/model.rds"))
+L <- model$L
+F <- model$F
+F[,1] <- F[,1] - 10 # center the data
+
+### plot the drift factorization of truth, where F is orthogonal across columns 
+pheatmap(L, show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True L")
+pheatmap(F, show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True F")
+pheatmap(F[,-1], show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True F")
+```
+
+
+# preliminary result (unsatisfactory); sd=0.5
+
+From $XX^T=(LF^T+E)(LF^T+E)^T\approx LF^TFL^T$, use the diagonal of $F^TF$ as the scaling factor.
+
+```{r}
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20211017.R")
+```
+
+```{r}
+set.seed(1)
+
+X <- L%*%t(F) + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+XXt <- X%*%t(X)
+Y <- XXt
+Ls <- L %*% diag(sqrt(as.vector(diag(t(F)%*%F))))
+
+fit.init <- INIT.L(init.L=Ls, Y=Y)
+fit.alt <- alt.flash(fit.init)
+plotLF(fit.alt$A.l, fit.alt$A.f, 'preliminary result')
+```
+
+
+
+# looking into data
+
+The Quadratic Programming approach: 
+
+To assess the difficulty (or well-definedness) of the problem, we can check the optimal weights $d_1,\dots,d_K$ that minimizes $\|Y-\sum_k d_k l_kl_k^T\|_F^22$ where $Y$ is the $XX^T$ matrix and $l_k$ is the $k$-th vector of the true matrix $L$, scaled to norm 1, and $(d_1,\dots,d_K)$ is the scale vector. 
+
+
+### noiseless case: approximating $LF^TFL^T$  
+
+```{r}
+# the first column is too powerful!
+sqrt(colSums(F^2))
+
+X0 <- L %*% t(F) 
+X0X0t <- X0 %*% t(X0)
+Ls <- scaleL.qp(Y=X0X0t, L, scale.min=0, print.scale=FALSE)
+
+```
+
+The solution is 
+```{r}
+print(Ls$scale)
+```
+and in a relative scale compared to the largest one ($d_1$), the scales are
+```{r}
+print(Ls$scale/max(Ls$scale))
+```
+Notice that the smallest one ($d_4$) is 3.173557e-05 times the size of the largest one.
+
+So, even for a noiseless case, given all $K$ true bases ($L$), the problem is close to ill-defined.
+
+
+### noisy cases: with noise level sd=0.5
+
+The noisy case is difficult as well, but not necessarily more difficult than the noiseless one.
+
+*The difficulty comes from the strong first factor ($F_1$), not from high noise level.*
+
+```{r}
+out <- rep(0,100)
+for (seed in 1:length(out)){
+  set.seed(seed)
+  X <- X0 + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+  XXt <- X %*% t(X)
+  Ls <- scaleL.qp(Y=XXt, L, scale.min=0, print.scale=FALSE)
+  out[seed] <- min(Ls$scale)/max(Ls$scale)
+}
+summary(out)
+```
+
+
+
+# what if: the first root factor $F_1$ has smaller effect
+
+Let's reduce the magnitude of the first factor by half.
+
+```{r}
+F[,1] <- F[,1]/2
+```
+
+
+For the noiseless data, the smallest one ($d_4$) is now 0.001624 compared to the largest; it is 50 times larger than before (3.173557e-05).
+
+```{r}
+X0 <- L %*% t(F) 
+X0X0t <- X0%*%t(X0)
+Ls <- scaleL.qp(Y=X0X0t, L, scale.min=0)
+min(Ls$scale)/max(Ls$scale)
+```
+
+Also, for the noisy data with sd=0.5, the ratio is on the same magnitude with the noiseless one.
+
+```{r}
+out <- rep(0,100)
+for (seed in 1:length(out)){
+  set.seed(seed)
+  X <- X0 + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+  XXt <- X %*% t(X)
+  Ls <- scaleL.qp(Y=XXt, L, scale.min=0, print.scale=FALSE)
+  out[seed] <- min(Ls$scale)/max(Ls$scale)
+}
+summary(out)
+```
+
+# now, somewhat surprisingly, we can solve the problem
+
+Remember: the $F$ used below is the one after rescaling the first factor by half.
+
+```{r}
+set.seed(1)
+X0 <- L %*% t(F) 
+X <- X0 + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+XXt <- X %*% t(X)
+```
+
+
+# results
+
+### `F^TF init` (using true $L$ and $F$)
+
+From $XX^T=(LF^T+E)(LF^T+E)^T\approx LF^TFL^T$, use the diagonal of $F^TF$ as the scaling factor.
+
+```{r}
+Y <- XXt
+Ls <- L %*% diag(sqrt(as.vector(diag(t(F)%*%F))))
+
+fit.init <- INIT.L(init.L=Ls, Y=Y)
+fit.alt <- alt.flash(fit.init)
+plotLF(fit.alt$A.l, fit.alt$A.f, 'FtF initialization')
+```
+
+
+### `qp init` (using true $L$)
+
+Use the optimal scales from quadratic programming approach.
+
+```{r}
+Y <- XXt
+Ls <- scaleL.qp(Y, L, scale.min=0)
+
+fit.init <- INIT.L(init.L=Ls$Ls, Y=Y)
+fit.alt <- alt.flash(fit.init)
+plotLF(fit.alt$A.l, fit.alt$A.f, 'qp initialization')
+```
+
+
+### some more seeds
+
+```{r}
+for (seed in 2:5){
+  
+  set.seed(seed)
+  X <- X0 + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+  Y <- X %*% t(X)
+  
+  print(paste0('seed=',seed))
+  
+  # F^TF init
+  fit.alt <- alt.flash(INIT.L(init.L=L %*% diag(sqrt(as.vector(diag(t(F)%*%F)))), Y=Y))
+  plotLF(fit.alt$A.l, fit.alt$A.f, paste0('seed=',seed,': FtF initialization'))
+  
+  # qp init
+  fit.alt <- alt.flash(INIT.L(init.L=scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$Ls, Y=Y))
+  plotLF(fit.alt$A.l, fit.alt$A.f, paste0('seed=',seed,': qp initialization'))
+}
+```
+
+
+
