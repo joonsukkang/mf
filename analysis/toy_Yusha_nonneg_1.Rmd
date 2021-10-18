@@ -133,7 +133,7 @@ scaleL.qp <- function(Y, L, scale.min, print.scale=TRUE){
   Ls <- matrix(0, nrow=n, ncol=K)
   
   # normalized L: column norm 1
-  Ln <- L %*% diag(x=1/sqrt(colSums(L^2)))
+  Ln <- L %*% diag(x=1/sqrt(colSums(L^2)),nrow=K)
   
   D <- crossprod(Ln)^2
   d <- rep(0, K);   for (k in 1:K){d[k] <- as.numeric(t(Ln[,k])%*%Y%*%Ln[,k])}
