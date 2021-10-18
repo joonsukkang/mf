@@ -133,6 +133,7 @@ editor_options:
 ::: {}
 
 + [svd of toy data by Yusha](toy_Yusha_svd.html)
++ [oracle init of toy data by Yusha](toy_Yusha_oracle.html)
 
 :::
 ::::
