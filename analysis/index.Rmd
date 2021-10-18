@@ -11,6 +11,29 @@ editor_options:
 
 ## alternating flash
 
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://raw.githubusercontent.com/joonsukkang/mf/master/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-2.png" width="400">
+:::
+::: {}
++ [altflash on Yusha's toy data](toy_Yusha_nonneg_1.html)
+  + method
+    + initialize nonnegative $L$ matrix using eigenvectors of $XX^T$
+  + results
+    + the result is interpretable in that it returns the 11 factors
+    + the elbo is lower than the result with oracle init (in which the pattern is less visible, though)
+    
+
++ More on the toy data
+  + [svd of toy data by Yusha](toy_Yusha_svd.html)
+  + [oracle init of toy data by Yusha](toy_Yusha_oracle.html)
+
+
+:::
+::::
+
+
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
 <img src="https://joonsukkang.github.io/mf/figure/tree_toy_altflash_1.Rmd/unnamed-chunk-14-2.png" width="400">
@@ -126,17 +149,6 @@ editor_options:
 ::::
 
 
-
-:::: {style="display: flex;"}
-::: {style="min-width: 300px; max-width: 300px"}
-:::
-::: {}
-
-+ [svd of toy data by Yusha](toy_Yusha_svd.html)
-+ [oracle init of toy data by Yusha](toy_Yusha_oracle.html)
-
-:::
-::::
 
 ## archive
 :::: {style="display: flex;"}
