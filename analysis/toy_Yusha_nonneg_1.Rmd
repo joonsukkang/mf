@@ -1,0 +1,202 @@
+---
+title: "toy data from Yusha: nonneg init (original data)"
+author: "Joonsuk Kang"
+date: "2021-10-18"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+# obeservations
+
+* Note: here, I am using the original version of Yusha's toy data (not F1 scaled)
+
+* alt-flash with a nonnegative initialization using eigenvectors (implemented below) leads to a more interpretable result (the patterns more kept) than alt-flash with the oracle initialization
+
+* in terms of elbo, oracle init tends to achieves a higher elbo (in experiments with seed=1,2,4,5; nonneg init's elbo was higher in when seed=3)
+
+
+
+
+
+# some functions
+
+### Initialize L (direction) for nonnegative priors
+
+the first (root) factor takes the first eigenvector (replace negative values with 0, if any)
+
+add factors by taking eigenvector of the residual matrix (the parts not explained by the existing factors) and replace negative values with 0.
+
+stop adding factors if the quadratic programming solution for finding optimal scale has the min/max ratio less than a threshold (1e-4).
+
+```{r}
+# return nonnegative direction estiamtes (L)
+INIT.L.NonNeg <- function(Y, verbose=1, max.K=20, tol.scale.ratio=1e-5){
+
+  n <- nrow(Y)
+
+  # residual Y
+  Yres <- Y
+
+  # root factor
+  u <- eigen(Yres)$vectors[,1]
+  u <- u * sign(u[which.max(abs(u))])
+  u[u<0] <- 0
+  u <- u/sqrt(sum(u^2))
+  L <- matrix(u, ncol=1)
+  d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+  Yres <- Y - L %*% diag(d, nrow=length(d)) %*% t(L)
+
+  # add factors
+  for (k in 2:max.K){
+    ## find direction
+    u <- eigen(Yres)$vectors[,1]
+    u <- u * sign(u[which.max(abs(u))])
+    u[u<0] <- 0
+    u <- u/sqrt(sum(u^2))
+
+    ## find scale
+    L <- cbind(L, matrix(u, ncol=1))
+    d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+    if(verbose==1){print(paste0(k,'-th factor fitting; ', 'min/max sacle ratio: ', min(d)/max(d)))}
+    if(min(d)/max(d) < tol.scale.ratio) {
+      L <- L[,-k]
+      d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+      break
+    }
+    Yres <- Y - L %*% diag(d, nrow=length(d)) %*% t(L)
+  }
+
+  if(verbose==1){print(paste0(ncol(L), ' factors fitted'))}
+  out.list <- list(L=L)
+  return(out.list)
+}
+
+```
+
+### some more functions
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+
+# plot posterior mean of L and F 
+plotLF <- function(A.l, A.f, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             F=c(A.f),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figL
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=F, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figF
+  
+  grid.arrange(figL, figF, nrow=2, 
+               top=title)
+}
+
+
+# scale L: quadratic programming approach to find optimal scaling
+scaleL.qp <- function(Y, L, scale.min, print.scale=TRUE){
+
+  n <- nrow(L); K <- ncol(L)
+  Ls <- matrix(0, nrow=n, ncol=K)
+  
+  # normalized L: column norm 1
+  Ln <- L %*% diag(x=1/sqrt(colSums(L^2)))
+  
+  D <- crossprod(Ln)^2
+  d <- rep(0, K);   for (k in 1:K){d[k] <- as.numeric(t(Ln[,k])%*%Y%*%Ln[,k])}
+  qp <- quadprog::solve.QP(Dmat=D, dvec=d, Amat=diag(1,nrow=K), bvec=rep(scale.min,K)) 
+  
+  scale <- qp$solution
+  if(print.scale){print(scale)}
+
+  for (k in 1:K){Ls[,k] <- sqrt(scale[k])*Ln[,k]}
+  
+  out.list <- list(scale=scale, Ls=Ls)
+  
+  return(out.list)
+}
+```
+
+
+# results
+
+```{r}
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20211017.R")
+```
+
+```{r}
+# source: https://yushaliu.github.io/single_cell_cancer/simulations3_update.html
+model <- readRDS(url("https://raw.githubusercontent.com/YushaLiu/single_cell_cancer/master/data/model.rds"))
+L <- model$L
+F <- model$F
+F[,1] <- F[,1] - 10 # center the data
+```
+
+```{r}
+set.seed(1)
+X <- L%*%t(F) + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+XXt <- X%*%t(X)
+Y <- XXt
+```
+
+### nonnegative initialization (using eigenvectors of Y)
+
+```{r}
+temp.obj <- INIT.L.NonNeg(Y, verbose=1) # initialize directions (L) 
+Ls <- scaleL.qp(Y, temp.obj$L, scale.min=0, print.scale=FALSE)
+
+fit.init <- INIT.L(init.L=Ls$Ls, Y=Y)
+fit.alt <- alt.flash(fit.init)
+plotLF(fit.alt$A.l, fit.alt$A.f, 'nonneg init')
+```
+
+### oracle initialization
+
+```{r}
+Ls <- scaleL.qp(Y, L, scale.min=1e-10)
+fit.init <- INIT.L(init.L=Ls$Ls, Y=Y)
+fit.alt <- alt.flash(fit.init)
+plotLF(fit.alt$A.l, fit.alt$A.f, 'oracle init')
+```
+
+### some more seeds
+
+```{r}
+for (seed in 2:5){
+  
+  set.seed(seed)
+  X <- L%*%t(F) + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+  Y <- X %*% t(X)
+  
+  print(paste0('seed=',seed))
+  
+  # nonneg init
+  temp.obj <- INIT.L.NonNeg(Y, verbose=0)
+  Ls <- scaleL.qp(Y, temp.obj$L, scale.min=1e-10, print.scale=FALSE)
+  fit.alt <- alt.flash(INIT.L(init.L=Ls$Ls, Y=Y))
+  plotLF(fit.alt$A.l, fit.alt$A.f, paste0('seed=',seed,': nonneg initialization'))
+  
+  # oracle init
+  fit.alt <- alt.flash(INIT.L(init.L=scaleL.qp(Y, L, scale.min=1e-10, print.scale=FALSE)$Ls, Y=Y))
+  plotLF(fit.alt$A.l, fit.alt$A.f, paste0('seed=',seed,': oracle initialization'))
+}
+
+
+```
+
