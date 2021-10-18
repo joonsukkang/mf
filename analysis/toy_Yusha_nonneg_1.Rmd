@@ -32,7 +32,7 @@ stop adding factors if the quadratic programming solution for finding optimal sc
 
 ```{r}
 # return nonnegative direction estiamtes (L)
-INIT.L.NonNeg <- function(Y, verbose=1, max.K=20, tol.scale.ratio=1e-5){
+INIT.L.NonNeg <- function(Y, verbose=1, max.K=20, tol.scale.ratio=1e-10){
 
   n <- nrow(Y)
 
@@ -107,6 +107,24 @@ plotLF <- function(A.l, A.f, title){
                top=title)
 }
 
+plotL <- function(A.l, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') +ggtitle(title)-> figL
+  
+  print(figL)
+}
+
 
 # scale L: quadratic programming approach to find optimal scaling
 scaleL.qp <- function(Y, L, scale.min, print.scale=TRUE){
@@ -159,23 +177,31 @@ Y <- XXt
 
 ```{r}
 temp.obj <- INIT.L.NonNeg(Y, verbose=1) # initialize directions (L) 
-Ls <- scaleL.qp(Y, temp.obj$L, scale.min=0, print.scale=FALSE)
+Ls <- scaleL.qp(Y, temp.obj$L, scale.min=1e-10, print.scale=FALSE)
+plotL(Ls$Ls, title='nonneg initialized L')
 
 fit.init <- INIT.L(init.L=Ls$Ls, Y=Y)
 fit.alt <- alt.flash(fit.init)
-plotLF(fit.alt$A.l, fit.alt$A.f, 'nonneg init')
+print(fit.alt$scales)
+plotLF(fit.alt$A.l, fit.alt$A.f, 'result: alt-flash with nonneg init')
 ```
 
 ### oracle initialization
 
 ```{r}
 Ls <- scaleL.qp(Y, L, scale.min=1e-10)
+plotL(Ls$Ls, title='oracle L') 
+
 fit.init <- INIT.L(init.L=Ls$Ls, Y=Y)
 fit.alt <- alt.flash(fit.init)
-plotLF(fit.alt$A.l, fit.alt$A.f, 'oracle init')
+print(fit.alt$scales)
+plotLF(fit.alt$A.l, fit.alt$A.f, 'result: alt-flash with oracle init')
 ```
 
+
 ### some more seeds
+
+since the fitted L and F are identical, I report only L
 
 ```{r}
 for (seed in 2:5){
@@ -189,14 +215,16 @@ for (seed in 2:5){
   # nonneg init
   temp.obj <- INIT.L.NonNeg(Y, verbose=0)
   Ls <- scaleL.qp(Y, temp.obj$L, scale.min=1e-10, print.scale=FALSE)
+  plotL(Ls$Ls, title=paste0('seed=',seed, ': nonneg initialized L'))
+
   fit.alt <- alt.flash(INIT.L(init.L=Ls$Ls, Y=Y))
-  plotLF(fit.alt$A.l, fit.alt$A.f, paste0('seed=',seed,': nonneg initialization'))
+  print(fit.alt$scales)
+  plotL(fit.alt$A.l, paste0('seed=',seed,': alt-flash w/ nonneg init'))
   
   # oracle init
   fit.alt <- alt.flash(INIT.L(init.L=scaleL.qp(Y, L, scale.min=1e-10, print.scale=FALSE)$Ls, Y=Y))
-  plotLF(fit.alt$A.l, fit.alt$A.f, paste0('seed=',seed,': oracle initialization'))
+  print(fit.alt$scales)
+  plotL(fit.alt$A.l, paste0('seed=',seed,': alt-flash w/ oracle init'))
 }
-
-
 ```
 
