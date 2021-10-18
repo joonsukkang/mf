@@ -500,16 +500,16 @@ relative
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f618b8c43ab85a331c4e221fedefa46b3e34f4etargetblank4f618b8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/4f618b8c43ab85a331c4e221fedefa46b3e34f4e" target="_blank">4f618b8</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreec26784745a9475bd94d8fba1cef42e37aa595308targetblankc267847a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/c26784745a9475bd94d8fba1cef42e37aa595308" target="_blank">c267847</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftree4f618b8c43ab85a331c4e221fedefa46b3e34f4etargetblank4f618b8a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreec26784745a9475bd94d8fba1cef42e37aa595308targetblankc267847a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/4f618b8c43ab85a331c4e221fedefa46b3e34f4e" target="_blank">4f618b8</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/c26784745a9475bd94d8fba1cef42e37aa595308" target="_blank">c267847</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -518,7 +518,6 @@ Note that you need to be careful to ensure that all relevant files for the analy
 Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
-    Ignored:    analysis/figure/
 
 Untracked files:
     Untracked:  altFlash.pdf
@@ -648,6 +647,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/c26784745a9475bd94d8fba1cef42e37aa595308/analysis/toy_Yusha_nonneg_1.Rmd" target="_blank">c267847</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+<td>
+result with same ordering as init
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/joonsukkang/mf/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/toy_Yusha_nonneg_1.html" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -832,7 +865,7 @@ scaleL.qp &lt;- function(Y, L, scale.min, print.scale=TRUE){
   Ls &lt;- matrix(0, nrow=n, ncol=K)
   
   # normalized L: column norm 1
-  Ln &lt;- L %*% diag(x=1/sqrt(colSums(L^2)))
+  Ln &lt;- L %*% diag(x=1/sqrt(colSums(L^2)),nrow=K)
   
   D &lt;- crossprod(Ln)^2
   d &lt;- rep(0, K);   for (k in 1:K){d[k] &lt;- as.numeric(t(Ln[,k])%*%Y%*%Ln[,k])}
@@ -904,6 +937,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-6-1.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-6-1.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -921,10 +965,47 @@ joonsukkang
 fit.alt &lt;- alt.flash(fit.init)</code></pre>
 <pre><code>[1] &quot;backfit completed; elbo=-2892802.62633242&quot;</code></pre>
 <pre class="r"><code>print(fit.alt$scales)</code></pre>
-<pre><code> [1] 7507062.041    7118.308    7041.679    6975.646    6776.843    6666.147
- [7]    6656.551    6625.456    6611.831    6523.776    5937.648</code></pre>
+<pre><code> [1] 7507062.041    6975.646    7041.679    7118.308    6776.843    6656.551
+ [7]    6611.831    6523.776    6666.147    5937.648    6625.456</code></pre>
 <pre class="r"><code>plotLF(fit.alt$A.l, fit.alt$A.f, &#39;result: alt-flash with nonneg init&#39;)</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-2">
+Past versions of unnamed-chunk-6-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-6-2.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="oracle-initialization" class="section level3">
 <h3>oracle initialization</h3>
@@ -958,6 +1039,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-7-1.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-7-1.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -975,11 +1067,48 @@ joonsukkang
 fit.alt &lt;- alt.flash(fit.init)</code></pre>
 <pre><code>[1] &quot;backfit completed; elbo=-2892718.93729506&quot;</code></pre>
 <pre class="r"><code>print(fit.alt$scales)</code></pre>
-<pre><code> [1] 7506652.3225    8828.8190    8369.2013    8216.1580    7710.5951
- [6]    7070.0549    6758.7017    6654.4743    6611.3774    6483.8768
-[11]     693.0178</code></pre>
+<pre><code> [1] 7506652.3225    8216.1580    8828.8190     693.0178    6483.8768
+ [6]    6758.7017    7070.0549    6611.3774    6654.4743    7710.5951
+[11]    8369.2013</code></pre>
 <pre class="r"><code>plotLF(fit.alt$A.l, fit.alt$A.f, &#39;result: alt-flash with oracle init&#39;)</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-2">
+Past versions of unnamed-chunk-7-2.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-2" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-7-2.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="some-more-seeds" class="section level3">
 <h3>some more seeds</h3>
@@ -1032,6 +1161,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-1.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-1.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -1046,8 +1186,8 @@ joonsukkang
 </div>
 </div>
 <pre><code>[1] &quot;backfit completed; elbo=-2891636.90788988&quot;
- [1] 7505000.948    7228.265    7159.670    7004.149    6887.406    6734.704
- [7]    6728.961    6709.541    6528.786    6195.338    5746.121</code></pre>
+ [1] 7505000.948    6195.338    7159.670    7228.265    6887.406    6734.704
+ [7]    7004.149    6528.786    6728.961    6709.541    5746.121</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-2">
@@ -1073,6 +1213,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-2.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-2.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -1087,8 +1238,8 @@ joonsukkang
 </div>
 </div>
 <pre><code>[1] &quot;backfit completed; elbo=-2891518.35145631&quot;
- [1] 7504591.429    8613.453    8574.022    7882.999    7376.928    7347.074
- [7]    7139.102    6885.044    6550.754    6442.982     736.161</code></pre>
+ [1] 7504591.429    8574.022    7347.074    8613.453    6442.982    6550.754
+ [7]    7376.928    7139.102    6885.044     736.161    7882.999</code></pre>
 <pre><code>[1] &quot;seed=3&quot;</code></pre>
 <pre><code>Warning in sqrt(scale[k]): NaNs produced
 
@@ -1116,6 +1267,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-3.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-3.png" target="_blank">dbd8a8f</a>
@@ -1156,6 +1318,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-4.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-4.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -1171,8 +1344,8 @@ joonsukkang
 </div>
 <pre><code>[1] &quot;drop 1 factor(s); 12 factor(s) remaining&quot;
 [1] &quot;backfit completed; elbo=-2892319.10772064&quot;
- [1] 7503357.1916    7322.6128    7219.3890    6822.8337    6677.9015
- [6]    6655.2648    6653.3922    6599.8580    6452.5658    6438.7603
+ [1] 7503357.1916    6452.5658    7219.3890    7322.6128    6599.8580
+ [6]    6653.3922    6655.2648    6822.8337    6677.9015    6438.7603
 [11]    5894.7812     892.7083</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-5.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
@@ -1199,6 +1372,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-5.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-5.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -1213,8 +1397,8 @@ joonsukkang
 </div>
 </div>
 <pre><code>[1] &quot;backfit completed; elbo=-2892482.35645795&quot;
- [1] 7502818.294    9217.785    8359.024    7603.757    7446.466    7380.109
- [7]    6793.232    6784.473    6661.408    6402.938     645.932</code></pre>
+ [1] 7502818.294    7603.757    8359.024    7446.466    6784.473    6402.938
+ [7]    7380.109    6661.408    6793.232     645.932    9217.785</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-6.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-6">
@@ -1238,6 +1422,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-6.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-6.png" target="_blank">dbd8a8f</a>
@@ -1279,6 +1474,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-7.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-7.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -1293,8 +1499,8 @@ joonsukkang
 </div>
 </div>
 <pre><code>[1] &quot;backfit completed; elbo=-2891478.15357691&quot;
- [1] 7505194.627    8418.943    8381.908    7785.432    7085.665    6952.268
- [7]    6660.365    6547.178    6287.450    5846.635    2682.826</code></pre>
+ [1] 7505194.627    7785.432    8381.908    7085.665    6952.268    6547.178
+ [7]    6660.365    2682.826    8418.943    5846.635    6287.450</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-8.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-8">
@@ -1320,6 +1526,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-8.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/joonsukkang/mf/blob/dbd8a8f0f71c165a99bffc86d5e381a9826835c6/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-8.png" target="_blank">dbd8a8f</a>
 </td>
 <td>
@@ -1334,21 +1551,169 @@ joonsukkang
 </div>
 </div>
 <pre><code>[1] &quot;backfit completed; elbo=-2891046.21852024&quot;
- [1] 7505098.6392    8541.4539    7885.9415    7508.3552    7463.2928
- [6]    7308.8806    7137.1888    6773.2190    6688.5196    6599.4288
-[11]     530.0788</code></pre>
+ [1] 7505098.6392    7885.9415    7463.2928    7308.8806    7508.3552
+ [6]    6773.2190    7137.1888    6688.5196    6599.4288     530.0788
+[11]    8541.4539</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-9.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-9">
+Past versions of unnamed-chunk-8-9.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-9" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-9.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre><code>[1] &quot;seed=5&quot;</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-10.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-10">
+Past versions of unnamed-chunk-8-10.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-10" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-10.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre><code>[1] &quot;backfit completed; elbo=-2893922.04082004&quot;
- [1] 7505319.692    9195.646    8936.601    7691.798    7644.771    6952.786
- [7]    6875.296    6684.965    6550.448    5953.811     853.317</code></pre>
+ [1] 7505319.692    7691.798    8936.601    9195.646    6875.296    6550.448
+ [7]    7644.771     853.317    6952.786    6684.965    5953.811</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-11.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-11">
+Past versions of unnamed-chunk-8-11.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-11" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-11.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre><code>[1] &quot;backfit completed; elbo=-2893594.38622796&quot;
- [1] 7505399.8006    9749.3897    8061.7028    7721.9879    7415.2219
- [6]    7217.4336    6642.7190    6615.5904    6503.4186    6460.4554
-[11]     822.2092</code></pre>
+ [1] 7505399.8006    7721.9879    8061.7028    7415.2219    6503.4186
+ [6]    6615.5904    7217.4336    6460.4554    6642.7190     822.2092
+[11]    9749.3897</code></pre>
 <p><img src="figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-12.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-12">
+Past versions of unnamed-chunk-8-12.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-12" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/4e60d7aad4bb8b4af428deba73d3b0b242965f81/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-12.png" target="_blank">4e60d7a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
