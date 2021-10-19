@@ -9,7 +9,8 @@ alt.flash <- function(fit.init,
                       maxiter=1000,
                       g.common=FALSE,
                       print.elbo=FALSE,
-                      sol.reg.max.iter=5
+                      sol.reg.max.iter=5,
+                      order.output=FALSE
 ){
 
   time.vec <- Sys.time()
@@ -112,16 +113,17 @@ alt.flash <- function(fit.init,
 
   # scale and order factors
   scales <- sqrt(diag(B.l) * diag(B.f))
-  ordering <- order(scales, decreasing=TRUE)
-  scales <- scales[ordering]
-  A.l <- A.l[,ordering,drop=FALSE]; C.l <- C.l[,ordering,drop=FALSE]
-  A.f <- A.f[,ordering,drop=FALSE]; C.f <- C.f[,ordering,drop=FALSE]
+  if(order.output==TRUE){
+    ordering <- order(scales, decreasing=TRUE)
+    scales <- scales[ordering]
+    A.l <- A.l[,ordering,drop=FALSE]; C.l <- C.l[,ordering,drop=FALSE]
+    A.f <- A.f[,ordering,drop=FALSE]; C.f <- C.f[,ordering,drop=FALSE]
 
-  B.l <- crossprod(A.l); diag(B.l) <- colSums(C.l)
-  B.f <- crossprod(A.f); diag(B.f) <- colSums(C.f)
+    B.l <- crossprod(A.l); diag(B.l) <- colSums(C.l)
+    B.f <- crossprod(A.f); diag(B.f) <- colSums(C.f)
 
-  g.l <- g.l[ordering]; g.f <- g.f[ordering]
-
+    g.l <- g.l[ordering]; g.f <- g.f[ordering]
+  }
 
   time.vec <- as.numeric(time.vec[-1] - time.vec[1])
 
@@ -135,6 +137,51 @@ alt.flash <- function(fit.init,
                    elbo.tol=elbo.tol,
                    scales=scales)
 
+  return(out.list)
+}
+
+# return nonnegative direction estiamtes
+INIT.L.NonNeg <- function(Y, verbose=1){
+
+  max.K <- 20
+  tol.scale.ratio <- 1e-4
+
+  n <- nrow(Y)
+
+  # residual Y
+  Yres <- Y
+
+  # root factor
+  u <- eigen(Yres)$vectors[,1]
+  u <- u * sign(u[which.max(abs(u))])
+  u[u<0] <- 0
+  u <- u/sqrt(sum(u^2))
+  L <- matrix(u, ncol=1)
+  d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+  Yres <- Y - L %*% diag(d, nrow=length(d)) %*% t(L)
+
+  # add factors
+  for (k in 1:max.K){
+    ## find direction
+    u <- eigen(Yres)$vectors[,1]
+    u <- u * sign(u[which.max(abs(u))])
+    u[u<0] <- 0
+    u <- u/sqrt(sum(u^2))
+
+    ## find scale
+    L <- cbind(L, matrix(u, ncol=1))
+    d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+    if(verbose==1){print(paste0('min/max sacle ratio: ', min(d)/max(d)))}
+    if(min(d)/max(d) < tol.scale.ratio) {
+      L <- L[,-k]
+      d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+      break
+    }
+    Yres <- Y - L %*% diag(d, nrow=length(d)) %*% t(L)
+  }
+
+  if(verbose==1){print(paste0(ncol(L), ' factors fitted'))}
+  out.list <- list(L=L)
   return(out.list)
 }
 
