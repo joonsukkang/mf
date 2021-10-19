@@ -20,6 +20,7 @@ editor_options:
 + [altflash on Yusha's toy data](toy_Yusha_nonneg_1.html)
   + method
     + initialize nonnegative $L$ matrix using eigenvectors of $XX^T$
+    + use point-exponential family as prior family
   + results
     + the result is interpretable in that it returns the 11 factors
     + the elbo is lower than the result with oracle init (in which the pattern is less visible, though)
