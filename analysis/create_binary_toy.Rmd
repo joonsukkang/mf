@@ -1,0 +1,100 @@
+---
+title: "binary toy data"
+author: "Joonsuk Kang"
+date: "2021-10-18"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+I created a binary toy data, available as
+
+```{r,}
+binary_toy <- readRDS(url("https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds"))
+```
+
+
+
+# binary toy data
+
+As a benchmark, let's make a binary toy data, meaning $L$ is a binary matrix, from the toy data from Yusha. 
+
+### import the data
+
+```{r}
+library(tidyverse)
+library(pheatmap)
+
+# source: https://yushaliu.github.io/single_cell_cancer/simulations3_update.html
+model <- readRDS(url("https://raw.githubusercontent.com/YushaLiu/single_cell_cancer/master/data/model.rds"))
+L <- model$L
+F <- model$F
+F[,1] <- F[,1] - 10 # center the data
+
+### plot the drift factorization of truth, where F is orthogonal across columns 
+pheatmap(L, show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True L")
+pheatmap(F, show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True F")
+pheatmap(F[,-1], show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, main="True F")
+```
+
+### transformation
+
+The true $L$ has all nonnegative entries, and the mean of the positive entries is 1. So, it seems fine to transform all the positive entries to 1.
+
+```{r}
+summary(c(L))
+summary(c(L[L>0]))
+
+L0 <- L
+L0[L0>0] <- 1
+summary(c(L0))
+pheatmap(L0, show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, 
+         main="Binary L")
+F0 <- F
+```
+
+### compare the binary version vs original
+
+```{r}
+# noiseless data
+X0 <- L0 %*% t(F0) # binary version
+X  <- L %*% t(F) 
+
+s0 <- svd(X0)
+s <- svd(X)
+```
+
+The 8 largest singular values (signal part) are almost identical (a little smaller in the binary case).
+
+```{r}
+# singular values
+s0$d[1:15]
+s$d[1:15]
+s0$d[1:15]/s$d[1:15]
+```
+
+```{r}
+# plot singular vectors
+plot.L10 <- function(X, title){
+  
+  s <- svd(X)
+  data.frame(L.svd=c(s$u[,1:10]),
+             x=rep(1:800,times=10),
+             factor=rep(1:10, each=800)) %>%
+    mutate(factor=as.factor(factor)) %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L.svd, group=factor, col=factor))+
+    facet_wrap(~factor)+ggtitle(title)
+}
+
+plot.L10(X0, "Left singular vector of binary toy data")
+plot.L10(X, "Left singular vector of original toy data")
+```
+
+### save the data
+
+```{r, eval=FALSE}
+out.list <- list(L0=L0, F0=F0)
+saveRDS(out.list, "data/binary_toy.rds")
+```
+
