@@ -1,0 +1,223 @@
+---
+title: "binary toy data: nonneg init + point-exponential prior"
+author: "Joonsuk Kang"
+date: "2021-10-18"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+# obeservations
+
+* When the true $L$ is a binary matrix, or can be well approximated by a binary matrix, the alt-falsh with the nonnegative initialization + point-exponential prior does not work well. 
+
+* the nonnegative initialization results in estimating too many factors, capturing false signals though with small weights.
+
+* an interesting observation is that the fit with oracle init achieves a lower elbo than the fit with nonnegative initialization; the oracle initialization results in dropping a few factors (losing true signals)
+
+* a binary initialization and/or a binary prior would be able to help finding a good solution
+
+
+
+# some functions
+
+### Initialize L (direction) for nonnegative priors
+
+```{r}
+# return nonnegative direction estiamtes (L)
+INIT.L.NonNeg <- function(Y, verbose=1, max.K=20, tol.scale.ratio=1e-10){
+
+  n <- nrow(Y)
+
+  # residual Y
+  Yres <- Y
+
+  # root factor
+  u <- eigen(Yres)$vectors[,1]
+  u <- u * sign(u[which.max(abs(u))])
+  u[u<0] <- 0
+  u <- u/sqrt(sum(u^2))
+  L <- matrix(u, ncol=1)
+  d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+  Yres <- Y - L %*% diag(d, nrow=length(d)) %*% t(L)
+
+  # add factors
+  for (k in 2:max.K){
+    ## find direction
+    u <- eigen(Yres)$vectors[,1]
+    u <- u * sign(u[which.max(abs(u))])
+    u[u<0] <- 0
+    u <- u/sqrt(sum(u^2))
+
+    ## find scale
+    L <- cbind(L, matrix(u, ncol=1))
+    d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+    if(verbose==1){print(paste0(k,'-th factor fitting; ', 'min/max sacle ratio: ', min(d)/max(d)))}
+    if(min(d)/max(d) < tol.scale.ratio) {
+      L <- L[,-k]
+      d <- scaleL.qp(Y, L, scale.min=0, print.scale=FALSE)$scale
+      break
+    }
+    Yres <- Y - L %*% diag(d, nrow=length(d)) %*% t(L)
+  }
+
+  if(verbose==1){print(paste0(ncol(L), ' factors fitted'))}
+  out.list <- list(L=L)
+  return(out.list)
+}
+
+```
+
+### some more functions
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+
+# plot posterior mean of L and F 
+plotLF <- function(A.l, A.f, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             F=c(A.f),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figL
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=F, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figF
+  
+  grid.arrange(figL, figF, nrow=2, 
+               top=title)
+}
+
+plotL <- function(A.l, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') +ggtitle(title)-> figL
+  
+  print(figL)
+}
+
+
+# scale L: quadratic programming approach to find optimal scaling
+scaleL.qp <- function(Y, L, scale.min, print.scale=TRUE){
+
+  n <- nrow(L); K <- ncol(L)
+  Ls <- matrix(0, nrow=n, ncol=K)
+  
+  # normalized L: column norm 1
+  Ln <- L %*% diag(x=1/sqrt(colSums(L^2)),nrow=K)
+  
+  D <- crossprod(Ln)^2
+  d <- rep(0, K);   for (k in 1:K){d[k] <- as.numeric(t(Ln[,k])%*%Y%*%Ln[,k])}
+  qp <- quadprog::solve.QP(Dmat=D, dvec=d, Amat=diag(1,nrow=K), bvec=rep(scale.min,K)) 
+  
+  scale <- qp$solution
+  if(print.scale){print(scale)}
+
+  for (k in 1:K){Ls[,k] <- sqrt(scale[k])*Ln[,k]}
+  
+  out.list <- list(scale=scale, Ls=Ls)
+  
+  return(out.list)
+}
+```
+
+
+# results
+
+```{r}
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20211017.R")
+```
+
+```{r}
+binary_toy <- readRDS(url("https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds"))
+L0 <- binary_toy$L0
+F0 <- binary_toy$F0
+X0 <- L0 %*% t(F0)
+```
+
+```{r}
+set.seed(1)
+X <- X0 + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+XXt <- X%*%t(X)
+Y <- XXt
+```
+
+### nonnegative initialization (using eigenvectors of Y)
+
+```{r}
+temp.obj <- INIT.L.NonNeg(Y, verbose=1) # initialize directions (L) 
+Ls <- scaleL.qp(Y, temp.obj$L, scale.min=1e-8, print.scale=FALSE)
+plotL(Ls$Ls, title='nonneg initialized L')
+
+fit.init <- INIT.L(init.L=Ls$Ls, Y=Y)
+fit.alt <- alt.flash(fit.init)
+print(fit.alt$scales)
+plotL(fit.alt$A.l, 'result: alt-flash with nonneg init')
+```
+
+### oracle initialization
+
+```{r}
+Ls <- scaleL.qp(Y, L0, scale.min=1e-8)
+plotL(Ls$Ls, title='oracle L') 
+
+fit.init <- INIT.L(init.L=Ls$Ls, Y=Y)
+fit.alt <- alt.flash(fit.init)
+print(fit.alt$scales)
+plotL(fit.alt$A.l, 'result: alt-flash with oracle init')
+```
+
+
+### some more seeds
+
+since the fitted L and F are identical, I report only L
+
+```{r}
+for (seed in 2:5){
+  
+  set.seed(seed)
+  X <- X0 + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+  Y <- X %*% t(X)
+  
+  print(paste0('seed=',seed))
+  
+  # nonneg init
+  temp.obj <- INIT.L.NonNeg(Y, verbose=0)
+  Ls <- scaleL.qp(Y, temp.obj$L, scale.min=1e-8, print.scale=FALSE)
+  plotL(Ls$Ls, title=paste0('seed=',seed, ': nonneg initialized L'))
+
+  fit.alt <- alt.flash(INIT.L(init.L=Ls$Ls, Y=Y))
+  print(fit.alt$scales)
+  plotL(fit.alt$A.l, paste0('seed=',seed,': alt-flash w/ nonneg init'))
+  
+  # oracle init
+  fit.alt <- alt.flash(INIT.L(init.L=scaleL.qp(Y, L0, scale.min=1e-8, print.scale=FALSE)$Ls, Y=Y))
+  print(fit.alt$scales)
+  plotL(fit.alt$A.l, paste0('seed=',seed,': alt-flash w/ oracle init'))
+}
+```
+
