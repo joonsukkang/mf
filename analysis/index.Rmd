@@ -12,6 +12,30 @@ editor_options:
 ## alternating flash
 
 
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/binary_toy_nonneg_pe.Rmd/unnamed-chunk-6-2.png" width="400">
+:::
+::: {}
++ [altflash: nonneg init + point-exponential prior](binary_toy_nonneg_pe.html) on binary toy data
+  + nonneg init: too many factors estimated (false signals captured)
+  + oracle init: some factors dropped (true signals lost)
+  + elbo: nonneg init > oracle init
+  + if the true $L$ is (close to) binary, binary prior seems beneficial
+
++ binary toy data
+  + [data](https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds)
+  + [script and SVD](create_binary_toy.html)
+    
+
+:::
+::::
+
+
+
+
+
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
 <img src="https://raw.githubusercontent.com/joonsukkang/mf/master/docs/figure/toy_Yusha_nonneg_1.Rmd/unnamed-chunk-8-2.png" width="400">
