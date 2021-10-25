@@ -1,0 +1,218 @@
+---
+title: "binary toy: denoising"
+author: "Joonsuk Kang"
+date: "2021-10-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# summary
+
+
++ by soft thresholding eigenvalues and dropping the leading factor, we can successfully denoise XX'
++ our key matrix XX'=(LF'+E)(LF'+E)'=LF'FL'+LF'E'+EFL'+EE'
++ "soft thresholding": the term EE' in XX' is close to $p\sigma^2I_n$, so the diagonal terms of XX' are disproportionately big; we can use soft thresholding eigenvalues to solve the issue
++ "dropping the leading factor": the term LF'E'+EFL' blurs the pattern observed in the true data; dropping the first factor $\lambda_1u_1u_1^T$ ($u_1$ is close to a constant) solves the issue
+
+
+# some functions
+
+
+### funciton for plotting three versions of cov matrix
+
+1. original data matrix
+
+2. soft thresholding eigenvalues
+
+3. soft thresholding eigenvalues + drop the first factor
+
+```{r}
+library(pheatmap)
+
+pheatmap1 <- function(matY, data){
+  pheatmap(matY, cluster_rows = FALSE, cluster_cols = FALSE, 
+           main=paste0(data, '; original'))
+  }
+pheatmap2 <- function(matY, data){
+  eigY <- eigen(matY)
+  matY <- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
+  
+  pheatmap(matY, cluster_rows = FALSE, cluster_cols = FALSE, 
+           main=paste0(data, '; soft thresholding, factors 1-8'))
+}
+pheatmap3 <- function(matY, data){
+  eigY <- eigen(matY)
+  matY <- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
+
+  pheatmap(matY, cluster_rows = FALSE, cluster_cols = FALSE, 
+           main=paste0(data, '; soft thresholding, factors 2-8'))
+}
+```
+
+### some other functions
+```{r}
+library(tidyverse)
+library(gridExtra)
+
+
+# plot posterior mean of L and F 
+plotLF <- function(A.l, A.f, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             F=c(A.f),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figL
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=F, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') -> figF
+  
+  grid.arrange(figL, figF, nrow=2, 
+               top=title)
+}
+
+plotL <- function(A.l, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') +ggtitle(title)-> figL
+  
+  print(figL)
+}
+
+```
+
+
+
+
+# binary data
+
+```{r}
+setwd("~/Box/2-research/mf")
+source("code/alt-flash_v20211020.R")
+
+binary_toy <- readRDS(url("https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds"))
+L0 <- binary_toy$L0
+F0 <- binary_toy$F0
+```
+
+# when sd=0.5
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+```
+
+### LF'FL'
+
+```{r}
+data <- "LF'FL'"
+matY <- L0 %*% diag(diag(t(F0)%*%F0)) %*% t(L0) 
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) # identical to the original because the matY is rank 8
+pheatmap3(matY, data=data)
+```
+
+### LF'FL' + EE'
+
+```{r}
+data <- "LF'FL'+EE'"
+matY <- L0 %*% diag(diag(t(F0)%*%F0)) %*% t(L0) + E %*% t(E)
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) 
+pheatmap3(matY, data=data)
+```
+
+### LF'FL' + LF'E' + EFL'
+
+```{r}
+data <- "LF'FL'+LF'E' + EFL'"
+matY <- L0 %*% diag(diag(t(F0)%*%F0)) %*% t(L0) + L0%*%t(F0)%*%t(E) + E%*%F0%*%t(L0)
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) 
+pheatmap3(matY, data=data)
+```
+
+
+### full XX'
+
+```{r}
+data <- "XX'"
+matY <- (L0%*%t(F0)+E) %*% t((L0%*%t(F0)+E))
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) 
+pheatmap3(matY, data=data)
+```
+
+
+
+# when sd=1
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+```
+
+
+### LF'FL'
+
+```{r}
+data <- "LF'FL'"
+matY <- L0 %*% diag(diag(t(F0)%*%F0)) %*% t(L0) 
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) # identical to the original because the matY is rank 8
+pheatmap3(matY, data=data)
+```
+
+### LF'FL' + EE'
+
+```{r}
+data <- "LF'FL'+EE'"
+matY <- L0 %*% diag(diag(t(F0)%*%F0)) %*% t(L0) + E %*% t(E)
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) 
+pheatmap3(matY, data=data)
+```
+
+### LF'FL' + LF'E' + EFL'
+
+```{r}
+data <- "LF'FL'+LF'E' + EFL'"
+matY <- L0 %*% diag(diag(t(F0)%*%F0)) %*% t(L0) + L0%*%t(F0)%*%t(E) + E%*%F0%*%t(L0)
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) 
+pheatmap3(matY, data=data)
+```
+
+
+### full XX'
+
+```{r}
+data <- "XX'"
+matY <- (L0%*%t(F0)+E) %*% t((L0%*%t(F0)+E))
+pheatmap1(matY, data=data)
+pheatmap2(matY, data=data) 
+pheatmap3(matY, data=data)
+```
+
+
