@@ -1,0 +1,282 @@
+---
+title: "binary toy data: NCut"
+author: "Joonsuk Kang"
+date: "2021-10-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# summary
+
+* If our data is generated from a nested structure, for example a tree structure, then Normalized Cut (NCut) would be a good method to apply.
+
+* NCut outperforms the hierarchical clustering (`hclust`) with complete linkage: even with the noisier data (factors 1-8), NCut successfully recovers the pattern, while `hclust` couldn't.
+
+* this is a preliminary implementation of the NCut algorithm. A more careful implementation would adaptively find which chunk to split at each stage and stop when a convergence criterion is satisfied
+
+
+
+# some functions
+
+### funstions of NCut
+
+```{r}
+compute.Ncut <- function(W, y2, vals, i){
+  A <- (y2<=vals[i])
+  B <- !A
+  cutAB <- sum(W[A,B])
+  assocAV <- sum(W[A,])
+  assocBV <- sum(W[B,])
+  
+  Ncut <- cutAB/assocAV + cutAB/assocBV
+  return(Ncut)
+}
+
+NCut <- function(matY, verbose=0){
+  
+    W <- matY; diag(W) <- 0
+    D <- diag(colSums(W))
+    Dinvqsrt <- diag(1/sqrt(colSums(W)))
+    eig <- eigen(Dinvqsrt%*%(D-W)%*%Dinvqsrt)
+    y2 <- c(Dinvqsrt %*% eig$vectors[,nrow(matY)-1])
+    if(verbose==2){plot(y2)}
+    
+    ### choose a split point
+    vals <- sort(unique(y2)); vals <- vals[-length(vals)]
+    Ncuts <- rep(0, times=length(vals))
+    
+    for (i in 1:length(Ncuts)){
+      Ncuts[i] <- compute.Ncut(W=W, y2=y2, vals=vals, i=i)
+    }
+
+    split.point <- vals[which.min(Ncuts)]
+    ggplot()+
+      geom_line(aes(x=1:length(Ncuts), y=Ncuts))+
+      geom_point(aes(x=which.min(Ncuts), y=Ncuts[which.min(Ncuts)]), col='red')+xlab("")+
+      ggtitle(paste0('NCuts by splitting points')) -> temp.fig
+    
+    if(verbose==2){print(temp.fig)}
+
+    l <- (y2<=split.point)
+    
+    ggplot()+
+      geom_line(aes(x=1:length(y2), y=y2, col=factor(l)))+ggtitle(paste0('colored eigvec')) -> temp.fig
+    if(verbose==2){print(temp.fig)}
+    
+    matY[l,!l] <- 0; matY[!l, l] <- 0
+    
+    if(verbose==1|verbose==2){
+      pheatmap(matY, cluster_rows = F, cluster_cols = F, main="after NCut")
+      }
+    
+    out.list <- list(l=l, matA=matY[l,l], matB=matY[!l,!l])
+    return(out.list)
+}
+```
+
+
+### some other functions
+
+```{r}
+library(tidyverse)
+library(pheatmap)
+
+plotL <- function(A.l, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') +ggtitle(title)-> figL
+  
+  print(figL)
+}
+
+
+```
+
+
+# binary data
+
+```{r}
+binary_toy <- readRDS(url("https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds"))
+L0 <- binary_toy$L0
+F0 <- binary_toy$F0
+```
+
+### when sd=0.5, denoised: using factors 2-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+plotL(eigY$vectors[,1:10], 'leading 10 eigenvectors') # the leading eigenvector is close to constant...
+
+# denoised matrix Y
+dY <- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
+dY <- dY - min(dY) # make nonnegative (to satisfy as a similarity matrix)
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 2-8")
+
+# first cut
+r1 <- NCut(dY, verbose=1)
+
+# second cut
+r2a <- NCut(r1$matA, verbose=1) # split the first chunk
+r2b <- NCut(r1$matB, verbose=1) # split the second chunk
+
+# third cut: cut smaller one of the two 
+if(nrow(r2a$matA)> nrow(r2a$matB)){ r3a <- NCut(r2a$matA, verbose=1)
+}else{ r3a <- NCut(r2a$matB, verbose=1)} 
+
+if(nrow(r2b$matA)> nrow(r2b$matB)){ r3b <- NCut(r2b$matA, verbose=1)
+}else{ r3b <- NCut(r2b$matB, verbose=1)
+} 
+ 
+# fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
+}else{ r4a <- NCut(r3a$matB, verbose=1)} 
+
+if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
+}else{ r4b <- NCut(r3b$matB, verbose=1)
+} 
+```
+
+
+
+### when sd=0.5, denoised: using factors 1-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+
+# denoised matrix Y
+dY <- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
+dY <- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 1-8")
+
+# first cut
+r1 <- NCut(dY, verbose=1)
+
+# second cut
+r2a <- NCut(r1$matA, verbose=1) # split the first chunk
+r2b <- NCut(r1$matB, verbose=1) # split the second chunk
+
+# third cut: cut smaller one of the two 
+if(nrow(r2a$matA)> nrow(r2a$matB)){ r3a <- NCut(r2a$matA, verbose=1)
+}else{ r3a <- NCut(r2a$matB, verbose=1)} 
+
+if(nrow(r2b$matA)> nrow(r2b$matB)){ r3b <- NCut(r2b$matA, verbose=1)
+}else{ r3b <- NCut(r2b$matB, verbose=1)
+} 
+ 
+# fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
+}else{ r4a <- NCut(r3a$matB, verbose=1)} 
+
+if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
+}else{ r4b <- NCut(r3b$matB, verbose=1)
+} 
+```
+
+
+### when sd=1, denoised: using factors 2-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+plotL(eigY$vectors[,1:10], 'leading 10 eigenvectors') # the leading eigenvector is close to constant...
+
+# denoised matrix Y
+dY <- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
+dY <- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 2-8")
+
+# first cut
+r1 <- NCut(dY, verbose=1)
+
+# second cut
+r2a <- NCut(r1$matA, verbose=1) # split the first chunk
+r2b <- NCut(r1$matB, verbose=1) # split the second chunk
+
+# third cut: cut smaller one of the two 
+if(nrow(r2a$matA)> nrow(r2a$matB)){ r3a <- NCut(r2a$matA, verbose=1)
+}else{ r3a <- NCut(r2a$matB, verbose=1)} 
+
+if(nrow(r2b$matA)> nrow(r2b$matB)){ r3b <- NCut(r2b$matA, verbose=1)
+}else{ r3b <- NCut(r2b$matB, verbose=1)
+} 
+ 
+# fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
+}else{ r4a <- NCut(r3a$matB, verbose=1)} 
+
+if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
+}else{ r4b <- NCut(r3b$matB, verbose=1)
+} 
+```
+
+### when sd=1, denoised: using factors 1-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+
+# denoised matrix Y
+dY <- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
+dY <- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 1-8")
+
+# first cut
+r1 <- NCut(dY, verbose=1)
+
+# second cut
+r2a <- NCut(r1$matA, verbose=1) # split the first chunk
+r2b <- NCut(r1$matB, verbose=1) # split the second chunk
+
+# third cut: cut smaller one of the two 
+if(nrow(r2a$matA)> nrow(r2a$matB)){ r3a <- NCut(r2a$matA, verbose=1)
+}else{ r3a <- NCut(r2a$matB, verbose=1)} 
+
+if(nrow(r2b$matA)> nrow(r2b$matB)){ r3b <- NCut(r2b$matA, verbose=1)
+}else{ r3b <- NCut(r2b$matB, verbose=1)
+} 
+ 
+# fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
+}else{ r4a <- NCut(r3a$matB, verbose=1)} 
+
+if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
+}else{ r4b <- NCut(r3b$matB, verbose=1)
+} 
+```
