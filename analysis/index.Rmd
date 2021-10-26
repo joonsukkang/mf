@@ -49,6 +49,23 @@ editor_options:
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/binary_toy_ncut.Rmd/unnamed-chunk-7-9.png">
+:::
+::: {}
+    
+
++ [NCut](binary_toy_ncut.html)
+  + NCut outperforms hierarchical clustering with complete linkage
+  + even with noisier version (factors 1-8), NCut successfully finds the structure
+  + Like hclust, NCut assumes a nested structure: we can find a tree, but not a general overlapping structure
+
+:::
+::::
+
+
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
 <img src="https://joonsukkang.github.io/mf/figure/binary_toy_hclust.Rmd/unnamed-chunk-3-3.png" width="400">
 :::
 ::: {}
