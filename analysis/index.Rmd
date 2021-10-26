@@ -12,7 +12,6 @@ editor_options:
 ## alternating flash
 
 
-
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
 <img src="https://joonsukkang.github.io/mf/figure/binary_toy_nonneg_pe.Rmd/unnamed-chunk-6-2.png" width="400">
@@ -24,14 +23,33 @@ editor_options:
   + elbo: nonneg init > oracle init
   + if the true $L$ is (close to) binary, binary prior seems beneficial
 
-+ binary toy data
-  + [data](https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds)
-  + [script and SVD](create_binary_toy.html)
-    
 
 :::
 ::::
 
+
+
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/binary_toy_denoising.Rmd/unnamed-chunk-8-3.png" width="400">
+:::
+::: {}
+
++ binary toy data
+  + [data](https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds)
+  + [script and SVD](create_binary_toy.html)
+    
++ binary toy investigations
+  + [denoising](binary_toy_denoising.html)
+    + by soft thresholding eigenvalues and dropping the leading factor, we can successfully denoise XX'
+    + our key matrix XX'=(LF'+E)(LF'+E)'=LF'FL'+LF'E'+EFL'+EE'
+    + "soft thresholding": the term EE' in XX' is close to $p\sigma^2I_n$, so the diagonal terms of XX' are disproportionately big; we can use soft thresholding eigenvalues to solve the issue
+    + "dropping the leading factor": the term LF'E'+EFL' blurs the pattern observed in the true data; dropping the first factor $\lambda_1u_1u_1^T$ ($u_1$ is close to a constant) solves the issue
+
+
+:::
+::::
 
 
 
