@@ -1,0 +1,150 @@
+---
+title: "binary toy data: hclust (complete linkage)"
+author: "Joonsuk Kang"
+date: "2021-10-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# summary
+
+* using denoised (soft-thresholding, factors 2-8) matrix, hierarchical clustering with complete linkage (default option for `hclust`) can eaisly find the eight clusters
+
+* if we include the factor 1 (i.e. use soft-thresholding, factors 1-8 matrix), the hierarchical clustering method fails
+
+* the result holds true for sd=0.5 and sd=1
+
+
+# some functions
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(pheatmap)
+
+plotL <- function(A.l, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') +ggtitle(title)-> figL
+  
+  print(figL)
+}
+```
+
+
+# binary data
+
+```{r}
+binary_toy <- readRDS(url("https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds"))
+L0 <- binary_toy$L0
+F0 <- binary_toy$F0
+```
+
+### when sd=0.5, denoised: using factors 2-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+plotL(eigY$vectors[,1:10], 'leading 10 eigenvectors') # the leading eigenvector is close to constant...
+
+# denoised matrix Y
+dY <- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
+dY <- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 2-8")
+
+hc <- hclust(as.dist(-dY))
+plot(hc, cex=0.01)
+ct <- cutree(hc, 8)
+plot(ct)
+```
+
+### when sd=0.5, denoised: using factors 1-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+
+# denoised matrix Y
+dY <- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
+dY <- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 1-8")
+
+hc <- hclust(as.dist(-dY))
+plot(hc, cex=0.01)
+ct <- cutree(hc, 8)
+plot(ct)
+```
+
+
+### when sd=1, denoised: using factors 2-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+plotL(eigY$vectors[,1:10], 'leading 10 eigenvectors') # the leading eigenvector is close to constant...
+
+# denoised matrix Y
+dY <- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
+dY <- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 2-8")
+
+hc <- hclust(as.dist(-dY))
+plot(hc, cex=0.01)
+ct <- cutree(hc, 8)
+plot(ct)
+```
+
+### when sd=1, denoised: using factors 1-8
+
+```{r}
+set.seed(1)
+E <- matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+X <- L0 %*% t(F0) + E
+XXt <- X %*% t(X)
+
+matY <- XXt
+eigY <- eigen(matY)
+
+# denoised matrix Y
+dY <- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
+dY <- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 1-8")
+
+hc <- hclust(as.dist(-dY))
+plot(hc, cex=0.01)
+ct <- cutree(hc, 8)
+plot(ct)
+```
+
+
+
