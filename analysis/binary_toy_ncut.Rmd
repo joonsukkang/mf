@@ -35,6 +35,8 @@ compute.Ncut <- function(W, y2, vals, i){
 
 NCut <- function(matY, verbose=0){
   
+    rn <- rownames(matY)
+  
     W <- matY; diag(W) <- 0
     D <- diag(colSums(W))
     Dinvqsrt <- diag(1/sqrt(colSums(W)))
@@ -60,6 +62,7 @@ NCut <- function(matY, verbose=0){
 
     l <- (y2<=split.point)
     
+    
     ggplot()+
       geom_line(aes(x=1:length(y2), y=y2, col=factor(l)))+ggtitle(paste0('colored eigvec')) -> temp.fig
     if(verbose==2){print(temp.fig)}
@@ -68,10 +71,27 @@ NCut <- function(matY, verbose=0){
     
     if(verbose==1|verbose==2){
       pheatmap(matY, cluster_rows = F, cluster_cols = F, main="after NCut")
-      }
+    }
+    matA <- matY[l,l]
+    matB <- matY[!l,!l]
+    l <- matrix(as.numeric(l), ncol=1)
+    rownames(l) <- rn
     
-    out.list <- list(l=l, matA=matY[l,l], matB=matY[!l,!l])
+    out.list <- list(l=l, matA=matA, matB=matB)
     return(out.list)
+}
+
+todf <- function(l){data.frame(idx=as.numeric(rownames(l)), L=l)}
+aggdf <- function(r.list){
+  
+  out.df <- todf(r.list[[1]]$l)
+  for (i in 2:length(r.list)){
+    out.df <- full_join(out.df, todf(r.list[[i]]$l), by='idx')
+  }
+  out.mat <- as.matrix(out.df)
+  out.mat <- out.mat[,-1]
+  colnames(out.mat) <- NULL
+    return(out.mat)
 }
 ```
 
@@ -99,8 +119,6 @@ plotL <- function(A.l, title){
   
   print(figL)
 }
-
-
 ```
 
 
@@ -127,6 +145,7 @@ plotL(eigY$vectors[,1:10], 'leading 10 eigenvectors') # the leading eigenvector 
 # denoised matrix Y
 dY <- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
 dY <- dY - min(dY) # make nonnegative (to satisfy as a similarity matrix)
+rownames(dY) <- 1:800
 
 pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 2-8")
 
@@ -152,6 +171,11 @@ if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
 if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
 }else{ r4b <- NCut(r3b$matB, verbose=1)
 } 
+
+
+# plot result
+pheatmap(aggdf(list(r1, r2a, r2b, r3a, r3b, r4a, r4b)), cluster_rows = F, cluster_cols = F,
+         main="NCut at each stage: 0 vs 1; NA is colored gray")
 ```
 
 
@@ -170,6 +194,7 @@ eigY <- eigen(matY)
 # denoised matrix Y
 dY <- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
 dY <- dY - min(dY) # make nonnegative
+rownames(dY) <- 1:800
 
 pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 1-8")
 
@@ -195,6 +220,10 @@ if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
 if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
 }else{ r4b <- NCut(r3b$matB, verbose=1)
 } 
+
+# plot result
+pheatmap(aggdf(list(r1, r2a, r2b, r3a, r3b, r4a, r4b)), cluster_rows = F, cluster_cols = F,
+         main="NCut at each stage: 0 vs 1; NA is colored gray")
 ```
 
 
@@ -213,6 +242,7 @@ plotL(eigY$vectors[,1:10], 'leading 10 eigenvectors') # the leading eigenvector 
 # denoised matrix Y
 dY <- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
 dY <- dY - min(dY) # make nonnegative
+rownames(dY) <- 1:800
 
 pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 2-8")
 
@@ -238,6 +268,10 @@ if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
 if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
 }else{ r4b <- NCut(r3b$matB, verbose=1)
 } 
+
+# plot result
+pheatmap(aggdf(list(r1, r2a, r2b, r3a, r3b, r4a, r4b)), cluster_rows = F, cluster_cols = F,
+         main="NCut at each stage: 0 vs 1; NA is colored gray")
 ```
 
 ### when sd=1, denoised: using factors 1-8
@@ -254,6 +288,7 @@ eigY <- eigen(matY)
 # denoised matrix Y
 dY <- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
 dY <- dY - min(dY) # make nonnegative
+rownames(dY) <- 1:800
 
 pheatmap(dY, cluster_rows = F, cluster_cols = F, main="XX', factors 1-8")
 
@@ -279,4 +314,8 @@ if(nrow(r3a$matA)> nrow(r3a$matB)){ r4a <- NCut(r3a$matA, verbose=1)
 if(nrow(r3b$matA)> nrow(r3b$matB)){ r4b <- NCut(r3b$matA, verbose=1)
 }else{ r4b <- NCut(r3b$matB, verbose=1)
 } 
+
+# plot result
+pheatmap(aggdf(list(r1, r2a, r2b, r3a, r3b, r4a, r4b)), cluster_rows = F, cluster_cols = F,
+         main="NCut at each stage: 0 vs 1; NA is colored gray")
 ```
