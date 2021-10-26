@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Joonsuk Kang" />
+
+<meta name="date" content="2021-10-25" />
+
+<title>binary toy data: NCut</title>
+
+<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/joonsukkang/mf">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">binary toy data: NCut</h1>
+<h4 class="author">Joonsuk Kang</h4>
+<h4 class="date">2021-10-25</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-10-25
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mf/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201010code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201010)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201010code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201010)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreed73178a5d82135d88522d6fc842e63a506ccc82etargetblankd73178aa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/d73178a5d82135d88522d6fc842e63a506ccc82e" target="_blank">d73178a</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreed73178a5d82135d88522d6fc842e63a506ccc82etargetblankd73178aa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/d73178a5d82135d88522d6fc842e63a506ccc82e" target="_blank">d73178a</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  altFlash.pdf
+    Untracked:  analysis/alt-flash-nonneg.Rmd
+    Untracked:  analysis/alt-flash-nonneg_largeY.Rmd
+    Untracked:  analysis/alt-flash-normal_largeY.Rmd
+    Untracked:  analysis/altflash_simulation_Yusha.Rmd
+    Untracked:  analysis/binary_toy_plots.Rmd
+    Untracked:  analysis/bingham.Rmd
+    Untracked:  analysis/bingham_constant.Rmd
+    Untracked:  analysis/create_binary_toy2.Rmd
+    Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g1_K.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g2_K.Rmd
+    Untracked:  analysis/demo8_splash.Rmd
+    Untracked:  analysis/flashImpute_ML100k.Rmd
+    Untracked:  analysis/flashImpute_ML1M.Rmd
+    Untracked:  analysis/flip_correlation.Rmd
+    Untracked:  analysis/flipping_pdf.Rmd
+    Untracked:  analysis/infinitefactor_toy.Rmd
+    Untracked:  analysis/model_exp_prior_v20201110m.Rmd
+    Untracked:  analysis/model_invgam_prior.Rmd
+    Untracked:  analysis/multiplicative.Rmd
+    Untracked:  analysis/site_libs (joonsukkang@uchicago.edu)/
+    Untracked:  analysis/sliding_correlation.Rmd
+    Untracked:  analysis/sliding_pdf.Rmd
+    Untracked:  analysis/temp.Rmd
+    Untracked:  analysis/toy_Yusha_nonneg_2.Rmd
+    Untracked:  analysis/toy_Yusha_oracle_flashier.Rmd
+    Untracked:  analysis/toy_Yusha_oracle_more seeds.Rmd
+    Untracked:  analysis/toy_p_notfixK.Rmd
+    Untracked:  analysis/y2_NoTargetsByTF.R
+    Untracked:  analysis/y2_eb.Rmd
+    Untracked:  analysis/y2_toy.Rmd
+    Untracked:  analysis/y2_toy_500.Rmd
+    Untracked:  analysis/y2_toy_highd.Rmd
+    Untracked:  analysis/y2_toy_highd_covver.Rmd
+    Untracked:  analysis/y2_toy_lastday_backtosimple.Rmd
+    Untracked:  analysis/y2_toy_master.Rmd
+    Untracked:  analysis/y2_toy_n.Rmd
+    Untracked:  analysis/y2_toy_n_K3.Rmd
+    Untracked:  code/alt-flash.R
+    Untracked:  code/alt-flash_v20210819.R
+    Untracked:  code/model_exp_v20201110.R
+    Untracked:  code/workflowr_codes.R
+    Untracked:  data/eigvals.rds
+    Untracked:  data/hTFtarget_NoTargetsByTF.txt
+    Untracked:  data/metro_results.txt
+    Untracked:  figure/
+    Untracked:  flashImpute.pdf
+    Untracked:  output/.Rapp.history
+    Untracked:  output/Likelihood.gif
+    Untracked:  output/altflash_simulation_Yusha_20211013_res1.rds
+    Untracked:  output/altflash_simulation_Yusha_20211013_res3.rds
+    Untracked:  output/nonneg_v20210824_large_fit.alt.p.rds
+    Untracked:  output/nonneg_v20210824_large_fit.alt.rds
+    Untracked:  output/nonneg_v20210824_large_fit.f.ext.rds
+    Untracked:  output/nonneg_v20210824_large_fit.f.seq.rds
+    Untracked:  output/nonneg_v20210824_large_fit.init.rds
+    Untracked:  output/nonneg_v20210824_small_fit.alt.p.rds
+    Untracked:  output/nonneg_v20210824_small_fit.alt.rds
+    Untracked:  output/nonneg_v20210824_small_fit.f.ext.rds
+    Untracked:  output/nonneg_v20210824_small_fit.f.seq.rds
+    Untracked:  output/nonneg_v20210824_small_fit.init.rds
+    Untracked:  output/tree_toy_altflash_X2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_X2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_X2n_b_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2n_b_v2021_1012_1309.rds
+    Untracked:  temp-blog/
+    Untracked:  writing/
+
+Unstaged changes:
+    Deleted:    .Rprofile
+    Deleted:    .gitattributes
+    Modified:   .gitignore
+    Deleted:    analysis/Alt-Flash.Rmd
+    Deleted:    analysis/ChoosingW.Rmd
+    Modified:   analysis/alt-flash-normal.Rmd
+    Deleted:    analysis/alt-flash-normal_v20210825.Rmd
+    Modified:   analysis/binary_toy_binary_altflash.Rmd
+    Deleted:    analysis/concentration.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g1.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g2.Rmd
+    Modified:   analysis/flashier_point_laplace.Rmd
+    Modified:   analysis/model_exp_prior.Rmd
+    Modified:   code/alt-flash_v20211013.R
+    Modified:   code/alt-flash_v20211020.R
+    Modified:   code/flashImpute.R
+    Deleted:    output/alt-flash-normal-elbo.pdf
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/binary_toy_ncut.Rmd</code>) and HTML (<code>docs/binary_toy_ncut.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/d73178a5d82135d88522d6fc842e63a506ccc82e/analysis/binary_toy_ncut.Rmd" target="_blank">d73178a</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-10-25
+</td>
+<td>
+binary toy ncut
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="summary" class="section level1">
+<h1>summary</h1>
+<ul>
+<li><p>If our data is generated from a nested structure, for example a tree structure, then Normalized Cut (NCut) would be a good method to apply.</p></li>
+<li><p>NCut outperforms the hierarchical clustering (<code>hclust</code>) with complete linkage: even with the noisier data (factors 1-8), NCut successfully recovers the pattern, while <code>hclust</code> couldn’t.</p></li>
+<li><p>this is a preliminary implementation of the NCut algorithm. A more careful implementation would adaptively find which chunk to split at each stage and stop when a convergence criterion is satisfied</p></li>
+</ul>
+</div>
+<div id="some-functions" class="section level1">
+<h1>some functions</h1>
+<div id="funstions-of-ncut" class="section level3">
+<h3>funstions of NCut</h3>
+<pre class="r"><code>compute.Ncut &lt;- function(W, y2, vals, i){
+  A &lt;- (y2&lt;=vals[i])
+  B &lt;- !A
+  cutAB &lt;- sum(W[A,B])
+  assocAV &lt;- sum(W[A,])
+  assocBV &lt;- sum(W[B,])
+  
+  Ncut &lt;- cutAB/assocAV + cutAB/assocBV
+  return(Ncut)
+}
+
+NCut &lt;- function(matY, verbose=0){
+  
+    W &lt;- matY; diag(W) &lt;- 0
+    D &lt;- diag(colSums(W))
+    Dinvqsrt &lt;- diag(1/sqrt(colSums(W)))
+    eig &lt;- eigen(Dinvqsrt%*%(D-W)%*%Dinvqsrt)
+    y2 &lt;- c(Dinvqsrt %*% eig$vectors[,nrow(matY)-1])
+    if(verbose==2){plot(y2)}
+    
+    ### choose a split point
+    vals &lt;- sort(unique(y2)); vals &lt;- vals[-length(vals)]
+    Ncuts &lt;- rep(0, times=length(vals))
+    
+    for (i in 1:length(Ncuts)){
+      Ncuts[i] &lt;- compute.Ncut(W=W, y2=y2, vals=vals, i=i)
+    }
+
+    split.point &lt;- vals[which.min(Ncuts)]
+    ggplot()+
+      geom_line(aes(x=1:length(Ncuts), y=Ncuts))+
+      geom_point(aes(x=which.min(Ncuts), y=Ncuts[which.min(Ncuts)]), col=&#39;red&#39;)+xlab(&quot;&quot;)+
+      ggtitle(paste0(&#39;NCuts by splitting points&#39;)) -&gt; temp.fig
+    
+    if(verbose==2){print(temp.fig)}
+
+    l &lt;- (y2&lt;=split.point)
+    
+    ggplot()+
+      geom_line(aes(x=1:length(y2), y=y2, col=factor(l)))+ggtitle(paste0(&#39;colored eigvec&#39;)) -&gt; temp.fig
+    if(verbose==2){print(temp.fig)}
+    
+    matY[l,!l] &lt;- 0; matY[!l, l] &lt;- 0
+    
+    if(verbose==1|verbose==2){
+      pheatmap(matY, cluster_rows = F, cluster_cols = F, main=&quot;after NCut&quot;)
+      }
+    
+    out.list &lt;- list(l=l, matA=matY[l,l], matB=matY[!l,!l])
+    return(out.list)
+}</code></pre>
+</div>
+<div id="some-other-functions" class="section level3">
+<h3>some other functions</h3>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
+<pre><code>✓ ggplot2 3.3.5     ✓ purrr   0.3.4
+✓ tibble  3.1.4     ✓ dplyr   1.0.7
+✓ tidyr   1.1.3     ✓ stringr 1.4.0
+✓ readr   2.0.1     ✓ forcats 0.5.1</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(pheatmap)
+
+plotL &lt;- function(A.l, title){
+
+  K &lt;- ncol(A.l)
+  n &lt;- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %&gt;%
+    mutate(factor=as.factor(factor)) -&gt; df.plot
+  
+  df.plot %&gt;%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales=&#39;free_y&#39;) +ggtitle(title)-&gt; figL
+  
+  print(figL)
+}</code></pre>
+</div>
+</div>
+<div id="binary-data" class="section level1">
+<h1>binary data</h1>
+<pre class="r"><code>binary_toy &lt;- readRDS(url(&quot;https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds&quot;))
+L0 &lt;- binary_toy$L0
+F0 &lt;- binary_toy$F0</code></pre>
+<div id="when-sd0.5-denoised-using-factors-2-8" class="section level3">
+<h3>when sd=0.5, denoised: using factors 2-8</h3>
+<pre class="r"><code>set.seed(1)
+E &lt;- matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+X &lt;- L0 %*% t(F0) + E
+XXt &lt;- X %*% t(X)
+
+matY &lt;- XXt
+eigY &lt;- eigen(matY)
+plotL(eigY$vectors[,1:10], &#39;leading 10 eigenvectors&#39;) # the leading eigenvector is close to constant...</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># denoised matrix Y
+dY &lt;- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
+dY &lt;- dY - min(dY) # make nonnegative (to satisfy as a similarity matrix)
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main=&quot;XX&#39;, factors 2-8&quot;)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># first cut
+r1 &lt;- NCut(dY, verbose=1)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># second cut
+r2a &lt;- NCut(r1$matA, verbose=1) # split the first chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>r2b &lt;- NCut(r1$matB, verbose=1) # split the second chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># third cut: cut smaller one of the two 
+if(nrow(r2a$matA)&gt; nrow(r2a$matB)){ r3a &lt;- NCut(r2a$matA, verbose=1)
+}else{ r3a &lt;- NCut(r2a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r2b$matA)&gt; nrow(r2b$matB)){ r3b &lt;- NCut(r2b$matA, verbose=1)
+}else{ r3b &lt;- NCut(r2b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)&gt; nrow(r3a$matB)){ r4a &lt;- NCut(r3a$matA, verbose=1)
+}else{ r4a &lt;- NCut(r3a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-8.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r3b$matA)&gt; nrow(r3b$matB)){ r4b &lt;- NCut(r3b$matA, verbose=1)
+}else{ r4b &lt;- NCut(r3b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-4-9.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="when-sd0.5-denoised-using-factors-1-8" class="section level3">
+<h3>when sd=0.5, denoised: using factors 1-8</h3>
+<pre class="r"><code>set.seed(1)
+E &lt;- matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
+X &lt;- L0 %*% t(F0) + E
+XXt &lt;- X %*% t(X)
+
+matY &lt;- XXt
+eigY &lt;- eigen(matY)
+
+# denoised matrix Y
+dY &lt;- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
+dY &lt;- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main=&quot;XX&#39;, factors 1-8&quot;)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># first cut
+r1 &lt;- NCut(dY, verbose=1)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># second cut
+r2a &lt;- NCut(r1$matA, verbose=1) # split the first chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>r2b &lt;- NCut(r1$matB, verbose=1) # split the second chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># third cut: cut smaller one of the two 
+if(nrow(r2a$matA)&gt; nrow(r2a$matB)){ r3a &lt;- NCut(r2a$matA, verbose=1)
+}else{ r3a &lt;- NCut(r2a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r2b$matA)&gt; nrow(r2b$matB)){ r3b &lt;- NCut(r2b$matA, verbose=1)
+}else{ r3b &lt;- NCut(r2b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)&gt; nrow(r3a$matB)){ r4a &lt;- NCut(r3a$matA, verbose=1)
+}else{ r4a &lt;- NCut(r3a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r3b$matA)&gt; nrow(r3b$matB)){ r4b &lt;- NCut(r3b$matA, verbose=1)
+}else{ r4b &lt;- NCut(r3b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-5-8.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="when-sd1-denoised-using-factors-2-8" class="section level3">
+<h3>when sd=1, denoised: using factors 2-8</h3>
+<pre class="r"><code>set.seed(1)
+E &lt;- matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+X &lt;- L0 %*% t(F0) + E
+XXt &lt;- X %*% t(X)
+
+matY &lt;- XXt
+eigY &lt;- eigen(matY)
+plotL(eigY$vectors[,1:10], &#39;leading 10 eigenvectors&#39;) # the leading eigenvector is close to constant...</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># denoised matrix Y
+dY &lt;- eigY$vectors[,2:8] %*% diag(eigY$values[2:8]-eigY$values[9]) %*% t(eigY$vectors[,2:8])
+dY &lt;- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main=&quot;XX&#39;, factors 2-8&quot;)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># first cut
+r1 &lt;- NCut(dY, verbose=1)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># second cut
+r2a &lt;- NCut(r1$matA, verbose=1) # split the first chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>r2b &lt;- NCut(r1$matB, verbose=1) # split the second chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># third cut: cut smaller one of the two 
+if(nrow(r2a$matA)&gt; nrow(r2a$matB)){ r3a &lt;- NCut(r2a$matA, verbose=1)
+}else{ r3a &lt;- NCut(r2a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r2b$matA)&gt; nrow(r2b$matB)){ r3b &lt;- NCut(r2b$matA, verbose=1)
+}else{ r3b &lt;- NCut(r2b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)&gt; nrow(r3a$matB)){ r4a &lt;- NCut(r3a$matA, verbose=1)
+}else{ r4a &lt;- NCut(r3a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-8.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r3b$matA)&gt; nrow(r3b$matB)){ r4b &lt;- NCut(r3b$matA, verbose=1)
+}else{ r4b &lt;- NCut(r3b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-6-9.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="when-sd1-denoised-using-factors-1-8" class="section level3">
+<h3>when sd=1, denoised: using factors 1-8</h3>
+<pre class="r"><code>set.seed(1)
+E &lt;- matrix(rnorm(800*2000, 0, 1), nrow=800, ncol=2000)
+X &lt;- L0 %*% t(F0) + E
+XXt &lt;- X %*% t(X)
+
+matY &lt;- XXt
+eigY &lt;- eigen(matY)
+
+# denoised matrix Y
+dY &lt;- eigY$vectors[,1:8] %*% diag(eigY$values[1:8]-eigY$values[9]) %*% t(eigY$vectors[,1:8])
+dY &lt;- dY - min(dY) # make nonnegative
+
+pheatmap(dY, cluster_rows = F, cluster_cols = F, main=&quot;XX&#39;, factors 1-8&quot;)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># first cut
+r1 &lt;- NCut(dY, verbose=1)</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># second cut
+r2a &lt;- NCut(r1$matA, verbose=1) # split the first chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>r2b &lt;- NCut(r1$matB, verbose=1) # split the second chunk</code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># third cut: cut smaller one of the two 
+if(nrow(r2a$matA)&gt; nrow(r2a$matB)){ r3a &lt;- NCut(r2a$matA, verbose=1)
+}else{ r3a &lt;- NCut(r2a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r2b$matA)&gt; nrow(r2b$matB)){ r3b &lt;- NCut(r2b$matA, verbose=1)
+}else{ r3b &lt;- NCut(r2b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># fourth cut: cut smaller one of the two
+if(nrow(r3a$matA)&gt; nrow(r3a$matB)){ r4a &lt;- NCut(r3a$matA, verbose=1)
+}else{ r4a &lt;- NCut(r3a$matB, verbose=1)} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>if(nrow(r3b$matA)&gt; nrow(r3b$matB)){ r4b &lt;- NCut(r3b$matA, verbose=1)
+}else{ r4b &lt;- NCut(r3b$matB, verbose=1)
+} </code></pre>
+<p><img src="figure/binary_toy_ncut.Rmd/unnamed-chunk-7-8.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.1 (2021-08-10)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS Big Sur 11.6
+
+Matrix products: default
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] pheatmap_1.0.12 forcats_0.5.1   stringr_1.4.0   dplyr_1.0.7    
+ [5] purrr_0.3.4     readr_2.0.1     tidyr_1.1.3     tibble_3.1.4   
+ [9] ggplot2_3.3.5   tidyverse_1.3.1
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.7         lubridate_1.7.10   assertthat_0.2.1   rprojroot_2.0.2   
+ [5] digest_0.6.27      utf8_1.2.2         R6_2.5.1           cellranger_1.1.0  
+ [9] backports_1.2.1    reprex_2.0.1       evaluate_0.14      highr_0.9         
+[13] httr_1.4.2         pillar_1.6.2       rlang_0.4.11       readxl_1.3.1      
+[17] rstudioapi_0.13    whisker_0.4        rmarkdown_2.10     labeling_0.4.2    
+[21] munsell_0.5.0      broom_0.7.9        compiler_4.1.1     httpuv_1.6.2      
+[25] modelr_0.1.8       xfun_0.25          pkgconfig_2.0.3    htmltools_0.5.2   
+[29] tidyselect_1.1.1   workflowr_1.6.2    fansi_0.5.0        crayon_1.4.1      
+[33] tzdb_0.1.2         dbplyr_2.1.1       withr_2.4.2        later_1.3.0       
+[37] grid_4.1.1         jsonlite_1.7.2     gtable_0.3.0       lifecycle_1.0.0   
+[41] DBI_1.1.1          git2r_0.28.0       magrittr_2.0.1     scales_1.1.1      
+[45] cli_3.0.1          stringi_1.7.4      farver_2.1.0       fs_1.5.0          
+[49] promises_1.2.0.1   xml2_1.3.2         ellipsis_0.3.2     generics_0.1.0    
+[53] vctrs_0.3.8        RColorBrewer_1.1-2 tools_4.1.1        glue_1.4.2        
+[57] hms_1.1.0          fastmap_1.1.0      yaml_2.2.1         colorspace_2.0-2  
+[61] rvest_1.0.1        knitr_1.33         haven_2.4.3       </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
