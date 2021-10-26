@@ -9,8 +9,25 @@ editor_options:
 ---
 
 
-## alternating flash
+# alternating flash
 
+### binary toy data
+
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
+
+:::
+::: {}
++ binary toy data
+  + [data](https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds)
+  + [script and SVD](create_binary_toy.html)
+
+
+:::
+::::
+
+  
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
@@ -32,26 +49,39 @@ editor_options:
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
+<img src="https://joonsukkang.github.io/mf/figure/binary_toy_hclust.Rmd/unnamed-chunk-3-3.png" width="400">
+:::
+::: {}
+    
+
++ [hierarchical clustering](binary_toy_hclust.html)
+  + using denoised (soft-thresholding, factors 2-8) matrix, hierarhical clustering with complete linkage easily uncovers the structure
+  + but if we include the factor 1, the method fails
+
+:::
+::::
+
+
+
+:::: {style="display: flex;"}
+::: {style="min-width: 300px; max-width: 300px"}
 <img src="https://joonsukkang.github.io/mf/figure/binary_toy_denoising.Rmd/unnamed-chunk-8-3.png" width="400">
 :::
 ::: {}
-
-+ binary toy data
-  + [data](https://raw.githubusercontent.com/joonsukkang/mf/master/data/binary_toy.rds)
-  + [script and SVD](create_binary_toy.html)
     
-+ binary toy investigations
-  + [denoising](binary_toy_denoising.html)
-    + by soft thresholding eigenvalues and dropping the leading factor, we can successfully denoise XX'
-    + our key matrix XX'=(LF'+E)(LF'+E)'=LF'FL'+LF'E'+EFL'+EE'
-    + "soft thresholding": the term EE' in XX' is close to $p\sigma^2I_n$, so the diagonal terms of XX' are disproportionately big; we can use soft thresholding eigenvalues to solve the issue
-    + "dropping the leading factor": the term LF'E'+EFL' blurs the pattern observed in the true data; dropping the first factor $\lambda_1u_1u_1^T$ ($u_1$ is close to a constant) solves the issue
++ [denoising](binary_toy_denoising.html)
+  + by soft thresholding eigenvalues and dropping the leading factor, we can successfully denoise XX'
+  + our key matrix XX'=(LF'+E)(LF'+E)'=LF'FL'+LF'E'+EFL'+EE'
+  + "soft thresholding": the term EE' in XX' is close to $p\sigma^2I_n$, so the diagonal terms of XX' are disproportionately big; we can use soft thresholding eigenvalues to solve the issue
+  + "dropping the leading factor": the term LF'E'+EFL' blurs the pattern observed in the true data; dropping the first factor $\lambda_1u_1u_1^T$ ($u_1$ is close to a constant) solves the issue
 
 
 :::
 ::::
 
 
+
+### Yusha's toy data
 
 
 :::: {style="display: flex;"}
@@ -76,6 +106,8 @@ editor_options:
 :::
 ::::
 
+### original tree toy data
+
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
@@ -96,7 +128,6 @@ editor_options:
 
 :::
 ::::
-
 
 
 
@@ -139,7 +170,7 @@ editor_options:
 
 
 
-## integrating f out
+# integrating f out
 
 
 
@@ -155,7 +186,7 @@ editor_options:
 ::::
 
 
-## miscellaneous
+# miscellaneous
 
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
@@ -193,7 +224,7 @@ editor_options:
 
 
 
-## archive
+# archive
 :::: {style="display: flex;"}
 ::: {style="min-width: 300px; max-width: 300px"}
 :::
