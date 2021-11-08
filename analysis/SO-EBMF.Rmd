@@ -1,0 +1,199 @@
+---
+title: "Semi-Orthogonal EBMF"
+author: "Joonsuk Kang"
+date: "2021-10-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+# some functions
+
+```{r}
+# update tau
+SOL.TAU <- function(trYTY, Y, A.l, A.f, B.l, B.f){
+
+  n <- nrow(Y)
+  p <- ncol(Y)
+
+  if(n<p){  tau <- ((trYTY - 2 * sum(diag(tcrossprod(crossprod(Y, A.l),A.f))) + sum(B.l*B.f))/(n*p))^(-1)}
+  if(n>=p){ tau <- ((trYTY - 2 * sum(diag(tcrossprod(tcrossprod(t(A.f), Y), t(A.l)))) + sum(B.l*B.f))/(n*p))^(-1)}
+  return(tau)
+}
+# compute elbo
+ELBO <- function(Y, trYTY, tau,
+                 A.l, A.f, B.l, B.f,
+                 KL.l, KL.f){
+  n <- nrow(Y)
+  p <- ncol(Y)
+  if(n<p){  chunk <- (trYTY - 2 * sum(diag(tcrossprod(crossprod(Y, A.l),A.f))) + sum(B.l*B.f))}
+  if(n>=p){ chunk <- (trYTY - 2 * sum(diag(tcrossprod(tcrossprod(t(A.f), Y), t(A.l)))) + sum(B.l*B.f))}
+  elbo.0 <- -(n*p/2)*log(2*pi) + (n*p/2)*log(tau) - (tau/2)*chunk
+
+  elbo <- elbo.0 + KL.l + KL.f
+  return(elbo)
+}
+
+
+library(tidyverse)
+library(pheatmap)
+
+plotL <- function(A.l, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') +ggtitle(title)-> figL
+  
+  print(figL)
+}
+```
+
+
+
+# toy data
+
+```{r}
+set.seed(312)
+
+n <- 80
+p <- 300
+
+L0 <- cbind(
+  matrix(rep(c(1,1,1,1), each=n/4, ncol=1)),
+  matrix(rep(c(1,1,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,1,1), each=n/4, ncol=1)),
+  matrix(rep(c(1,0,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,1,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,1,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,0,1), each=n/4, ncol=1))
+)
+
+K <- ncol(L0)
+F0 <- rstiefel::rustiefel(m=p, R=K)
+
+pheatmap(L0, cluster_rows=F, cluster_cols=F)
+pheatmap(F0, cluster_rows=F, cluster_cols=F)
+
+X0 <- L0 %*% t(F0)
+X <- X0 + matrix(rnorm(n*p, mean=0, sd=0.1), nrow=n, ncol=p)
+
+pheatmap(X0, cluster_rows = F, cluster_cols = F)
+pheatmap(X, cluster_rows = F, cluster_cols = F)
+
+XXt <- X%*%t(X)
+XXtn <- XXt; diag(XXtn) <- NA
+pheatmap(XXtn, cluster_rows = F, cluster_cols = F)
+
+svdX0 <- svd(X0)
+svdX0$d[1:10] # rank 4 
+plotL(svdX0$u[,1:4], 'left singular vectors')
+
+svdX <- svd(X)
+svdX$d[1:10] # rank 4 + noise
+
+plotL(svdX$u[,1:6], 'left singular vectors')
+```
+
+
+
+# the SO-EBMF
+
+```{r}
+Y <- X
+
+
+########## initialization
+
+library(ebnm)
+#set.seed(1) # fix initialization
+
+K <- 7 # draw many!! (big K to init)
+g.l.pf <- 'point_normal' # 'point_normal', 'point_exponential', ... 
+max.iter <- 1000
+elbo.tol <- sqrt(.Machine$double.eps) *prod(dim(Y))
+
+
+n <- nrow(Y)
+p <- ncol(Y)
+trYTY <- sum(diag(Y %*% t(Y)))
+
+tau <- 1/sd(Y)^2
+
+
+A.f <- rstiefel::rustiefel(m=p, R=K) # random draw from Stiefel manifold
+B.f <- diag(1, nrow=K)
+
+A.l <- matrix(0, nrow=n, ncol=K)
+C.l <- matrix(0, nrow=n, ncol=K)
+g.l <- list()
+KL.l <- rep(0, K)
+for (k in 1:K){
+
+  x <- Y %*% A.f[,k]
+  s <- rep(1/sqrt(tau), length(x))
+  temp.obj <- ebnm(x=x, s=s, prior_family=g.l.pf, 
+                   output=c('posterior_mean', "posterior_second_moment", "log_likelihood", "fitted_g"))
+  
+  Et <- A.l[,k] <- temp.obj$posterior$mean
+  Et2 <- C.l[,k] <- temp.obj$posterior$second_moment
+  KL.l[k] <- temp.obj$log_likelihood + sum(log(2*pi*s^2)/2) + sum((x^2 - 2*x*Et + Et2)/(2*s^2))
+  g.l[[k]] <- temp.obj$fitted_g
+}
+B.l <- crossprod(A.l); diag(B.l) <- colSums(C.l)
+
+tau <- SOL.TAU(trYTY, Y, A.l, A.f, B.l, B.f)
+
+old.elbo <- ELBO(Y, trYTY, tau, A.l, A.f, B.l, B.f, KL.l=sum(KL.l), KL.f=0)
+
+
+```
+
+```{r}
+########## updates
+for (iter in 1:max.iter){
+    # updates
+    
+    # A.f
+    svdLY <- svd(t(A.l) %*% Y)
+    A.f <- t(svdLY$u %*% t(svdLY$v))
+    
+    # ql and gl
+    for (k in 1:K){
+    
+      x <- Y %*% A.f[,k]
+      s <- rep(1/sqrt(tau), length(x))
+      temp.obj <- ebnm(x=x, s=s, prior_family=g.l.pf,
+                       output=c('posterior_mean', "posterior_second_moment", "log_likelihood", "fitted_g"))
+
+      Et <- A.l[,k] <- temp.obj$posterior$mean
+      Et2 <- C.l[,k] <- temp.obj$posterior$second_moment
+      KL.l[k] <- temp.obj$log_likelihood + sum(log(2*pi*s^2)/2) + sum((x^2 - 2*x*Et + Et2)/(2*s^2))
+      g.l[[k]] <- temp.obj$fitted_g
+    }
+    B.l <- crossprod(A.l); diag(B.l) <- colSums(C.l)
+    
+    # tau
+    tau <- SOL.TAU(trYTY, Y, A.l, A.f, B.l, B.f)
+    
+    elbo <- ELBO(Y, trYTY, tau, A.l, A.f, B.l, B.f, KL.l=sum(KL.l), KL.f=0)
+    
+    if(iter%%50==0)print(paste0('iter ', iter, '; elbo diff=', elbo-old.elbo, '; elbo=',elbo))
+    if(elbo-old.elbo<elbo.tol) break
+    old.elbo <- elbo
+}
+print(paste0('iter ', iter, '; elbo diff=', elbo-old.elbo, '; elbo=',elbo))
+
+plotL(A.l[,order(diag(B.l), decreasing=TRUE)], 'A.l all')
+
+```
+
