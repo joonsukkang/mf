@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Joonsuk Kang" />
+
+<meta name="date" content="2021-10-25" />
+
+<title>Semi-Orthogonal EBMF</title>
+
+<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mf</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/joonsukkang/mf">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Semi-Orthogonal EBMF</h1>
+<h4 class="author">Joonsuk Kang</h4>
+<h4 class="date">2021-10-25</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-11-08
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mf/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20201010code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20201010)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20201010code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20201010)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee8f2044df015225a0e2c38beebf0be23da8971c0targetblanke8f2044a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/joonsukkang/mf/tree/e8f2044df015225a0e2c38beebf0be23da8971c0" target="_blank">e8f2044</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjoonsukkangmftreee8f2044df015225a0e2c38beebf0be23da8971c0targetblanke8f2044a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/joonsukkang/mf/tree/e8f2044df015225a0e2c38beebf0be23da8971c0" target="_blank">e8f2044</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  altFlash.pdf
+    Untracked:  analysis/alt-flash-nonneg.Rmd
+    Untracked:  analysis/alt-flash-nonneg_largeY.Rmd
+    Untracked:  analysis/alt-flash-normal_largeY.Rmd
+    Untracked:  analysis/altflash_simulation_Yusha.Rmd
+    Untracked:  analysis/bingham.Rmd
+    Untracked:  analysis/bingham_constant.Rmd
+    Untracked:  analysis/create_binary_toy2.Rmd
+    Untracked:  analysis/demo3_toy.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g1_K.Rmd
+    Untracked:  analysis/demo7_ebfa_hb_g2_K.Rmd
+    Untracked:  analysis/demo8_splash.Rmd
+    Untracked:  analysis/flashImpute_ML100k.Rmd
+    Untracked:  analysis/flashImpute_ML1M.Rmd
+    Untracked:  analysis/flip_correlation.Rmd
+    Untracked:  analysis/flipping_pdf.Rmd
+    Untracked:  analysis/infinitefactor_toy.Rmd
+    Untracked:  analysis/model_exp_prior_v20201110m.Rmd
+    Untracked:  analysis/model_invgam_prior.Rmd
+    Untracked:  analysis/multiplicative.Rmd
+    Untracked:  analysis/site_libs (joonsukkang@uchicago.edu)/
+    Untracked:  analysis/sliding_correlation.Rmd
+    Untracked:  analysis/sliding_pdf.Rmd
+    Untracked:  analysis/temp.Rmd
+    Untracked:  analysis/toy_Yusha_nonneg_2.Rmd
+    Untracked:  analysis/toy_Yusha_oracle_flashier.Rmd
+    Untracked:  analysis/toy_Yusha_oracle_more seeds.Rmd
+    Untracked:  analysis/toy_p_notfixK.Rmd
+    Untracked:  analysis/y2_NoTargetsByTF.R
+    Untracked:  analysis/y2_eb.Rmd
+    Untracked:  analysis/y2_toy.Rmd
+    Untracked:  analysis/y2_toy_500.Rmd
+    Untracked:  analysis/y2_toy_highd.Rmd
+    Untracked:  analysis/y2_toy_highd_covver.Rmd
+    Untracked:  analysis/y2_toy_lastday_backtosimple.Rmd
+    Untracked:  analysis/y2_toy_master.Rmd
+    Untracked:  analysis/y2_toy_n.Rmd
+    Untracked:  analysis/y2_toy_n_K3.Rmd
+    Untracked:  code/alt-flash.R
+    Untracked:  code/alt-flash_v20210819.R
+    Untracked:  code/model_exp_v20201110.R
+    Untracked:  code/workflowr_codes.R
+    Untracked:  data/eigvals.rds
+    Untracked:  data/hTFtarget_NoTargetsByTF.txt
+    Untracked:  data/metro_results.txt
+    Untracked:  figure/
+    Untracked:  flashImpute.pdf
+    Untracked:  output/.Rapp.history
+    Untracked:  output/Likelihood.gif
+    Untracked:  output/altflash_simulation_Yusha_20211013_res1.rds
+    Untracked:  output/altflash_simulation_Yusha_20211013_res3.rds
+    Untracked:  output/nonneg_v20210824_large_fit.alt.p.rds
+    Untracked:  output/nonneg_v20210824_large_fit.alt.rds
+    Untracked:  output/nonneg_v20210824_large_fit.f.ext.rds
+    Untracked:  output/nonneg_v20210824_large_fit.f.seq.rds
+    Untracked:  output/nonneg_v20210824_large_fit.init.rds
+    Untracked:  output/nonneg_v20210824_small_fit.alt.p.rds
+    Untracked:  output/nonneg_v20210824_small_fit.alt.rds
+    Untracked:  output/nonneg_v20210824_small_fit.f.ext.rds
+    Untracked:  output/nonneg_v20210824_small_fit.f.seq.rds
+    Untracked:  output/nonneg_v20210824_small_fit.init.rds
+    Untracked:  output/tree_toy_altflash_X2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_X2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_X2n_b_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_dX2n_b_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2n_a_v2021_1012_1309.rds
+    Untracked:  output/tree_toy_altflash_mat2n_b_v2021_1012_1309.rds
+    Untracked:  temp-blog/
+    Untracked:  writing/
+
+Unstaged changes:
+    Deleted:    .Rprofile
+    Deleted:    .gitattributes
+    Modified:   .gitignore
+    Modified:   README.md
+    Modified:   _workflowr.yml
+    Deleted:    analysis/Alt-Flash.Rmd
+    Deleted:    analysis/ChoosingW.Rmd
+    Modified:   analysis/_site.yml
+    Modified:   analysis/about.Rmd
+    Modified:   analysis/alt-flash-normal.Rmd
+    Deleted:    analysis/alt-flash-normal_v20210825.Rmd
+    Modified:   analysis/alt-flash-sanity.Rmd
+    Modified:   analysis/binary_toy_binary_altflash.Rmd
+    Modified:   analysis/binary_toy_denoising.Rmd
+    Modified:   analysis/binary_toy_hclust.Rmd
+    Modified:   analysis/binary_toy_ncut.Rmd
+    Modified:   analysis/binary_toy_nonneg_pe.Rmd
+    Modified:   analysis/bingham_variance.Rmd
+    Deleted:    analysis/concentration.Rmd
+    Modified:   analysis/create_binary_toy.Rmd
+    Modified:   analysis/demo2_toy.Rmd
+    Modified:   analysis/demo5_model_exp_or_expmix.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g1.Rmd
+    Modified:   analysis/demo6_ebfa_hb_g2.Rmd
+    Modified:   analysis/demo_toy.Rmd
+    Modified:   analysis/flashier_point_laplace.Rmd
+    Modified:   analysis/hierarchical.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/license.Rmd
+    Modified:   analysis/likelihood_rdmatrix.Rmd
+    Modified:   analysis/model_exp_mixture_prior.Rmd
+    Modified:   analysis/model_exp_prior.Rmd
+    Modified:   analysis/prior.Rmd
+    Modified:   analysis/rank1_setup.Rmd
+    Modified:   analysis/sparsity_resvar.Rmd
+    Modified:   analysis/toy_Yusha_nonneg_1.Rmd
+    Modified:   analysis/toy_Yusha_oracle.Rmd
+    Modified:   analysis/toy_Yusha_svd.Rmd
+    Modified:   analysis/toy_p.Rmd
+    Modified:   analysis/tree_toy_altflash_1.Rmd
+    Modified:   analysis/tree_toy_flashier.Rmd
+    Modified:   analysis/tree_toy_flashier_denoising.Rmd
+    Modified:   analysis/warmstart.Rmd
+    Modified:   code/README.md
+    Modified:   code/alt-flash_v20210825.R
+    Modified:   code/alt-flash_v20211010.R
+    Modified:   code/alt-flash_v20211013.R
+    Modified:   code/alt-flash_v20211017.R
+    Modified:   code/alt-flash_v20211020.R
+    Modified:   code/flash.backfit_elbo_tracking.R
+    Modified:   code/flashImpute.R
+    Modified:   code/flashImpute.cpp
+    Modified:   data/README.md
+    Modified:   data/binary_toy.rds
+    Modified:   mf.Rproj
+    Modified:   output/GaussianBall.gif
+    Modified:   output/GaussianBall.jpg
+    Modified:   output/LaplacianBall.gif
+    Modified:   output/LaplacianBall.jpg
+    Modified:   output/README.md
+    Deleted:    output/alt-flash-normal-elbo.pdf
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/SO-EBMF.Rmd</code>) and HTML (<code>docs/SO-EBMF.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/joonsukkang/mf/blob/e8f2044df015225a0e2c38beebf0be23da8971c0/analysis/SO-EBMF.Rmd" target="_blank">e8f2044</a>
+</td>
+<td>
+joonsukkang
+</td>
+<td>
+2021-11-08
+</td>
+<td>
+semi-orthogonal EBMF
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="some-functions" class="section level1">
+<h1>some functions</h1>
+<pre class="r"><code># update tau
+SOL.TAU &lt;- function(trYTY, Y, A.l, A.f, B.l, B.f){
+
+  n &lt;- nrow(Y)
+  p &lt;- ncol(Y)
+
+  if(n&lt;p){  tau &lt;- ((trYTY - 2 * sum(diag(tcrossprod(crossprod(Y, A.l),A.f))) + sum(B.l*B.f))/(n*p))^(-1)}
+  if(n&gt;=p){ tau &lt;- ((trYTY - 2 * sum(diag(tcrossprod(tcrossprod(t(A.f), Y), t(A.l)))) + sum(B.l*B.f))/(n*p))^(-1)}
+  return(tau)
+}
+# compute elbo
+ELBO &lt;- function(Y, trYTY, tau,
+                 A.l, A.f, B.l, B.f,
+                 KL.l, KL.f){
+  n &lt;- nrow(Y)
+  p &lt;- ncol(Y)
+  if(n&lt;p){  chunk &lt;- (trYTY - 2 * sum(diag(tcrossprod(crossprod(Y, A.l),A.f))) + sum(B.l*B.f))}
+  if(n&gt;=p){ chunk &lt;- (trYTY - 2 * sum(diag(tcrossprod(tcrossprod(t(A.f), Y), t(A.l)))) + sum(B.l*B.f))}
+  elbo.0 &lt;- -(n*p/2)*log(2*pi) + (n*p/2)*log(tau) - (tau/2)*chunk
+
+  elbo &lt;- elbo.0 + KL.l + KL.f
+  return(elbo)
+}
+
+
+library(tidyverse)</code></pre>
+<pre><code>── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
+<pre><code>✓ ggplot2 3.3.5     ✓ purrr   0.3.4
+✓ tibble  3.1.4     ✓ dplyr   1.0.7
+✓ tidyr   1.1.3     ✓ stringr 1.4.0
+✓ readr   2.0.1     ✓ forcats 0.5.1</code></pre>
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(pheatmap)
+
+plotL &lt;- function(A.l, title){
+
+  K &lt;- ncol(A.l)
+  n &lt;- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %&gt;%
+    mutate(factor=as.factor(factor)) -&gt; df.plot
+  
+  df.plot %&gt;%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales=&#39;free_y&#39;) +ggtitle(title)-&gt; figL
+  
+  print(figL)
+}</code></pre>
+</div>
+<div id="toy-data" class="section level1">
+<h1>toy data</h1>
+<pre class="r"><code>set.seed(312)
+
+n &lt;- 80
+p &lt;- 300
+
+L0 &lt;- cbind(
+  matrix(rep(c(1,1,1,1), each=n/4, ncol=1)),
+  matrix(rep(c(1,1,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,1,1), each=n/4, ncol=1)),
+  matrix(rep(c(1,0,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,1,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,1,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,0,1), each=n/4, ncol=1))
+)
+
+K &lt;- ncol(L0)
+F0 &lt;- rstiefel::rustiefel(m=p, R=K)
+
+pheatmap(L0, cluster_rows=F, cluster_cols=F)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pheatmap(F0, cluster_rows=F, cluster_cols=F)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>X0 &lt;- L0 %*% t(F0)
+X &lt;- X0 + matrix(rnorm(n*p, mean=0, sd=0.1), nrow=n, ncol=p)
+
+pheatmap(X0, cluster_rows = F, cluster_cols = F)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-2-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pheatmap(X, cluster_rows = F, cluster_cols = F)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-2-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>XXt &lt;- X%*%t(X)
+XXtn &lt;- XXt; diag(XXtn) &lt;- NA
+pheatmap(XXtn, cluster_rows = F, cluster_cols = F)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-2-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>svdX0 &lt;- svd(X0)
+svdX0$d[1:10] # rank 4 </code></pre>
+<pre><code> [1] 1.183216e+01 7.745967e+00 4.472136e+00 4.472136e+00 9.992007e-16
+ [6] 9.992007e-16 9.992007e-16 9.992007e-16 9.992007e-16 9.992007e-16</code></pre>
+<pre class="r"><code>plotL(svdX0$u[,1:4], &#39;left singular vectors&#39;)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-2-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>svdX &lt;- svd(X)
+svdX$d[1:10] # rank 4 + noise</code></pre>
+<pre><code> [1] 11.870802  7.942812  4.934474  4.870070  2.523062  2.487825  2.442037
+ [8]  2.358653  2.335409  2.312934</code></pre>
+<pre class="r"><code>plotL(svdX$u[,1:6], &#39;left singular vectors&#39;)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-2-7.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-so-ebmf" class="section level1">
+<h1>the SO-EBMF</h1>
+<pre class="r"><code>Y &lt;- X
+
+
+########## initialization
+
+library(ebnm)
+#set.seed(1) # fix initialization
+
+K &lt;- 7 # draw many!! (big K to init)
+g.l.pf &lt;- &#39;point_normal&#39; # &#39;point_normal&#39;, &#39;point_exponential&#39;, ... 
+max.iter &lt;- 1000
+elbo.tol &lt;- sqrt(.Machine$double.eps) *prod(dim(Y))
+
+
+n &lt;- nrow(Y)
+p &lt;- ncol(Y)
+trYTY &lt;- sum(diag(Y %*% t(Y)))
+
+tau &lt;- 1/sd(Y)^2
+
+
+A.f &lt;- rstiefel::rustiefel(m=p, R=K) # random draw from Stiefel manifold
+B.f &lt;- diag(1, nrow=K)
+
+A.l &lt;- matrix(0, nrow=n, ncol=K)
+C.l &lt;- matrix(0, nrow=n, ncol=K)
+g.l &lt;- list()
+KL.l &lt;- rep(0, K)
+for (k in 1:K){
+
+  x &lt;- Y %*% A.f[,k]
+  s &lt;- rep(1/sqrt(tau), length(x))
+  temp.obj &lt;- ebnm(x=x, s=s, prior_family=g.l.pf, 
+                   output=c(&#39;posterior_mean&#39;, &quot;posterior_second_moment&quot;, &quot;log_likelihood&quot;, &quot;fitted_g&quot;))
+  
+  Et &lt;- A.l[,k] &lt;- temp.obj$posterior$mean
+  Et2 &lt;- C.l[,k] &lt;- temp.obj$posterior$second_moment
+  KL.l[k] &lt;- temp.obj$log_likelihood + sum(log(2*pi*s^2)/2) + sum((x^2 - 2*x*Et + Et2)/(2*s^2))
+  g.l[[k]] &lt;- temp.obj$fitted_g
+}
+B.l &lt;- crossprod(A.l); diag(B.l) &lt;- colSums(C.l)
+
+tau &lt;- SOL.TAU(trYTY, Y, A.l, A.f, B.l, B.f)
+
+old.elbo &lt;- ELBO(Y, trYTY, tau, A.l, A.f, B.l, B.f, KL.l=sum(KL.l), KL.f=0)</code></pre>
+<pre class="r"><code>########## updates
+for (iter in 1:max.iter){
+    # updates
+    
+    # A.f
+    svdLY &lt;- svd(t(A.l) %*% Y)
+    A.f &lt;- t(svdLY$u %*% t(svdLY$v))
+    
+    # ql and gl
+    for (k in 1:K){
+    
+      x &lt;- Y %*% A.f[,k]
+      s &lt;- rep(1/sqrt(tau), length(x))
+      temp.obj &lt;- ebnm(x=x, s=s, prior_family=g.l.pf,
+                       output=c(&#39;posterior_mean&#39;, &quot;posterior_second_moment&quot;, &quot;log_likelihood&quot;, &quot;fitted_g&quot;))
+
+      Et &lt;- A.l[,k] &lt;- temp.obj$posterior$mean
+      Et2 &lt;- C.l[,k] &lt;- temp.obj$posterior$second_moment
+      KL.l[k] &lt;- temp.obj$log_likelihood + sum(log(2*pi*s^2)/2) + sum((x^2 - 2*x*Et + Et2)/(2*s^2))
+      g.l[[k]] &lt;- temp.obj$fitted_g
+    }
+    B.l &lt;- crossprod(A.l); diag(B.l) &lt;- colSums(C.l)
+    
+    # tau
+    tau &lt;- SOL.TAU(trYTY, Y, A.l, A.f, B.l, B.f)
+    
+    elbo &lt;- ELBO(Y, trYTY, tau, A.l, A.f, B.l, B.f, KL.l=sum(KL.l), KL.f=0)
+    
+    if(iter%%50==0)print(paste0(&#39;iter &#39;, iter, &#39;; elbo diff=&#39;, elbo-old.elbo, &#39;; elbo=&#39;,elbo))
+    if(elbo-old.elbo&lt;elbo.tol) break
+    old.elbo &lt;- elbo
+}</code></pre>
+<pre><code>[1] &quot;iter 50; elbo diff=0.59462479231297; elbo=21768.0519575438&quot;
+[1] &quot;iter 100; elbo diff=0.0880317663832102; elbo=21774.8526211353&quot;
+[1] &quot;iter 150; elbo diff=0.10082851216066; elbo=21780.3353096414&quot;
+[1] &quot;iter 200; elbo diff=0.00644066667882726; elbo=21782.1381721761&quot;
+[1] &quot;iter 250; elbo diff=0.00489662163818139; elbo=21782.4191393184&quot;
+[1] &quot;iter 300; elbo diff=0.00366322236368433; elbo=21782.6313620778&quot;
+[1] &quot;iter 350; elbo diff=0.00269493865926052; elbo=21782.7887734892&quot;
+[1] &quot;iter 400; elbo diff=0.00195943998915027; elbo=21782.9038843117&quot;
+[1] &quot;iter 450; elbo diff=0.00141343298673746; elbo=21782.9872348525&quot;
+[1] &quot;iter 500; elbo diff=0.00101478388387477; elbo=21783.0472082988&quot;
+[1] &quot;iter 550; elbo diff=0.000727121878298931; elbo=21783.090216139&quot;
+[1] &quot;iter 600; elbo diff=0.000521263074915623; elbo=21783.1210335757&quot;
+[1] &quot;iter 650; elbo diff=0.000374815972463693; elbo=21783.1431535215&quot;</code></pre>
+<pre class="r"><code>print(paste0(&#39;iter &#39;, iter, &#39;; elbo diff=&#39;, elbo-old.elbo, &#39;; elbo=&#39;,elbo))</code></pre>
+<pre><code>[1] &quot;iter 658; elbo diff=0.000355713636963628; elbo=21783.1460653959&quot;</code></pre>
+<pre class="r"><code>plotL(A.l[,order(diag(B.l), decreasing=TRUE)], &#39;A.l all&#39;)</code></pre>
+<p><img src="figure/SO-EBMF.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.1 (2021-08-10)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS Monterey 12.0.1
+
+Matrix products: default
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] ebnm_0.1-52     pheatmap_1.0.12 forcats_0.5.1   stringr_1.4.0  
+ [5] dplyr_1.0.7     purrr_0.3.4     readr_2.0.1     tidyr_1.1.3    
+ [9] tibble_3.1.4    ggplot2_3.3.5   tidyverse_1.3.1
+
+loaded via a namespace (and not attached):
+ [1] httr_1.4.2         splines_4.1.1      jsonlite_1.7.2     modelr_0.1.8      
+ [5] assertthat_0.2.1   horseshoe_0.2.0    mixsqp_0.3-43      highr_0.9         
+ [9] deconvolveR_1.2-1  cellranger_1.1.0   yaml_2.2.1         pillar_1.6.2      
+[13] backports_1.2.1    lattice_0.20-44    glue_1.4.2         digest_0.6.27     
+[17] RColorBrewer_1.1-2 promises_1.2.0.1   rvest_1.0.1        colorspace_2.0-2  
+[21] htmltools_0.5.2    httpuv_1.6.2       Matrix_1.3-4       pkgconfig_2.0.3   
+[25] invgamma_1.1       broom_0.7.9        haven_2.4.3        scales_1.1.1      
+[29] whisker_0.4        later_1.3.0        tzdb_0.1.2         git2r_0.28.0      
+[33] generics_0.1.0     farver_2.1.0       ellipsis_0.3.2     withr_2.4.2       
+[37] ashr_2.2-47        cli_3.0.1          magrittr_2.0.1     crayon_1.4.1      
+[41] readxl_1.3.1       evaluate_0.14      fs_1.5.0           fansi_0.5.0       
+[45] xml2_1.3.2         truncnorm_1.0-8    tools_4.1.1        hms_1.1.0         
+[49] REBayes_2.2        lifecycle_1.0.0    trust_0.1-8        munsell_0.5.0     
+[53] reprex_2.0.1       irlba_2.3.3        compiler_4.1.1     rlang_0.4.11      
+[57] grid_4.1.1         rstudioapi_0.13    labeling_0.4.2     rmarkdown_2.10    
+[61] gtable_0.3.0       DBI_1.1.1          R6_2.5.1           lubridate_1.7.10  
+[65] knitr_1.33         fastmap_1.1.0      utf8_1.2.2         workflowr_1.6.2   
+[69] rstiefel_1.0.1     rprojroot_2.0.2    stringi_1.7.4      SQUAREM_2021.1    
+[73] Rcpp_1.0.7         vctrs_0.3.8        dbplyr_2.1.1       tidyselect_1.1.1  
+[77] xfun_0.25         </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
