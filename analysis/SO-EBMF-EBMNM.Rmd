@@ -140,7 +140,7 @@ for (seed in 1:5){
 
 ## ebnm results
 
-```{r, eval=FALSE}
+```{r}
 fit1 <- soebmf(Y=X, K=10, g.l.pf='normal')
 plotL(fit1$EL, 'normal')
 sqrt(colSums(fit1$EL^2))
