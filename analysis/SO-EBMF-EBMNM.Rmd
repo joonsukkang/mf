@@ -1,0 +1,174 @@
+---
+title: "Semi-Orthogonal EBMF with EBMNM"
+author: "Joonsuk Kang"
+date: "2021-12-01"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+# some functions
+
+```{r}
+source('code/ebmnm.R')
+source('code/soebmf.R')
+```
+
+
+
+```{r}
+library(tidyverse)
+library(pheatmap)
+
+plotL <- function(A.l, title){
+
+  K <- ncol(A.l)
+  n <- nrow(A.l)
+  
+  data.frame(L=c(A.l),
+             factor=rep(1:K, each=n),
+             x=rep(1:n, times=K)) %>%
+    mutate(factor=as.factor(factor)) -> df.plot
+  
+  df.plot %>%
+    ggplot()+
+    geom_line(aes(x=x, y=L, group=factor, col=factor))+
+    facet_wrap(~factor, scales='free_y') +ggtitle(title)-> figL
+  
+  print(figL)
+}
+```
+
+
+
+# toy data
+
+```{r}
+set.seed(312)
+
+n <- 200
+p <- 50
+
+L0 <- cbind(
+  matrix(rep(c(1,1,1,1), each=n/4, ncol=1)),
+  matrix(rep(c(1,1,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,1,1), each=n/4, ncol=1)),
+  matrix(rep(c(1,0,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,1,0,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,1,0), each=n/4, ncol=1)),
+  matrix(rep(c(0,0,0,1), each=n/4, ncol=1))
+)
+
+K <- ncol(L0)
+F0 <- rstiefel::rustiefel(m=p, R=K)
+pheatmap(L0, cluster_rows=F, cluster_cols=F)
+pheatmap(F0, cluster_rows=F, cluster_cols=F)
+
+X0 <- L0 %*% t(F0)
+X <- X0 + matrix(rnorm(n*p, mean=0, sd=0.1), nrow=n, ncol=p)
+
+svdX0 <- svd(X0)
+svdX0$d[1:10] # rank 4 
+plotL(svdX0$u[,1:4], 'left singular vectors')
+
+svdX <- svd(X)
+svdX$d[1:10] # rank 4 + noise
+plotL(svdX$u[,1:6], 'left singular vectors')
+```
+
+
+# the SO-EBMF
+
+
+## ebmnm results: scaled binary grid
+
+```{r}
+set.K <- 7; pf <- 'sbg'; set.seed <- 312
+fit1 <- soebmf(Y=X, K=set.K, g.l.pf=pf, intercept=FALSE, init.F='rand', seed=set.seed)
+plotL(fit1$EL, paste0('sbg + rand w/o intercept; seed=', set.seed))
+fit1$elbo
+
+fit2 <- soebmf(Y=X, K=set.K-1, g.l.pf=pf, intercept=TRUE, init.F='rand', seed=set.seed)
+plotL(fit2$mu0EL, paste0('sbg + rand + intercept; seed=', set.seed))
+fit2$elbo
+```
+
+
+```{r}
+set.K <- 7; pf <- 'sbg'; set.seed <- 312
+fit1 <- soebmf(Y=X, K=set.K, g.l.pf=pf, intercept=FALSE, init.F='rand', seed=set.seed)
+plotL(fit1$EL, paste0('sbg + rand w/o intercept; seed=', set.seed))
+fit1$elbo
+
+for (seed in 1:5){
+  fit <- soebmf(Y=X, K=set.K, g.l.pf=pf, intercept=FALSE, init.F='rand', seed=seed)
+  plotL(fit$EL, paste0('sbg + rand  w/o; seed=', seed))
+  print(fit$elbo)
+}
+```
+
+
+```{r}
+set.K <- 7; pf <- 'sbg'; set.seed <- 312
+fit2 <- soebmf(Y=X, K=set.K-1, g.l.pf=pf, intercept=TRUE, init.F='rand', seed=set.seed)
+plotL(fit2$mu0EL, paste0('sbg + rand + intercept; seed=', set.seed))
+fit2$elbo
+
+for (seed in 1:5){
+  fit <- soebmf(Y=X, K=set.K-1, g.l.pf=pf, intercept=TRUE, init.F='rand', seed=set.seed)
+  plotL(fit$mu0EL, paste0('sbg + rand + intercept; seed=', set.seed))
+  fit$elbo
+}
+```
+
+## to do
+
+- experiments when K> true K; consider dropping factors after elbo convergence (null check?)
+
+- compare with real data: factor phylogeny paper?
+
+- interpretation as augmenting F; 
+
+
+## ebmnm results: multivariate normal (with spherical covariance)
+
+
+## ebmnm results: approximate npmle
+
+
+
+## ebnm results
+
+```{r, eval=FALSE}
+fit1 <- soebmf(Y=X, K=10, g.l.pf='normal')
+plotL(fit1$EL, 'normal')
+sqrt(colSums(fit1$EL^2))
+
+fit1 <- soebmf(Y=X, K=10, g.l.pf='point_normal')
+plotL(fit1$EL, 'point_normal')
+sqrt(colSums(fit1$EL^2))
+
+fit1 <- soebmf(Y=X, K=10, g.l.pf='point_exponential')
+plotL(fit1$EL, 'point_exponential')
+sqrt(colSums(fit1$EL^2))
+
+fit1 <- soebmf(Y=X, K=10, g.l.pf='normal', intercept=FALSE)
+plotL(fit1$EL, 'normal')
+sqrt(colSums(fit1$EL^2))
+
+fit1 <- soebmf(Y=X, K=10, g.l.pf='point_normal', intercept=FALSE)
+plotL(fit1$EL, 'point_normal')
+sqrt(colSums(fit1$EL^2))
+
+fit1 <- soebmf(Y=X, K=10, g.l.pf='point_exponential', intercept=FALSE)
+plotL(fit1$EL, 'point_exponential')
+sqrt(colSums(fit1$EL^2))
+
+```
+
+
+
+
+
+
