@@ -1,0 +1,56 @@
+---
+title: "alt-flash vs flashier: GTEx"
+author: "Joonsuk Kang"
+date: "2021-12-06"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+# some functions
+
+```{r}
+source('code/alt-flash-ebnm-2021-1206.R')
+```
+
+# GTEX data
+
+Codes are from Willwerscheid and Stephens (2021, ebnm; https://arxiv.org/pdf/2110.00152.pdf)
+
+```{r}
+library(tidyverse)
+library(flashier)
+
+url_prefix <- "https://github.com/stephenslab/gtexresults/blob/master/data/" 
+gtex_url <- paste0(url_prefix, "MatrixEQTLSumStats.Portable.Z.rds?raw=TRUE") 
+colors_url <- paste0(url_prefix, "GTExColors.txt?raw=TRUE")
+gtex <- readRDS(gzcon(url(gtex_url)))
+strong <- t(gtex$strong.z) # Dataset used by Urbut et al. and Wang & Stephens.
+gtex.colors <- read_tsv(colors_url, col_names = c("Tissue", "Hex", "RGB")) %>%
+  mutate(Tissue = str_remove_all(Tissue, "[\\(\\)\\-]")) %>%
+  mutate(Tissue = str_replace_all(Tissue, " +", "_")) %>%
+  pull(Hex, name = Tissue)
+gtex.colors <- gtex.colors[rownames(strong)]
+```
+
+
+# subsampling columns
+
+The original matrix has dimensions 44 X 16,069. We sample columns of sample size 100, 500, 1k, 5k and compare flashier and altflash. Given a data matrix, the number of factors $\hat{K}$ estimated from flash is a deterministic number since flash is a deterministic algorithm. We use $\hat{K}+3$ as the initial number of factors in altflash.
+
+```{r}
+dim(strong)
+set.seed(1)
+
+for (n in c(100, 500, 1000, 5000)){
+
+  colidx <- sample(1:ncol(strong), n, replace=FALSE)
+  mat <- strong[,colidx]
+  fit.flash <- flash(mat, prior.family=c(as.prior(ebnm::ebnm_point_exponential, sign = 1), 
+                                         as.prior(ebnm::ebnm_point_normal)), 
+                     backfit=TRUE, verbose.lvl=0)
+  fit.alt <- altflash(mat, initial.K=fit.flash$n.factors+3, prior.family=c('point_exponential', 'point_normal'), verbose=0)
+  print(paste0("n=",n,"; flash elbo=", round(fit.flash$elbo), "; altflash elbo=", round(last(fit.alt$elbo.vec))))
+}
+```
