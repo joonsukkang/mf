@@ -106,7 +106,7 @@ plotL(fit.alt$EL, "altflash EL")
 ```{r}
 fit.alt.1 <- altflash(X, initial.K=1, prior.family=c('point_exponential', 'point_normal'), verbose=0)
 last(fit.alt.1$elbo.vec)
-plotL(fit.alt.1$EL, "altflash EL")
+plotL(fit.alt.1$EL, "altflash E[L]")
 ```
 
 ### try different random initializations for flashier
@@ -115,7 +115,7 @@ plotL(fit.alt.1$EL, "altflash EL")
 for (seed in 2:5){
   fit.alt <- altflash(X, initial.K=5, prior.family=c('point_exponential', 'point_normal'), verbose=0, seed=seed)
   print(last(fit.alt$elbo.vec))
-  plotL(fit.alt$EL, "altflash EL")
+  plotL(fit.alt$EL, paste0("altflash E[L]: ", 'seed=',seed))
 }
 ```
 
@@ -139,9 +139,9 @@ fit.flashier <- flash(X, prior.family=c(prior.point.exponential(), prior.point.n
                       backfit=TRUE, verbose.lvl=0)
 fit.flashier$n.factors
 fit.flashier$elbo
-plotL(fit.flashier$loadings.pm[[1]], "flashier EL")
+plotL(fit.flashier$loadings.pm[[1]], "flashier E[L]")
 
 fit.alt <- altflash(X, initial.K=15, prior.family=c('point_exponential', 'point_normal'), verbose=0)
 last(fit.alt$elbo.vec)
-plotL(fit.alt$EL, "altflash EL")
+plotL(fit.alt$EL, "altflash E[L]")
 ``` 
