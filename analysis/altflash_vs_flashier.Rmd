@@ -11,7 +11,7 @@ editor_options:
 # some functions
 
 ```{r}
-source('code/alt-flash-ebnm-2021-1206.R')
+source('code/alt-flash-ebnm-2021-1208.R')
 ```
 
 
@@ -63,25 +63,27 @@ plot.factors <- function(fit, showK=NULL){
 # toy data
 
 ```{r}
-set.seed(1)
-
-n <- 150
-p <- 240
-K <- 3
-tau <- 1
-
-L <- matrix(0, nrow=n, ncol=K)
-F <- matrix(0, nrow=p, ncol=K)
-L[1:10,1] <- rexp(10, rate=1/10)
-L[11:60,2] <- rexp(50, rate=1/5)
-L[61:150,3] <- rexp(90, rate=1)
-F[1:80, 1] <- rnorm(80, sd=1)
-F[81:160,2] <- rnorm(80, sd=1)
-F[161:240,3] <- rnorm(80, sd=1)
-E <- matrix(rnorm(n*p, mean=0, sd=tau^(-1/2)), nrow=n, ncol=p)
-
-X0 <- L %*% t(F)
-X <- X0 + E
+toy1 <- function(seed){
+  set.seed(seed)
+  n <- 150
+  p <- 240
+  K <- 3
+  tau <- 1
+  
+  L <- matrix(0, nrow=n, ncol=K)
+  F <- matrix(0, nrow=p, ncol=K)
+  L[1:10,1] <- rexp(10, rate=1/10)
+  L[11:60,2] <- rexp(50, rate=1/5)
+  L[61:150,3] <- rexp(90, rate=1)
+  F[1:80, 1] <- rnorm(80, sd=1)
+  F[81:160,2] <- rnorm(80, sd=1)
+  F[161:240,3] <- rnorm(80, sd=1)
+  E <- matrix(rnorm(n*p, mean=0, sd=tau^(-1/2)), nrow=n, ncol=p)
+  
+  X0 <- L %*% t(F)
+  X <- X0 + E
+  return(X)
+}
 ```
 
 
@@ -90,58 +92,20 @@ X <- X0 + E
 
 ```{r}
 library(flashier)
-fit.flashier <- flash(X, prior.family=c(prior.point.exponential(), prior.point.normal()),
-                      backfit=TRUE, verbose.lvl=0)
-fit.flashier$n.factors
-fit.flashier$elbo
-plotL(fit.flashier$loadings.pm[[1]], "flashier EL")
 
-fit.alt <- altflash(X, initial.K=5, prior.family=c('point_exponential', 'point_normal'), verbose=0)
-last(fit.alt$elbo.vec)
-plotL(fit.alt$EL, "altflash EL")
-```
-
-### if set K=1, the result is identical to the flashier fit
-
-```{r}
-fit.alt.1 <- altflash(X, initial.K=1, prior.family=c('point_exponential', 'point_normal'), verbose=0)
-last(fit.alt.1$elbo.vec)
-plotL(fit.alt.1$EL, "altflash E[L]")
-```
-
-### try different random initializations for flashier
-
-```{r}
-for (seed in 2:5){
-  fit.alt <- altflash(X, initial.K=5, prior.family=c('point_exponential', 'point_normal'), verbose=0, seed=seed)
-  print(last(fit.alt$elbo.vec))
-  plotL(fit.alt$EL, paste0("altflash E[L]: ", 'seed=',seed))
+results <- matrix(nrow=0, ncol=4)
+for (data.seed in 1:10){
+  X <- toy1(data.seed)
+  fit.flashier <- flash(X, prior.family=c(prior.point.exponential(), prior.point.normal()),
+                        backfit=TRUE, verbose.lvl=0)
+  for (alt.seed in 101:105){ # set to avoid same seed affecting toy data generation and altflash init
+      fit.alt <- altflash(X, initial.K=5, seed=alt.seed,
+                          prior.family=c('point_exponential', 'point_normal'), verbose=0)
+      results <- rbind(results, c(data.seed, alt.seed, fit.flashier$elbo, last(fit.alt$elbo.vec)))
+  }
 }
+data.frame(data.seed=results[,1], alt.seed=results[,2], flashier=results[,3], altflash=results[,4]) %>%
+  mutate(diff=altflash-flashier) %>% # elbo difference; + means alt-flash outperforms
+  print()
 ```
 
-
-# another toy
-
-```{r}
-# source: https://yushaliu.github.io/single_cell_cancer/simulations3_update.html
-model <- readRDS(url("https://raw.githubusercontent.com/YushaLiu/single_cell_cancer/master/data/model.rds"))
-L <- model$L
-F <- model$F
-F[,1] <- F[,1] - 10 # center the data
-
-X <- L%*%t(F) + matrix(rnorm(800*2000, 0, 0.5), nrow=800, ncol=2000)
-```
-
-
-```{r}
-library(flashier)
-fit.flashier <- flash(X, prior.family=c(prior.point.exponential(), prior.point.normal()),
-                      backfit=TRUE, verbose.lvl=0)
-fit.flashier$n.factors
-fit.flashier$elbo
-plotL(fit.flashier$loadings.pm[[1]], "flashier E[L]")
-
-fit.alt <- altflash(X, initial.K=15, prior.family=c('point_exponential', 'point_normal'), verbose=0)
-last(fit.alt$elbo.vec)
-plotL(fit.alt$EL, "altflash E[L]")
-``` 
