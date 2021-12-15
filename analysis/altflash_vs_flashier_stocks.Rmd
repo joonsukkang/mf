@@ -1,0 +1,91 @@
+---
+title: "alt-flash vs flashier: stocks"
+author: "Joonsuk Kang"
+date: "2021-12-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r}
+# https://stephens999.github.io/stat34800/stocks.html
+library(tidyquant)
+library(purrr)
+
+# add more tickers to the original version
+tickers = c("AAPL", "MSFT", "GOOG", "AMZN", "TSLA", "FB", "NVDA", "TSM", "JPM", "JNJ", "HD", "LVMUY", "PG", "NSRGY", "BAC", "RHHBY", "BABA", "MA", "ASML", "PFE", "DIS", "ORCL", "NKE", "TM", "KO", "COST", "ABT", "PEP", "ABBV", "PYPL", "V")
+getSymbols(tickers)
+
+prices <- map(tickers,function(x) Ad(get(x))) # gets the adjusted prices of each stock
+prices <- reduce(prices,merge)
+colnames(prices) <- tickers
+head(prices)
+
+nomiss = function(x){all(!is.na(x))}
+prices = prices[apply(prices,1,nomiss),]
+head(prices)
+tail(prices)
+
+log_prices = log(prices)
+log_returns = apply(log_prices,2, diff)
+```
+
+
+```{r}
+library(flashier)
+X <- t(as.matrix(log_returns))
+dim(X)
+
+fit.0 <- flash(X, prior.family=c(as.prior(ebnm::ebnm_point_exponential, sign = 1), 
+                                 as.prior(ebnm::ebnm_point_normal)),
+               backfit=TRUE, verbose.lvl=0)
+#plotL(fit.0$loadings.pm[[1]], "EL")
+#plotL(fit.0$loadings.pm[[2]], "EF")
+fit.0$n.factors
+fit.0$elbo
+```
+
+
+```{r}
+setwd("~/Library/Mobile Documents/com~apple~CloudDocs/2-research/mf")
+source('code/alt-flash-ebnm-2021-1213.R')
+source('code/ebmnm.R')
+source('code/soebmf.R')
+
+for (alt.seed in 1:10){
+  fit.1 <- altflash(X, initial.K=25, seed=alt.seed,
+                  prior.family=c('point_exponential', 'point_normal'), verbose=0)
+  print(round(c(last(fit.1$elbo.vec), last(fit.1$elbo.vec)-fit.0$elbo)), 2)
+  #plotL(fit.1$EL, "EL")
+  #plotL(fit.1$EF, "EF")  
+}
+```
+
+```{r}
+for (so.seed in 1:10){
+  
+  fit.so <- compact.soebmf(X=X, K=25, g.l.pf='point_exponential', seed=so.seed, maxiter=30)
+  fit.2 <- alt.full(soebmf.to.alt(fit.soebmf=fit.so, prior.family=c('point_exponential', 'point_normal')),
+                       verbose=0, sol.reg.max.iter = 5)
+  print(round(c(last(fit.2$elbo.vec), last(fit.2$elbo.vec)-fit.0$elbo)), 2)
+  #plotL(fit.2$EL, "EL")
+  #plotL(fit.2$EF, "EF")
+}
+
+```
+
+```{r}
+for (so.seed in 1:10){
+  
+  fit.so <- compact.soebmf(X=X, K=25, g.l.pf='point_exponential', seed=so.seed, maxiter=500)
+  fit.2 <- alt.full(soebmf.to.alt(fit.soebmf=fit.so, prior.family=c('point_exponential', 'point_normal')),
+                       verbose=0, sol.reg.max.iter = 5)
+  print(round(c(last(fit.2$elbo.vec), last(fit.2$elbo.vec)-fit.0$elbo)), 2)
+  #plotL(fit.2$EL, "EL")
+  #plotL(fit.2$EF, "EF")
+}
+```
+
+
+
