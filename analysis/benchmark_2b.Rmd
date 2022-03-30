@@ -1,0 +1,98 @@
+---
+title: "Benchmarking ebcd and flash"
+output: html_document
+date: '2022-03-30'
+---
+
+
+```{r}
+library(tidyverse)
+library(ebcd.alpha)
+library(flashier)
+
+library(here)
+source(here('code', 'ebcd_benchmarking.R'))
+```
+
+
+# two nonoverlapping binary factors
+
+```{r}
+# two binary factors
+groups_2b <- rbind(c(0, 0),
+                   c(1, 0),
+                   c(0, 1),
+                   c(1, 1)
+                   )
+```
+
+
+```{r}
+df <- data.frame(p = c(), dffn = c(), ebcd = c(), covflash = c())
+for (p in c(100, 200, 500, 1000, 2000, 5000)){
+  
+  genX.iter <- function(seed){
+    genX(groups = groups_2b,
+         group_ratio = c(0, 0.5, 0.5, 0),
+         signal_lvl = c(1, 1),
+         n = 200,
+         p = p,
+         F_dist = 'normal',
+         F_sd = 0.1,
+         noise_sd = 1,
+         seed = seed)
+  }
+  
+  res.ebcd <- n.cs(genX.iter, method = 'ebcd',  
+               ebnm.fn = ebnm::ebnm_point_normal, nseed = 50)
+  
+  res.covflash <- n.cs(genX.iter, method = 'covflash', 
+               ebnm.fn = ebnm::ebnm_point_normal, nseed = 50)
+  
+  # for (cov)flash, 'cs' (cosine similarity) returns NA if estimated K < true K
+  # for fair comparison, split results into two categories
+  idx.both <- !is.na(res.covflash$cs)
+  
+  df <- rbind(df, 
+              data.frame(p=p, 
+                         n.all = sum(idx.both), # number of non-NA covflash results
+                         covflash.both = mean(res.covflash$cs[idx.both]),
+                         ebcd.both = mean(res.ebcd$cs[idx.both]),
+                         n.only = sum(!idx.both),
+                         ebcd.only = mean(res.ebcd$cs[!idx.both]))
+              )
+}
+
+print(df)
+
+```
+
+
+
+
+for example, when p=2000 and seed=1, estimated K from covflash is 0
+
+```{r}
+genX.iter <- function(seed){
+  genX(groups = groups_2b,
+       group_ratio = c(0, 0.5, 0.5, 0),
+       signal_lvl = c(1, 1),
+       n = 200,
+       p = 2000,
+       F_dist = 'normal',
+       F_sd = 0.1,
+       noise_sd = 1,
+       seed = seed)
+}
+  
+X.list <- genX.iter(1)
+
+fit <- flash(tcrossprod(X.list$X),
+             ebnm.fn = ebnm::ebnm_point_normal,
+            greedy.Kmax = ncol(X.list$L_true), # use true K
+            backfit = TRUE,
+                   verbose = 0)
+fit$n.factors
+
+```
+
